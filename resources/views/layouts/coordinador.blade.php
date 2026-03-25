@@ -6,12 +6,16 @@
     <title>@yield('title', 'SENA APE - Sistema de Gestión de Turnos')</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    fontFamily: { 
+                        sans: ['Inter', 'sans-serif'],
+                        poppins: ['Poppins', 'sans-serif']
+                    },
                     colors: {
                         sena: { 500: '#39A900', 600: '#2d8700', 50: '#e8f5e9' }
                     }
@@ -30,10 +34,10 @@
     <header class="bg-white px-8 py-4 flex items-center justify-between border-b border-gray-100 shrink-0 z-20">
         <!-- Logo -->
         <div class="flex items-center space-x-4 w-1/4">
-            <img src="{{ asset('images/Logo.png') }}" class="h-10 w-auto object-contain" alt="SENA Logo">
+            <img src="{{ asset('images/logoSena.png') }}" class="h-10 w-auto object-contain" alt="SENA Logo">
             <div class="h-6 w-px bg-gray-100"></div>
             <div>
-                <h1 class="text-lg font-bold text-gray-900 leading-tight">SENA APE</h1>
+                <h1 class="text-lg font-poppins font-bold text-gray-900 leading-tight">SENA APE</h1>
                 <p class="text-[10px] font-bold text-sena-500 tracking-wider">Sistema de Gestión de Turnos</p>
             </div>
         </div>
@@ -46,22 +50,46 @@
             </div>
             <div class="relative w-80">
                 <i class="fa-solid fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                <input type="text" placeholder="Buscar módulos..." class="w-full bg-gray-50 border border-gray-100 rounded-full py-2.5 pl-10 pr-4 text-xs focus:ring-2 focus:ring-sena-500 outline-none text-gray-700 font-medium transition-all">
+                <input type="text" id="globalSearchInput" placeholder="Buscar módulos o asesores..." class="w-full bg-gray-50 border border-gray-100 rounded-full py-2.5 pl-10 pr-4 text-xs focus:ring-2 focus:ring-sena-500 outline-none text-gray-700 font-medium transition-all">
             </div>
         </div>
 
         <!-- Actions -->
-        <div class="flex items-center justify-end space-x-6 w-1/4">
+        <div class="flex items-center justify-end space-x-4 w-1/4">
             <a href="{{ route('coordinador.export') }}" class="bg-sena-500 hover:bg-sena-600 text-white px-5 py-2.5 rounded-full text-[11px] font-bold transition flex items-center space-x-2 shadow-sm">
                 <i class="fa-solid fa-download"></i>
-                <span>Exportar Datos</span>
+                <span>Exportar</span>
             </a>
-            <div class="flex items-center space-x-3 border-l border-gray-200 pl-6">
+            <!-- User + Logout -->
+            <div class="flex items-center space-x-3 border-l border-gray-200 pl-4 relative" x-data="{ open: false }">
                 <div class="text-right">
-                    <p class="text-xs font-bold text-gray-900">Carlos Rodriguez</p>
-                    <p class="text-[10px] font-semibold text-gray-500">Coordinador Principal</p>
+                    <p class="text-xs font-bold text-gray-900">{{ session('coordinador_nombre', 'Coordinador') }}</p>
+                    <p class="text-[10px] font-semibold text-sena-500">Coordinador</p>
                 </div>
-                <img src="https://ui-avatars.com/api/?name=Carlos+Rodriguez&background=f3f4f6&color=39A900&bold=true" class="w-10 h-10 rounded-full border border-gray-200" alt="Profile">
+                <div class="relative">
+                    <button onclick="document.getElementById('coord-user-menu').classList.toggle('hidden')" 
+                            class="w-10 h-10 rounded-full border-2 border-gray-200 hover:border-sena-300 transition overflow-hidden focus:outline-none">
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode(session('coordinador_nombre', 'C')) }}&background=e8f5e9&color=39A900&bold=true" class="w-full h-full object-cover" alt="Profile">
+                    </button>
+                    <!-- Dropdown -->
+                    <div id="coord-user-menu" class="hidden absolute right-0 top-12 bg-white border border-gray-100 rounded-2xl shadow-2xl w-52 z-50 overflow-hidden py-2">
+                        <div class="px-4 py-3 border-b border-gray-50">
+                            <p class="text-xs font-black text-gray-900">{{ session('coordinador_nombre', 'Coordinador') }}</p>
+                            <p class="text-[10px] text-gray-400 font-medium mt-0.5">Coordinador APE SENA</p>
+                        </div>
+                        <a href="{{ route('coordinador.configuracion') }}" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 transition">
+                            <i class="fa-solid fa-gear text-gray-400 w-4 text-center"></i>
+                            <span class="text-xs font-bold text-gray-600">Configuración</span>
+                        </a>
+                        <form action="{{ route('coordinador.logout') }}" method="POST" class="w-full">
+                            @csrf
+                            <button type="submit" class="w-full flex items-center space-x-3 px-4 py-3 hover:bg-red-50 transition text-left">
+                                <i class="fa-solid fa-right-from-bracket text-red-400 w-4 text-center"></i>
+                                <span class="text-xs font-bold text-red-500">Cerrar Sesión</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
@@ -104,12 +132,19 @@
             </nav>
 
             <!-- Sidebar Footer -->
-            <div class="p-6 border-t border-gray-50">
+            <div class="p-6 border-t border-gray-50 space-y-3">
                 <div class="bg-gray-50 rounded-2xl p-4">
                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-2">Ayuda</p>
                     <p class="text-[11px] text-gray-600 leading-relaxed">¿Necesitas ayuda con el sistema?</p>
-                    <a href="#" class="inline-block mt-3 text-[11px] font-bold text-sena-500 hover:underline">Manual de usuario</a>
+                    <a href="{{ route('manual.coordinador') }}" class="inline-block mt-3 text-[11px] font-bold text-sena-500 hover:underline">Manual de usuario</a>
                 </div>
+                <form action="{{ route('coordinador.logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="w-full flex items-center justify-center space-x-2 bg-red-50 hover:bg-red-100 border border-red-100 text-red-500 font-black py-3 rounded-2xl text-[11px] uppercase tracking-widest transition">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar Sesión</span>
+                    </button>
+                </form>
             </div>
         </aside>
 
@@ -132,7 +167,25 @@
         }
         setInterval(updateHeaderClock, 1000);
         updateHeaderClock();
+
+        // GLOBAL SEARCH LAUNCHER
+        const searchInput = document.getElementById('globalSearchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const term = e.target.value.toLowerCase().trim();
+                const items = document.querySelectorAll('.searchable-item');
+                items.forEach(item => {
+                    const searchData = item.getAttribute('data-search') || '';
+                    if (searchData.toLowerCase().includes(term)) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        }
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     @yield('scripts')
 </body>
 </html>

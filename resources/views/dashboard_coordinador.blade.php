@@ -74,15 +74,24 @@
 
             <!-- Modules Grid -->
             <div class="grid grid-cols-2 xl:grid-cols-3 gap-4">
-                @foreach(collect($asesoresStatus)->take(6) as $ase)
+                @foreach($asesoresStatus as $ase)
                 @php
-                    $estado = $ase['estado'] == 'Free' ? 'ATENDIENDO' : ($ase['estado'] == 'Break Time' ? 'DESCANSO' : 'LIBRE');
-                    $color = $estado == 'ATENDIENDO' ? '#39A900' : ($estado == 'DESCANSO' ? '#f59e0b' : '#ef4444');
+                    $estado = strtoupper($ase['estado']);
+                    $color = $estado == 'ATENDIENDO' ? '#39A900' : ($estado == 'DESCANSO' ? '#f59e0b' : '#6b7280');
                     $timeLabel = $estado == 'ATENDIENDO' ? 'Sesión Actual' : ($estado == 'DESCANSO' ? 'Tiempo Descanso' : 'Tiempo Inactivo');
-                    $timeText = $estado == 'ATENDIENDO' ? rand(5,20).':'.rand(10,59).' min' : rand(2,10).':00 min';
+                    
+                    // Tiempo transcurrido si está atendiendo
+                    $timeText = '00:00 min';
+                    if ($ase['atencion']) {
+                        $diff = $ase['atencion']->atnc_hora_inicio->diff(now());
+                        $timeText = $diff->format('%I:%S') . ' min';
+                    } else if ($estado == 'DESCANSO') {
+                        $timeText = '15:00 min'; // Mock para descanso
+                    }
+
                     $icon = $estado == 'ATENDIENDO' ? 'fa-message' : ($estado == 'DESCANSO' ? 'fa-mug-hot' : 'fa-stopwatch');
                 @endphp
-                <div class="border border-gray-100 rounded-2xl p-4 flex flex-col justify-between hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 min-h-[120px] bg-white group hover:-translate-y-1">
+                <div data-search="{{ explode(' ', $ase['nombre'])[0] }} modulo {{ sprintf('%02d', $ase['modulo']) }} {{ $estado }}" class="searchable-item border border-gray-100 rounded-2xl p-4 flex flex-col justify-between hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 min-h-[120px] bg-white group hover:-translate-y-1">
                     <div class="flex justify-between items-start mb-4">
                         <div class="flex items-center space-x-3">
                             <div class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center overflow-hidden shrink-0 border border-gray-100 group-hover:border-sena-100">
@@ -93,7 +102,7 @@
                                 <p class="text-[9px] font-bold text-gray-400 mt-1 uppercase">Módulo {{ sprintf('%02d', $ase['modulo']) }}</p>
                             </div>
                         </div>
-                        <span class="text-white text-[8px] font-black px-2 py-0.5 rounded shadow-sm tracking-wider" style="background-color: {{ $color }}">{{ $estado }}</span>
+                        <span class="text-white text-[8px] font-black px-2 py-0.5 rounded shadow-sm tracking-widest" style="background-color: {{ $color }}">{{ $estado }}</span>
                     </div>
                     <div class="flex justify-between items-end mt-auto">
                         <div>
@@ -119,27 +128,38 @@
                    <i class="fa-solid fa-map text-[200px]"></i>
                 </div>
 
-                <!-- Pins - Fake positions -->
-                <div class="absolute flex flex-col items-center justify-center group cursor-pointer" style="left: 20%; top: 35%;">
-                    <div class="w-10 h-10 bg-sena-50 rounded-full flex items-center justify-center shadow-md border-2 border-white group-hover:scale-110 transition">
-                        <div class="w-3 h-3 bg-sena-500 rounded-full"></div>
+                <!-- Pins Dynamically Mapped to Advisors -->
+                @foreach($asesoresStatus as $index => $ase)
+                @php
+                    // Distribución visual estática para el layout del mapa abstracto
+                    $positions = [
+                        ['left' => '20%', 'top' => '35%'],
+                        ['left' => '45%', 'top' => '60%'],
+                        ['left' => '68%', 'bottom' => '25%'],
+                        ['left' => '75%', 'top' => '35%'],
+                    ];
+                    $pos = $positions[$index % count($positions)];
+                    
+                    $colorClass = 'bg-gray-400';
+                    $bgClass = 'bg-gray-100';
+                    if(strtoupper($ase['estado']) == 'ATENDIENDO') {
+                        $colorClass = 'bg-sena-500';
+                        $bgClass = 'bg-sena-50';
+                    } else if (strtoupper($ase['estado']) == 'DESCANSO') {
+                        $colorClass = 'bg-amber-500';
+                        $bgClass = 'bg-amber-50';
+                    }
+                @endphp
+                <div class="absolute flex flex-col items-center justify-center group cursor-pointer" style="left: {{ $pos['left'] ?? 'auto' }}; top: {{ $pos['top'] ?? 'auto' }}; bottom: {{ $pos['bottom'] ?? 'auto' }}; z-index: 10;">
+                    <div class="w-10 h-10 {{ $bgClass }} rounded-full flex items-center justify-center shadow-md border-2 border-white group-hover:scale-110 transition relative">
+                        @if(strtoupper($ase['estado']) == 'ATENDIENDO')
+                            <div class="absolute inset-0 {{ $colorClass }} rounded-full animate-ping opacity-20"></div>
+                        @endif
+                        <div class="w-3 h-3 {{ $colorClass }} rounded-full"></div>
                     </div>
-                    <span class="text-[9px] font-black text-gray-700 mt-2 bg-white px-2 py-1 rounded shadow-sm border border-gray-100">M1-M4</span>
+                    <span class="text-[9px] font-black text-gray-700 mt-2 bg-white px-2 py-1 rounded shadow-sm border border-gray-100">Mod {{ sprintf('%02d', $ase['modulo']) }}</span>
                 </div>
-
-                <div class="absolute flex flex-col items-center justify-center group cursor-pointer" style="left: 45%; top: 60%;">
-                    <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center shadow-md border-2 border-white group-hover:scale-110 transition">
-                        <div class="w-3 h-3 bg-gray-400 rounded-full"></div>
-                    </div>
-                    <span class="text-[9px] font-black text-gray-500 mt-2 bg-white px-2 py-1 rounded shadow-sm border border-gray-100">Recepción</span>
-                </div>
-
-                <div class="absolute flex flex-col items-center justify-center group cursor-pointer" style="left: 65%; bottom: 30%;">
-                    <div class="w-10 h-10 bg-sena-100 rounded-full flex items-center justify-center shadow-md border-2 border-white group-hover:scale-110 transition">
-                        <div class="w-3 h-3 bg-sena-600 rounded-full"></div>
-                    </div>
-                    <span class="text-[9px] font-black text-gray-700 mt-2 bg-white px-2 py-1 rounded shadow-sm border border-gray-100">M5-M8</span>
-                </div>
+                @endforeach
 
                 <!-- Legend -->
                 <div class="absolute bottom-4 right-4 bg-white p-4 rounded-2xl shadow-xl border border-gray-50 flex flex-col space-y-2 z-10 min-w-[120px]">
@@ -178,32 +198,29 @@
                 <div class="w-1/2 h-full relative">
                     <canvas id="docChart"></canvas>
                     <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                        <span class="text-xl font-black text-gray-900 leading-none">65%</span>
+                        <span class="text-xl font-black text-gray-900 leading-none">
+                            @php
+                                $total = array_sum($docData) ?: 1;
+                                $ccCount = $docData['CC'] ?? 0;
+                                echo round(($ccCount / $total) * 100) . '%';
+                            @endphp
+                        </span>
                         <span class="text-[8px] font-bold text-gray-400 mt-1 uppercase tracking-widest">CC</span>
                     </div>
                 </div>
                 <div class="w-1/2 pl-6 flex flex-col space-y-4">
+                    @foreach($docData as $type => $count)
                     <div class="flex justify-between items-center">
                         <div class="flex items-center space-x-2">
-                            <div class="w-2 h-2 bg-sena-500 rounded-full"></div>
-                            <span class="text-[10px] font-bold text-gray-600">CC</span>
+                            <div class="w-2 h-2 rounded-full" style="background-color: {{ $type == 'CC' ? '#39A900' : ($type == 'NIT' ? '#3b82f6' : '#d1d5db') }}"></div>
+                            <span class="text-[10px] font-bold text-gray-600">{{ $type }}</span>
                         </div>
-                        <span class="text-[10px] font-black text-gray-900">834</span>
+                        <span class="text-[10px] font-black text-gray-900">{{ $count }}</span>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-                            <span class="text-[10px] font-bold text-gray-600">NIT</span>
-                        </div>
-                        <span class="text-[10px] font-black text-gray-900">320</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-2 h-2 bg-gray-200 rounded-full"></div>
-                            <span class="text-[10px] font-bold text-gray-600">Otros</span>
-                        </div>
-                        <span class="text-[10px] font-black text-gray-900">130</span>
-                    </div>
+                    @endforeach
+                    @if(empty($docData))
+                    <p class="text-[10px] text-gray-400 font-bold italic">Sin datos hoy</p>
+                    @endif
                 </div>
             </div>
         </div>
@@ -212,47 +229,42 @@
         <div class="bg-white p-6 rounded-[1.5rem] shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)] border border-gray-100 flex flex-col flex-1 min-h-[300px]">
             <div class="flex justify-between items-start mb-6">
                 <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">ALERTAS RECIENTES</h3>
-                <span class="bg-red-500 text-white w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black shadow-sm mr-2 animate-bounce">3</span>
+                @if(count($alertas) > 0)
+                <span class="bg-red-500 text-white w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black shadow-sm mr-2 animate-bounce">{{ count($alertas) }}</span>
+                @endif
             </div>
 
-            <div class="space-y-4 flex-1 mb-6">
-                <!-- Alert 1 -->
-                <div class="flex items-start space-x-3 group cursor-pointer hover:bg-red-50/30 transition p-2 -ml-2 rounded-2xl border border-transparent hover:border-red-100">
-                    <div class="w-9 h-9 rounded-xl bg-red-50 flex justify-center items-center shrink-0 border border-red-100 text-red-500">
-                        <i class="fa-solid fa-clock-rotate-left text-sm"></i>
+            <div class="space-y-4 flex-1 mb-6 overflow-y-auto pr-2">
+                @forelse($alertas as $alerta)
+                @php
+                    $isCritica = isset($alerta['tipo']) && $alerta['tipo'] == 'critica';
+                    $bgClass = $isCritica ? 'bg-red-50' : 'bg-blue-50';
+                    $borderClass = $isCritica ? 'border-red-100' : 'border-blue-100';
+                    $textClass = $isCritica ? 'text-red-500' : 'text-blue-500';
+                    $hoverBorderClass = $isCritica ? 'hover:border-red-100' : 'hover:border-blue-100';
+                    $hoverBgClass = $isCritica ? 'hover:bg-red-50/30' : 'hover:bg-blue-50/30';
+                    $iconClass = $isCritica ? 'fa-clock-rotate-left' : 'fa-circle-info';
+                @endphp
+                <div class="flex items-start space-x-3 group cursor-pointer {{ $hoverBgClass }} transition p-2 -ml-2 rounded-2xl border border-transparent {{ $hoverBorderClass }}">
+                    <div class="w-9 h-9 rounded-xl {{ $bgClass }} flex justify-center items-center shrink-0 border {{ $borderClass }} {{ $textClass }}">
+                        <i class="fa-solid {{ $iconClass }} text-sm"></i>
                     </div>
                     <div class="flex-1">
-                        <h4 class="text-[11px] font-black text-gray-900 mb-0.5 uppercase tracking-wide">Tiempo espera > 20m</h4>
-                        <p class="text-[10px] font-medium text-gray-500 mb-1 leading-tight">El Módulo Grupo B reporta retrasos técnicos.</p>
-                        <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest">HACE 2 MINUTOS</p>
+                        <h4 class="text-[11px] font-black text-gray-900 mb-0.5 uppercase tracking-wide">{{ $alerta['msg'] }}</h4>
+                        <!--<p class="text-[10px] font-medium text-gray-500 mb-1 leading-tight">Detalle disponible próximamente.</p>-->
+                        <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mt-1">{{ $alerta['time'] }}</p>
                     </div>
                 </div>
-                <!-- Alert 2 -->
-                <div class="flex items-start space-x-3 group cursor-pointer hover:bg-amber-50/30 transition p-2 -ml-2 rounded-2xl border border-transparent hover:border-amber-100">
-                    <div class="w-9 h-9 rounded-xl bg-amber-50 flex justify-center items-center shrink-0 border border-amber-100 text-amber-500">
-                        <i class="fa-solid fa-link-slash text-sm"></i>
-                    </div>
-                    <div class="flex-1">
-                        <h4 class="text-[11px] font-black text-gray-900 mb-0.5 uppercase tracking-wide">Módulo 05 desconectado</h4>
-                        <p class="text-[10px] font-medium text-gray-500 mb-1 leading-tight">Pérdida de conexión con el dispositivo biométrico.</p>
-                        <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest">HACE 15 MINUTOS</p>
-                    </div>
+                @empty
+                <div class="text-center py-6">
+                    <i class="fa-solid fa-bell-slash text-gray-200 text-3xl mb-3"></i>
+                    <p class="text-[10px] font-black uppercase text-gray-400">Sin Alertas Recientes</p>
                 </div>
-                <!-- Alert 3 -->
-                <div class="flex items-start space-x-3 group cursor-pointer hover:bg-blue-50/30 transition p-2 -ml-2 rounded-2xl border border-transparent hover:border-blue-100">
-                    <div class="w-9 h-9 rounded-xl bg-blue-50 flex justify-center items-center shrink-0 border border-blue-100 text-blue-500">
-                        <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
-                    </div>
-                    <div class="flex-1">
-                        <h4 class="text-[11px] font-black text-gray-900 mb-0.5 uppercase tracking-wide">Backup completo</h4>
-                        <p class="text-[10px] font-medium text-gray-500 mb-1 leading-tight">Datos del servidor exportados a la nube SENA.</p>
-                        <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest">HACE 1 HORA</p>
-                    </div>
-                </div>
+                @endforelse
             </div>
             
             <div class="mt-auto border-t border-gray-50 pt-5 text-center">
-                <a href="#" class="text-[10px] font-black text-sena-500 hover:text-sena-600 hover:underline uppercase tracking-widest">Ver Todas las Notificaciones</a>
+                <a href="#" onclick="document.getElementById('notificationsModal').classList.remove('hidden'); return false;" class="text-[10px] font-black text-sena-500 hover:text-sena-600 hover:underline uppercase tracking-widest">Ver Todas las Notificaciones</a>
             </div>
         </div>
 
@@ -265,6 +277,35 @@
             <span class="text-[8px] font-bold text-gray-500 text-right">Sistema de Gestión de Turnos<br>v4.9.0-estable</span>
         </div>
 
+    </div>
+</div>
+
+<!-- Modal Historial Notificaciones -->
+<div id="notificationsModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/40 backdrop-blur-sm transition-all">
+    <div class="bg-white w-full max-w-xl rounded-[2.5rem] p-8 shadow-2xl relative flex flex-col max-h-[80vh]">
+        <button onclick="document.getElementById('notificationsModal').classList.add('hidden')" class="absolute top-6 right-6 w-8 h-8 flex items-center justify-center bg-gray-50 text-gray-500 hover:text-rose-500 rounded-full transition">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <h3 class="text-lg font-black text-gray-900 mb-6 uppercase tracking-wider">Historial de Notificaciones</h3>
+        
+        <div class="space-y-4 overflow-y-auto pr-2 flex-1">
+            <div class="text-center py-10">
+                <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100">
+                    <i class="fa-solid fa-bell-slash text-gray-300 text-2xl"></i>
+                </div>
+                <h4 class="text-xs font-black text-gray-900 uppercase tracking-widest mb-1">El historial está vacío</h4>
+                <p class="text-[10px] text-gray-400 font-medium">No hay notificaciones antiguas guardadas en el sistema.</p>
+            </div>
+            
+            <!-- Alert temporal -->
+            <div class="mt-4 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex items-start space-x-4">
+                <i class="fa-solid fa-check-circle text-emerald-500 mt-1"></i>
+                <div>
+                    <p class="text-[11px] font-black text-emerald-900 leading-tight">Sistema en Tiempo Real Activo</p>
+                    <p class="text-[10px] text-emerald-700 mt-1 font-medium leading-relaxed">Las alertas que ves en el Dashboard ahora son calculadas en vivo inspeccionando los turnos en la base de datos.</p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 @endsection
@@ -281,9 +322,9 @@
     new Chart(flowCtx, {
         type: 'bar',
         data: {
-            labels: ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00'],
+            labels: @json($flowLabels),
             datasets: [{
-                data: [35, 55, 45, 60, 40, 25], 
+                data: @json($flowValues), 
                 backgroundColor: '#39A900',
                 borderRadius: 4,
                 borderSkipped: false,
@@ -309,10 +350,10 @@
     new Chart(docCtx, {
         type: 'doughnut',
         data: {
-            labels: ['CC', 'NIT', 'Otros'],
+            labels: @json(array_keys($docData)),
             datasets: [{
-                data: [834, 320, 130],
-                backgroundColor: ['#39A900', '#3b82f6', '#f3f4f6'],
+                data: @json(array_values($docData)),
+                backgroundColor: ['#39A900', '#3b82f6', '#94a3b8', '#cbd5e1', '#f1f5f9'],
                 borderWidth: 0,
                 hoverOffset: 6
             }]

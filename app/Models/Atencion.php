@@ -14,6 +14,11 @@ class Atencion extends Model
         'atnc_hora_inicio', 'atnc_hora_fin', 'atnc_tipo', 'ASESOR_ase_id', 'TURNO_tur_id'
     ];
 
+    protected $casts = [
+        'atnc_hora_inicio' => 'datetime',
+        'atnc_hora_fin' => 'datetime',
+    ];
+
     public function asesor()
     {
         return $this->belongsTo(Asesor::class, 'ASESOR_ase_id', 'ase_id');

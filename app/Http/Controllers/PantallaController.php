@@ -21,9 +21,13 @@ class PantallaController extends Controller
             'modulo' => $atencionActual->ASESOR_ase_id // Simulación del módulo por ID de asesor
         ] : null;
 
-        // Turnos en espera (que no tienen atención iniciada hoy)
+        // Turnos en espera (Ordenados por prioridad SENA: Víctima > Prioritario > General)
         $turnosEnEspera = Turno::whereDate('tur_hora_fecha', now()->today())
                                 ->whereDoesntHave('atencion')
+                                ->orderByRaw("CASE 
+                                    WHEN tur_tipo = 'Victimas' THEN 1 
+                                    WHEN tur_tipo = 'Prioritario' THEN 2 
+                                    ELSE 3 END ASC")
                                 ->orderBy('tur_id', 'asc')
                                 ->get();
 

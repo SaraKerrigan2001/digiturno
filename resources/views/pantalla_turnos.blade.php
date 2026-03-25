@@ -6,14 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pantalla de Turnos - SENA</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    fontFamily: { 
+                        sans: ['Inter', 'sans-serif'],
+                        poppins: ['Poppins', 'sans-serif']
+                    },
                     colors: {
                         sena: { 500: '#39A900', 600: '#2d8700', 50: '#e8f5e9' }
                     }
@@ -29,10 +31,10 @@
     <header
         class="bg-white px-8 py-4 flex justify-between items-center shrink-0 border-b border-gray-200 shadow-sm relative z-20">
         <div class="flex items-center space-x-6">
-            <img src="{{ asset('images/Logo.png') }}" class="h-16 w-auto object-contain" alt="SENA Logo">
+            <img src="{{ asset('images/logoSena.png') }}" class="h-16 w-auto object-contain" alt="SENA Logo">
             <div class="h-10 w-px bg-gray-200"></div>
             <div>
-                <h1 class="text-3xl font-black text-gray-900 tracking-tight leading-none mb-1">SENA</h1>
+                <h1 class="text-3xl font-poppins font-black text-gray-900 tracking-tight leading-none mb-1">SENA</h1>
                 <p class="text-xs font-bold text-gray-500 tracking-widest uppercase">Sistema de Gestión de Turnos</p>
             </div>
         </div>
@@ -78,14 +80,18 @@
 
             <!-- List -->
             <div class="flex-1 overflow-auto pb-32">
-                @forelse($turnosEnEspera->take(5) as $turno)
-                    <div
-                        class="grid grid-cols-5 px-6 py-6 border-b border-gray-100 items-center hover:bg-gray-50 transition">
+                @forelse($turnosEnEspera as $turno)
+                    <div class="grid grid-cols-5 px-6 py-6 border-b border-gray-100 items-center hover:bg-gray-50 transition relative">
+                        <!-- Indicador de prioridad lateral -->
+                        <div class="absolute left-0 top-2 bottom-2 w-1.5 {{ $turno->tur_tipo == 'Victimas' ? 'bg-rose-500' : ($turno->tur_tipo == 'Prioritario' ? 'bg-amber-500' : 'bg-sena-500') }} rounded-r-full"></div>
+
                         <div class="col-span-2 text-[2.75rem] font-black text-[#2e384d] tracking-tight ml-4">
                             {{ $turno->tur_numero }}</div>
                         <div class="col-span-3 text-lg font-semibold text-[#4a5568] leading-tight">
-                            Módulo {{ sprintf('%02d', $turno->modulo ?? '01') }} -<br>
-                            <span class="text-base font-medium text-gray-500">{{ $turno->tur_tipo ?? 'Orientación' }}</span>
+                            <span class="text-xs font-black uppercase tracking-widest px-2 py-1 rounded {{ $turno->tur_tipo == 'Victimas' ? 'bg-rose-500 text-white' : ($turno->tur_tipo == 'Prioritario' ? 'bg-amber-500 text-white' : 'bg-sena-50 text-sena-600') }} mb-2 inline-block">
+                                {{ $turno->tur_tipo == 'Victimas' ? 'Urgente' : ($turno->tur_tipo == 'Prioritario' ? 'Prioridad' : 'General') }}
+                            </span><br>
+                            <span class="text-base font-medium text-gray-400">En espera</span>
                         </div>
                     </div>
                 @empty
@@ -93,13 +99,13 @@
                 @endforelse
 
                 @if($turnoActual)
-                    <!-- Simulando que el último o primero tb puede ser remarcado -->
-                    <div class="grid grid-cols-5 px-6 py-6 border-b border-gray-100 items-center bg-[#f0fdf4]">
-                        <div class="col-span-2 text-[2.75rem] font-black text-[#15803d] tracking-tight ml-4">
+                    <div class="grid grid-cols-5 px-6 py-6 border-b border-gray-100 items-center bg-[#f0fdf4] relative animate-pulse">
+                        <div class="absolute left-0 top-0 bottom-0 w-2 bg-sena-500"></div>
+                        <div class="col-span-2 text-[3rem] font-black text-[#15803d] tracking-tight ml-4">
                             {{ $turnoActual->tur_numero ?? '---' }}</div>
                         <div class="col-span-3 text-lg font-semibold text-[#4a5568] leading-tight">
-                            Módulo {{ sprintf('%02d', $turnoActual->modulo ?? '01') }} -<br>
-                            <span class="text-base font-medium text-gray-500">Atendiendo</span>
+                            <p class="text-xs font-black text-sena-600 uppercase tracking-[0.2em] mb-1">Pasar a:</p>
+                            <span class="text-2xl font-black text-gray-900">Módulo {{ sprintf('%02d', $turnoActual->modulo ?? '01') }}</span>
                         </div>
                     </div>
                 @endif
@@ -133,32 +139,27 @@
             <!-- Video/Image Box -->
             <div
                 class="flex-1 relative rounded-[2rem] overflow-hidden shadow-sm border border-gray-200 bg-black flex flex-col group">
-                <!-- Image Component -->
-                <div class="relative flex-1 bg-gray-900 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
-                        alt="Sena Lab"
-                        class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-[1.02] transition duration-700 ease-in-out">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
-
-                    <!-- Play Button Overlay -->
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <div
-                            class="w-24 h-24 bg-sena-500 rounded-full flex items-center justify-center shadow-2xl shadow-sena-500/50 cursor-pointer hover:bg-sena-600 hover:scale-110 transition duration-300">
-                            <i class="fa-solid fa-play text-white text-3xl ml-2"></i>
-                        </div>
+                <!-- Video Player Component (YouTube API) -->
+                <div class="relative flex-1 bg-gray-900 overflow-hidden pointer-events-none">
+                    <!-- Scale transform helps the iframe mimic object-cover by bleeding edges out of view -->
+                    <div class="absolute inset-0 w-full h-full transform scale-[1.35] transition-opacity duration-700" id="video-container">
+                        <div id="youtube-player" class="w-full h-full"></div>
                     </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent"></div>
                 </div>
 
-                <!-- Text Overlay Layer (Inside image, bottom) -->
+                <!-- Text Overlay Layer (Inside video, bottom) -->
                 <div class="absolute bottom-[5.5rem] left-10 right-10 z-10">
-                    <h2 class="text-[2.2rem] font-bold text-white leading-tight drop-shadow-md">SENA: Transformando el
-                        futuro de Colombia</h2>
+                    <h2 id="video-title" class="text-[2.2rem] font-bold text-white leading-tight drop-shadow-md transition-all duration-500">
+                        SENA: Transformando el futuro de Colombia
+                    </h2>
                 </div>
 
                 <!-- Bottom Solid Text Bar -->
-                <div class="bg-[#111] px-10 py-5 min-h-[5.5rem] flex items-center z-10">
-                    <h3 class="text-xl font-medium text-gray-300 tracking-wide m-0 leading-none">Conoce nuestras nuevas
-                        convocatorias de formación titulada 2026</h3>
+                <div class="bg-[#111] px-10 py-5 min-h-[5.5rem] flex items-center z-10 border-t border-white/5">
+                    <h3 id="video-subtitle" class="text-xl font-medium text-gray-400 tracking-wide m-0 leading-none transition-all duration-500">
+                        Conoce nuestras nuevas convocatorias de formación titulada 2026
+                    </h3>
                 </div>
             </div>
 
@@ -247,6 +248,96 @@
 
     <!-- Script overlay fix y reloj -->
     <script>
+        // Lógica de Playlist de YouTube
+        const playlistIds = [
+            { id: 'LT42fRHkxEc', title: 'Somos SENA', subtitle: 'Transformando el futuro de Colombia con educación' },
+            { id: 'SqBeOiTOhE4', title: 'Formación para el Trabajo', subtitle: 'Capacitación integral para conectar con nuevas oportunidades' },
+            { id: '7fQpAnZpEbk', title: 'Orgullo SENA', subtitle: 'Miles de talentos construyendo un mejor país' },
+            { id: 'fmneZiWgtEU', title: 'Innovación y Futuro', subtitle: 'Apostando por la tecnología y el desarrollo regional' },
+            { id: '2TVT-v56W9M', title: 'Crecemos Contigo', subtitle: 'Nuevas opciones de aprendizaje técnico y tecnológico' },
+            { id: 'J5tfdua9zLo', title: 'Apoyo al Emprendimiento', subtitle: 'Tus ideas hechas realidad con Fondo Emprender' },
+            { id: 'f2LA_i2MsPk', title: 'SENA es Empleo', subtitle: 'La Agencia Pública de Empleo más grande del país' }
+        ];
+
+        let currentVideoIndex = 0;
+        const titleEl = document.getElementById('video-title');
+        const subtitleEl = document.getElementById('video-subtitle');
+        const videoContainer = document.getElementById('video-container');
+        var player;
+
+        // Cargar el script de YouTube IFrame API asíncronamente
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('youtube-player', {
+                height: '100%',
+                width: '100%',
+                videoId: playlistIds[currentVideoIndex].id,
+                playerVars: {
+                    'autoplay': 1,
+                    'controls': 0,
+                    'disablekb': 1,
+                    'fs': 0,
+                    'modestbranding': 1,
+                    'playsinline': 1,
+                    'rel': 0,
+                    'showinfo': 0,
+                    'mute': 1,     // Requerido para autoplay en pantallas modernas
+                    'loop': 0,
+                    'iv_load_policy': 3
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            updateTextOverlay();
+            event.target.playVideo();
+        }
+
+        function onPlayerStateChange(event) {
+            // Cuando finaliza un video, pasar al siguiente
+            if (event.data === YT.PlayerState.ENDED) {
+                // Fade out text and container slightly
+                videoContainer.style.opacity = '0.5';
+                
+                currentVideoIndex = (currentVideoIndex + 1) % playlistIds.length;
+                player.loadVideoById(playlistIds[currentVideoIndex].id);
+                updateTextOverlay();
+                
+                // Fade it back after short delay (let tube load next cache)
+                setTimeout(() => { videoContainer.style.opacity = '1'; }, 1000);
+            }
+            if (event.data === YT.PlayerState.PLAYING) {
+                videoContainer.style.opacity = '1';
+            }
+        }
+
+        function updateTextOverlay() {
+            const videoData = playlistIds[currentVideoIndex];
+            
+            // Animación Fade
+            titleEl.style.opacity = '0';
+            titleEl.style.transform = 'translateY(10px)';
+            subtitleEl.style.opacity = '0';
+            
+            setTimeout(() => {
+                titleEl.textContent = videoData.title;
+                subtitleEl.textContent = videoData.subtitle;
+                
+                titleEl.style.opacity = '1';
+                titleEl.style.transform = 'translateY(0)';
+                subtitleEl.style.opacity = '1';
+            }, 500);
+        }
+
+        // Reloj y Fecha
         function updateClock() {
             const now = new Date();
             const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };

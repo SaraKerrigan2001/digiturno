@@ -38,8 +38,14 @@ class TurnoController extends Controller
             'sol_tipo' => $request->sol_tipo
         ]);
 
-        // 3. Generar tur_numero
-        $prefix = substr($request->tur_tipo, 0, 1); // G, P, V
+        // 3. Generar tur_numero (Modelo SENA: A-Víctima, B-Prioritaria, C-General)
+        $prefixMap = [
+            'Victimas' => 'A',
+            'Prioritario' => 'B',
+            'General' => 'C'
+        ];
+        $prefix = $prefixMap[$request->tur_tipo] ?? 'C';
+
         $count = Turno::whereDate('tur_hora_fecha', Carbon::today())
                       ->where('tur_tipo', $request->tur_tipo)
                       ->count();

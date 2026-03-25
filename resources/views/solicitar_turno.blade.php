@@ -5,13 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SENA APE - Kiosco Digital</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    fontFamily: { 
+                        sans: ['Inter', 'sans-serif'],
+                        poppins: ['Poppins', 'sans-serif']
+                    },
                     colors: {
                         sena: { 50: '#f1f8e9', 100: '#dcedc8', 500: '#39A900', 600: '#2d8700' }
                     }
@@ -25,7 +28,8 @@
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
         
         /* Clean Container */
@@ -50,16 +54,12 @@
 
         /* Minimal Numpad */
         .numpad-key {
-            @apply flex items-center justify-center p-8 text-4xl font-extrabold text-gray-800 bg-gray-50/50 rounded-[2rem] border border-gray-100 hover:bg-white hover:shadow-xl active:scale-90 transition-all;
+            @apply flex items-center justify-center p-6 text-3xl font-extrabold text-gray-800 bg-gray-50/50 rounded-[2rem] border border-gray-100 hover:bg-white hover:shadow-xl active:scale-90 transition-all;
         }
 
         /* Progress Bar */
         .progress-dot { @apply w-2.5 h-2.5 rounded-full bg-gray-200 transition-all duration-500; }
         .progress-dot.active { @apply bg-sena-500 w-8; }
-
-        .btn-sena {
-            @apply bg-sena-500 text-white font-black py-7 rounded-[2rem] shadow-xl hover:bg-sena-600 active:scale-95 transition-all flex items-center justify-center space-x-4 uppercase tracking-[0.2em];
-        }
 
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #39A900; border-radius: 10px; }
@@ -67,19 +67,19 @@
 </head>
 <body class="min-h-screen flex items-center justify-center p-8">
 
-    <div class="w-full max-w-7xl min-h-[850px] main-card rounded-[4.5rem] flex flex-col items-center relative overflow-hidden">
+    <div class="w-full max-w-5xl min-h-[650px] main-card rounded-[3.5rem] flex flex-col items-center relative overflow-hidden shadow-2xl">
         
         <!-- Header Universal -->
-        <header class="w-full px-16 py-10 flex justify-between items-center border-b border-gray-100/50">
-            <div class="flex items-center space-x-5">
-                <img src="{{ asset('images/Logo.png') }}" class="h-10 w-auto" alt="Logo">
-                <div class="h-8 w-px bg-gray-200"></div>
+        <header class="w-full px-8 md:px-12 py-6 flex justify-between items-center border-b border-gray-100/50">
+            <div class="flex items-center space-x-4">
+                <img src="{{ asset('images/logoSena.png') }}" class="h-8 w-auto mix-blend-multiply" alt="Logo">
+                <div class="h-6 w-px bg-gray-200"></div>
                 <div>
-                    <h1 class="text-xs font-black text-gray-900 uppercase tracking-widest leading-none">Agencia Pública de Empleo</h1>
-                    <p class="text-[9px] font-bold text-sena-500 uppercase tracking-[0.3em] mt-1">Kiosco de Turnos Digital</p>
+                    <h1 class="text-[11px] font-black text-gray-900 uppercase tracking-widest leading-none">Agencia Pública de Empleo</h1>
+                    <p class="text-[8px] font-bold text-sena-500 uppercase tracking-[0.3em] mt-1">Kiosco de Turnos Digital</p>
                 </div>
             </div>
-            <div id="stepIndicator" class="flex items-center space-x-2">
+            <div id="stepIndicator" class="hidden md:flex items-center space-x-2">
                 @for($i=1; $i<=6; $i++)
                 <div class="progress-dot {{ $i == 1 ? 'active' : '' }}" data-step="{{ $i }}"></div>
                 @endfor
@@ -101,20 +101,23 @@
             <input type="hidden" name="receive_method" id="hidden_receive_method" value="SMS">
 
             <!-- STEP 1: BIENVENIDA -->
-            <div id="step1" class="step-content active flex-col items-center justify-center text-center p-20 space-y-16">
+            <div id="step1" class="step-content active flex-col items-center justify-center text-center p-8 md:p-12 lg:p-14 space-y-8 lg:space-y-10">
                 <div class="relative group">
-                    <div class="absolute -inset-16 bg-sena-500/5 blur-[120px] rounded-full"></div>
-                    <img src="{{ asset('images/Logo.png') }}" class="w-64 h-auto relative z-10 drop-shadow-2xl animate-bounce-slow" style="animation: bounce 3s infinite ease-in-out;">
+                    <div class="absolute -inset-10 bg-sena-500/5 blur-[80px] rounded-full"></div>
+                    <img src="{{ asset('images/logoSena.png') }}" class="w-48 lg:w-56 h-auto relative z-10 animate-bounce-slow mix-blend-multiply" style="animation: bounce 3s infinite ease-in-out;">
                 </div>
 
-                <div class="space-y-8 max-w-4xl">
-                    <h2 class="text-[5.5rem] font-black leading-[0.9] text-gray-900 tracking-tighter italic">Solicitud de <br><span class="text-sena-500">Turno Digital</span></h2>
-                    <p class="text-xl font-medium text-gray-400 uppercase tracking-[0.4em]">Toque el botón inferior para comenzar su trámite</p>
+                <div class="space-y-3 lg:space-y-4 max-w-3xl">
+                    <h2 class="text-4xl md:text-5xl lg:text-7xl font-poppins font-extrabold leading-[1.1] text-gray-900 tracking-tight">
+                        Solicitud de <br>
+                        <span class="text-sena-500 bg-gradient-to-r from-sena-500 to-sena-600 bg-clip-text text-transparent">Turno Digital</span>
+                    </h2>
+                    <p class="text-sm md:text-base lg:text-lg font-medium text-gray-600 uppercase tracking-widest opacity-80 mt-2">Toque el botón inferior para comenzar su trámite</p>
                 </div>
 
-                <button type="button" onclick="nextStep(2)" class="btn-sena w-full max-w-sm text-2xl py-8 mt-10">
+                <button type="button" onclick="nextStep(2)" class="w-full max-w-sm text-lg lg:text-xl py-5 lg:py-6 mt-4 lg:mt-8 mx-auto bg-gradient-to-r from-sena-500 to-sena-600 text-white font-bold rounded-2xl shadow-[0_15px_30px_-10px_rgba(57,169,0,0.3)] hover:shadow-[0_20px_40px_-10px_rgba(57,169,0,0.4)] hover:-translate-y-1 active:scale-95 transition-all duration-300 flex items-center justify-center space-x-4 uppercase tracking-[0.1em] border border-white/10">
                     <span>EMPEZAR AQUÍ</span>
-                    <i class="fa-solid fa-chevron-right text-base"></i>
+                    <i class="fa-solid fa-chevron-right text-base text-white/80"></i>
                 </button>
             </div>
 
@@ -166,7 +169,7 @@
             </div>
 
             <!-- STEP 3: TIPO ATENCIÓN -->
-            <div id="step3" class="step-content flex-col items-center justify-center p-20 space-y-16">
+            <div id="step3" class="step-content flex-col items-center justify-center p-10 space-y-10">
                 <div class="text-center space-y-4">
                     <h3 class="text-7xl font-black text-gray-900 tracking-tighter italic leading-none">Perfil de Atención</h3>
                     <p class="text-base text-gray-400 font-bold uppercase tracking-[0.5em] mt-4">¿Cuál es su categoría de usuario?</p>
@@ -175,9 +178,9 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-10 w-full max-w-7xl">
                     @php 
                     $types = [
-                        ['id' => 'General', 'icon' => 'fa-users', 'title' => 'General', 'desc' => 'Público Externo'],
+                        ['id' => 'General', 'icon' => 'fa-users', 'title' => 'General', 'desc' => 'Atención Normal'],
                         ['id' => 'Prioritario', 'icon' => 'fa-person-cane', 'title' => 'Prioritario', 'desc' => 'Adulto Mayor / Discapacidad'],
-                        ['id' => 'Victimas', 'icon' => 'fa-certificate', 'title' => 'Especial', 'desc' => 'Población Vulnerable']
+                        ['id' => 'Victimas', 'icon' => 'fa-certificate', 'title' => 'Víctima', 'desc' => 'Prioridad Máxima']
                     ];
                     @endphp
                     @foreach($types as $t)
@@ -195,7 +198,7 @@
             </div>
 
             <!-- STEP 4: IDENTIDAD -->
-            <div id="step4" class="step-content flex-col items-center justify-center p-20 space-y-16">
+            <div id="step4" class="step-content flex-col items-center justify-center p-10 space-y-8">
                 <div class="text-center space-y-4">
                     <h3 class="text-7xl font-black text-gray-900 tracking-tighter italic">Identificación</h3>
                     <p class="text-base text-gray-400 font-bold uppercase tracking-[0.5em]">Ingreso de número de documento</p>
@@ -210,8 +213,8 @@
                         @endforeach
                     </div>
 
-                    <div class="bg-white border-4 border-gray-50 rounded-[4rem] px-16 h-48 flex items-center justify-center shadow-3xl">
-                        <span id="docDisplay" class="text-[7.5rem] font-black text-gray-900 tracking-wider">0000000000</span>
+                    <div class="bg-white border-4 border-gray-50 rounded-[4rem] px-16 h-32 flex items-center justify-center shadow-3xl">
+                        <span id="docDisplay" class="text-[5rem] font-black text-gray-900 tracking-wider">0000000000</span>
                     </div>
 
                     <div class="grid grid-cols-3 gap-6">
@@ -223,7 +226,7 @@
                         <button type="button" onclick="backspace()" class="numpad-key text-amber-500 hover:bg-amber-50 border-amber-100 hover:border-amber-200"><i class="fa-solid fa-delete-left"></i></button>
                     </div>
 
-                    <button type="button" onclick="validateDoc()" class="btn-sena w-full text-2xl py-10 rounded-[3.5rem] shadow-2xl">
+                    <button type="button" onclick="validateDoc()" class="w-full text-2xl py-10 rounded-[3.5rem] bg-gradient-to-r from-sena-500 to-sena-600 text-white font-bold shadow-[0_15px_30px_-10px_rgba(57,169,0,0.3)] hover:shadow-2xl hover:-translate-y-1 active:scale-95 transition-all duration-300 flex items-center justify-center space-x-4 uppercase tracking-[0.1em] border border-white/10">
                         <span>CONFIRMAR IDENTIDAD</span>
                         <i class="fa-solid fa-arrow-right"></i>
                     </button>
@@ -231,15 +234,15 @@
             </div>
 
             <!-- STEP 5: CONTACTO -->
-            <div id="step5" class="step-content flex-col items-center justify-center p-20 space-y-16">
+            <div id="step5" class="step-content flex-col items-center justify-center p-10 space-y-8">
                 <div class="text-center space-y-4">
                     <h3 class="text-7xl font-black text-gray-900 tracking-tighter italic leading-none">Datos de Contacto</h3>
                     <p class="text-base text-gray-400 font-bold uppercase tracking-[0.5em] mt-4">Ingrese su número celular para el turno</p>
                 </div>
 
-                <div class="w-full max-w-3xl space-y-12">
-                    <div class="bg-white border-4 border-gray-50 rounded-[4rem] px-16 h-48 flex flex-col items-center justify-center shadow-3xl">
-                        <span id="phoneDisplay" class="text-[7.5rem] font-black text-gray-900 tracking-wider">300 000 0000</span>
+                <div class="w-full max-w-3xl space-y-8">
+                    <div class="bg-white border-4 border-gray-50 rounded-[4rem] px-16 h-32 flex flex-col items-center justify-center shadow-3xl">
+                        <span id="phoneDisplay" class="text-[5rem] font-black text-gray-900 tracking-wider">300 000 0000</span>
                         <div class="flex items-center space-x-3 mt-2">
                              <div class="w-2 h-2 rounded-full bg-sena-500 animate-pulse"></div>
                              <span class="text-[10px] font-black text-gray-300 uppercase tracking-widest">Enlace de notificación Móvil</span>
@@ -255,7 +258,7 @@
                         <button type="button" onclick="backspacePhone()" class="numpad-key text-gray-300"><i class="fa-solid fa-delete-left"></i></button>
                     </div>
 
-                    <button type="button" onclick="nextStep(6)" class="btn-sena w-full text-2xl py-10 rounded-[3.5rem] shadow-2xl">
+                    <button type="button" onclick="nextStep(6)" class="w-full text-2xl py-10 rounded-[3.5rem] bg-gradient-to-r from-sena-500 to-sena-600 text-white font-bold shadow-[0_15px_30px_-10px_rgba(57,169,0,0.3)] hover:shadow-2xl hover:-translate-y-1 active:scale-95 transition-all duration-300 flex items-center justify-center space-x-4 uppercase tracking-[0.1em] border border-white/10">
                         <span>CONTINUAR</span>
                         <i class="fa-solid fa-chevron-right"></i>
                     </button>
@@ -292,7 +295,7 @@
                     <button type="button" onclick="nextStep(5)" class="px-14 py-8 bg-white border border-gray-100 rounded-[3rem] text-gray-400 font-black uppercase tracking-widest text-xs hover:bg-gray-50 active:scale-95 transition-all flex items-center space-x-6">
                         <i class="fa-solid fa-arrow-left"></i><span>Volver</span>
                     </button>
-                    <button type="submit" class="btn-sena flex-1 text-2xl py-10 rounded-[3.5rem] shadow-2xl">
+                    <button type="submit" class="flex-1 text-2xl py-10 rounded-[3.5rem] bg-gradient-to-r from-sena-500 to-sena-600 text-white font-bold shadow-[0_15px_30px_-10px_rgba(57,169,0,0.3)] hover:shadow-2xl hover:-translate-y-1 active:scale-95 transition-all duration-300 flex items-center justify-center space-x-4 uppercase tracking-[0.1em] border border-white/10">
                         <span>GENERAR TURNO FINAL</span>
                         <i class="fa-solid fa-ticket"></i>
                     </button>
@@ -301,6 +304,93 @@
 
         </form>
     </div>
+
+    <!-- MODAL DE ÉXITO -->
+    @if(session('success'))
+    <div id="successModal" class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-2xl rounded-[4rem] p-16 shadow-2xl flex flex-col items-center text-center space-y-10 border border-gray-100 transition-transform">
+            
+            <!-- Icono Animado -->
+            <div class="w-32 h-32 bg-sena-50 rounded-full flex items-center justify-center relative">
+                <div class="absolute inset-0 bg-sena-500/20 rounded-full animate-ping"></div>
+                <i class="fa-solid fa-check text-6xl text-sena-500 relative z-10"></i>
+            </div>
+
+            <div class="space-y-4">
+                <h3 class="text-5xl font-poppins font-black text-gray-900 tracking-tight leading-none italic">¡Turno Generado!</h3>
+                <p class="text-xl font-medium text-gray-400 uppercase tracking-[0.3em]">Su proceso ha finalizado con éxito</p>
+            </div>
+
+            <!-- Número del Turno -->
+            <div class="bg-gray-50/50 border-2 border-dashed border-sena-500/30 rounded-[3rem] px-16 py-10 w-full group overflow-hidden relative">
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-sena-500/5 rounded-full blur-2xl group-hover:bg-sena-500/10 transition-colors"></div>
+                <p class="text-sm font-bold text-sena-500 uppercase tracking-widest mb-1">SU NÚMERO DE TURNO ES:</p>
+                <div class="text-9xl font-poppins font-black text-gray-900 tracking-tighter">
+                    {{ str_replace('Turno solicitado con éxito: ', '', session('success')) }}
+                </div>
+            </div>
+
+            <div class="space-y-6 w-full">
+                <div class="flex items-center justify-center space-x-3 text-gray-400">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span class="text-xs font-bold uppercase tracking-widest">Esta ventana se cerrará automáticamente</span>
+                </div>
+                
+                <button onclick="closeModal()" class="w-full py-8 rounded-[2.5rem] bg-gray-900 text-white font-black text-xl uppercase tracking-widest hover:bg-black transition-all shadow-xl active:scale-95">
+                    FINALIZAR AHORA
+                </button>
+            </div>
+        </div>
+    </div>
+    <script>
+        function closeModal() {
+            const modal = document.getElementById('successModal');
+            modal.style.opacity = '0';
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+        // Auto-cierre tras 8 segundos
+        setTimeout(closeModal, 8000);
+    </script>
+    @endif
+
+    <!-- MODAL DE ERROR -->
+    @if($errors->any() || session('error'))
+    <div id="errorModal" class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-2xl rounded-[4rem] p-12 shadow-2xl flex flex-col items-center text-center space-y-8 border border-gray-100 relative">
+            
+            <button type="button" onclick="document.getElementById('errorModal').style.display='none'" class="absolute top-8 right-8 text-gray-400 hover:text-gray-900 text-3xl transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <!-- Icono Animado Error -->
+            <div class="w-28 h-28 bg-rose-50 rounded-full flex items-center justify-center relative">
+                <div class="absolute inset-0 bg-rose-500/20 rounded-full animate-ping"></div>
+                <i class="fa-solid fa-triangle-exclamation text-5xl text-rose-500 relative z-10"></i>
+            </div>
+
+            <div class="space-y-3">
+                <h3 class="text-4xl font-poppins font-black text-gray-900 tracking-tight leading-none italic">¡Algo salió mal!</h3>
+                <p class="text-base font-bold text-gray-500 uppercase tracking-widest">
+                    @if(session('error')) {{ session('error') }} @else Por favor verifica los datos ingresados: @endif
+                </p>
+            </div>
+
+            @if($errors->any())
+            <div class="bg-rose-50/50 border border-rose-100 rounded-3xl p-6 w-full text-left overflow-y-auto max-h-40">
+                <ul class="list-disc list-inside text-rose-600 font-medium space-y-2 text-sm">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+
+            <button type="button" onclick="document.getElementById('errorModal').style.display='none'" class="w-full py-6 rounded-[2rem] bg-gray-900 text-white font-black text-lg uppercase tracking-widest hover:bg-black transition-all shadow-xl active:scale-95">
+                INTENTAR DE NUEVO
+            </button>
+        </div>
+    </div>
+    @endif
 
     <script>
         let docNumber = "";

@@ -11,13 +11,16 @@
     <title>@yield('title', 'APE Advisor - Digital Queue Control')</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    fontFamily: { 
+                        sans: ['Inter', 'sans-serif'],
+                        poppins: ['Poppins', 'sans-serif']
+                    },
                     colors: {
                         sena: { 50: '#e8f5e9', 100: '#c8e6c9', 500: '#39A900', 600: '#2d8700' },
                         amber: { 50: '#fff8e1', 100: '#ffecb3', 500: '#ffb300', 600: '#ffa000' }
@@ -39,10 +42,10 @@
     <aside class="w-72 bg-white flex flex-col border-r border-gray-100 shrink-0 z-30">
         <div class="px-8 py-10 flex flex-col space-y-4">
             <div class="flex items-center space-x-3">
-                <img src="{{ asset('images/Logo.png') }}" class="h-12 w-auto object-contain" alt="SENA Logo">
+                <img src="{{ asset('images/logoSena.png') }}" class="h-12 w-auto object-contain" alt="SENA Logo">
                 <div class="h-8 w-px bg-gray-100 mx-2"></div>
                 <div>
-                    <h1 class="text-xl font-black text-gray-900 tracking-tight leading-none uppercase">SENA APE</h1>
+                    <h1 class="text-xl font-poppins font-black text-gray-900 tracking-tight leading-none uppercase">SENA APE</h1>
                     <p class="text-[9px] font-bold text-sena-500 uppercase tracking-wider mt-1 leading-none">Sistema de Gestión de Turnos</p>
                 </div>
             </div>
@@ -85,17 +88,30 @@
                 <span class="text-sm font-bold">Configuración</span>
             </a>
 
-            <div class="flex items-center justify-between bg-gray-50 p-4 rounded-[2rem] border border-gray-100">
-                <div class="flex items-center space-x-3">
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode($asesor->persona->pers_nombres ?? 'Carlos Ruiz') }}&background=39A900&color=fff&bold=true" class="w-10 h-10 rounded-full border-2 border-white shadow-sm" alt="Profile">
-                    <div>
-                        <p class="text-[11px] font-black text-gray-900 leading-tight">{{ explode(' ', $asesor->persona->pers_nombres ?? 'Carlos Ruiz')[0] }}</p>
-                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Módulo {{ $asesor->modulo ?? '04' }}</p>
+            <div class="flex flex-col bg-gray-50 p-4 rounded-[2rem] border border-gray-100">
+                <div class="flex items-center justify-between mb-3 px-1">
+                    <div class="flex items-center space-x-3">
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode(session('ase_nombre', 'Asesor')) }}&background=39A900&color=fff&bold=true" class="w-10 h-10 rounded-full border-2 border-white shadow-sm" alt="Profile">
+                        <div>
+                            <p class="text-[11px] font-black text-gray-900 leading-tight">{{ session('ase_nombre', 'Asesor') }}</p>
+                            <p class="text-[9px] font-bold text-sena-500 uppercase tracking-widest">{{ session('ase_tipo_asesor', 'General') }}</p>
+                        </div>
                     </div>
+                    <form action="{{ route('asesor.logout') }}" method="POST" id="logout-form">
+                        @csrf
+                        <button type="submit" class="text-gray-300 hover:text-rose-500 px-2 transition-colors" title="Cerrar Sesión">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </button>
+                    </form>
                 </div>
-                <button class="text-gray-300 hover:text-red-500 px-2 transition-colors">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                </button>
+                <div class="px-1">
+                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Módulo {{ $asesor->modulo ?? '04' }}</p>
+                </div>
+            </div>
+            <div class="bg-gray-50 rounded-2xl p-4 mt-6">
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Ayuda</p>
+                <p class="text-[11px] text-gray-600 leading-relaxed italic">¿Necesitas ayuda?</p>
+                <a href="{{ route('manual.asesor') }}" class="inline-block mt-2 text-[11px] font-bold text-sena-500 hover:underline">Manual de usuario</a>
             </div>
         </div>
     </aside>
@@ -116,11 +132,52 @@
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span class="text-xs font-black text-emerald-600 uppercase tracking-widest">En Línea</span>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <button class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-50 rounded-full transition relative">
+                <div class="flex items-center space-x-4 relative">
+                    <button id="notification-bell" class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-50 rounded-full transition relative focus:outline-none">
                         <i class="fa-solid fa-bell"></i>
-                        <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                        <span id="notification-indicator" class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white transition-opacity"></span>
                     </button>
+                    
+                    <!-- Notification Dropdown -->
+                    <div id="notification-dropdown" class="hidden absolute top-12 right-0 w-80 bg-white rounded-[2rem] shadow-2xl border border-gray-100 overflow-hidden transform opacity-0 scale-95 transition-all duration-300 z-50">
+                        <div class="p-5 border-b border-gray-50 bg-gray-50/50 flex items-center justify-between">
+                            <h4 class="text-xs font-black text-gray-900 uppercase tracking-widest">Notificaciones</h4>
+                            <span id="notification-badge" class="text-[9px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg uppercase tracking-widest">2 Nuevas</span>
+                        </div>
+                        <div class="max-h-[300px] overflow-y-auto">
+                            <!-- Item 1 -->
+                            <div class="p-5 border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors relative group">
+                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 rounded-r-lg group-hover:w-2 transition-all"></div>
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-500 shrink-0">
+                                        <i class="fa-solid fa-bullhorn text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-black text-gray-900">Actualización del Sistema</p>
+                                        <p class="text-[10px] font-medium text-gray-500 mt-1 leading-relaxed">Se han implementado nuevas mejoras visuales en el panel de configuración.</p>
+                                        <p class="text-[9px] font-black text-gray-400 mt-3 uppercase tracking-widest">Hace 5 min</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Item 2 -->
+                            <div class="p-5 hover:bg-gray-50 cursor-pointer transition-colors relative group">
+                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-amber-500 rounded-r-lg group-hover:w-2 transition-all"></div>
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500 shrink-0">
+                                        <i class="fa-solid fa-clock-rotate-left text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-black text-gray-900">Recordatorio de Pausa</p>
+                                        <p class="text-[10px] font-medium text-gray-500 mt-1 leading-relaxed">Tu próximo receso programado inicia en 15 minutos.</p>
+                                        <p class="text-[9px] font-black text-gray-400 mt-3 uppercase tracking-widest">Hace 1 hora</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 border-t border-gray-50 text-center bg-gray-50/50">
+                            <button id="mark-read-btn" class="w-full py-2 bg-white rounded-xl border border-gray-100 text-[9px] font-black text-gray-500 hover:text-emerald-500 hover:border-emerald-200 uppercase tracking-widest hover:shadow-sm transition-all">Marcar todas como leídas</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </header>
@@ -151,9 +208,52 @@
     </main>
 
     <script>
-        function updateHeaderClock() {
-            // ... (implementación si es necesaria)
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const bell = document.getElementById('notification-bell');
+            const dropdown = document.getElementById('notification-dropdown');
+            const indicator = document.getElementById('notification-indicator');
+            const badge = document.getElementById('notification-badge');
+            const markReadBtn = document.getElementById('mark-read-btn');
+
+            if(bell && dropdown) {
+                bell.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if(dropdown.classList.contains('hidden')) {
+                        dropdown.classList.remove('hidden');
+                        setTimeout(() => {
+                            dropdown.classList.remove('opacity-0', 'scale-95');
+                        }, 10);
+                    } else {
+                        dropdown.classList.add('opacity-0', 'scale-95');
+                        setTimeout(() => {
+                            dropdown.classList.add('hidden');
+                        }, 300);
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    if(!dropdown.contains(e.target) && !dropdown.classList.contains('hidden')) {
+                        dropdown.classList.add('opacity-0', 'scale-95');
+                        setTimeout(() => {
+                            dropdown.classList.add('hidden');
+                        }, 300);
+                    }
+                });
+
+                if(markReadBtn) {
+                    markReadBtn.addEventListener('click', () => {
+                        if(indicator) indicator.classList.add('opacity-0');
+                        if(badge) {
+                            badge.textContent = '0 Nuevas';
+                            badge.classList.replace('bg-emerald-50', 'bg-gray-100');
+                            badge.classList.replace('text-emerald-600', 'text-gray-400');
+                        }
+                        markReadBtn.textContent = 'Sin notificaciones pendientes';
+                        markReadBtn.disabled = true;
+                    });
+                }
+            }
+        });
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     @yield('scripts')
