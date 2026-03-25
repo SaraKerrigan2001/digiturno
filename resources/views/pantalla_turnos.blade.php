@@ -103,9 +103,12 @@
                         <div class="absolute left-0 top-0 bottom-0 w-2 bg-sena-500"></div>
                         <div class="col-span-2 text-[3rem] font-black text-[#15803d] tracking-tight ml-4">
                             {{ $turnoActual->tur_numero ?? '---' }}</div>
-                        <div class="col-span-3 text-lg font-semibold text-[#4a5568] leading-tight">
-                            <p class="text-xs font-black text-sena-600 uppercase tracking-[0.2em] mb-1">Pasar a:</p>
-                            <span class="text-2xl font-black text-gray-900">Módulo {{ sprintf('%02d', $turnoActual->modulo ?? '01') }}</span>
+                        <div class="col-span-3 flex items-center space-x-4">
+                            <img src="{{ asset($turnoActual->ase_foto ?? 'images/foto de perfil.jpg') }}" class="w-16 h-16 rounded-2xl border-2 border-white shadow-sm object-cover">
+                            <div class="leading-tight">
+                                <p class="text-xs font-black text-sena-600 uppercase tracking-[0.2em] mb-1">Pasar a:</p>
+                                <span class="text-2xl font-black text-gray-900">Módulo {{ sprintf('%02d', $turnoActual->modulo ?? '01') }}</span>
+                            </div>
                         </div>
                     </div>
                 @endif

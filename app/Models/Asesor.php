@@ -11,7 +11,7 @@ class Asesor extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'ase_nrocontrato', 'ase_tipo_asesor', 'ase_vigencia', 'ase_password', 'ase_correo', 'PERSONA_pers_doc'
+        'ase_nrocontrato', 'ase_tipo_asesor', 'ase_vigencia', 'ase_password', 'ase_correo', 'PERSONA_pers_doc', 'ase_foto'
     ];
 
     public function persona()

@@ -9,7 +9,9 @@ use App\Http\Controllers\CoordinadorController;
 // Kiosco
 Route::get('/', [TurnoController::class, 'index'])->name('kiosco.index');
 Route::get('/solicitar', [TurnoController::class, 'index']);
-Route::post('/turno/solicitar', [TurnoController::class, 'store'])->name('turnos.store');
+Route::post('/turno/solicitar', [TurnoController::class, 'store'])
+    ->name('turnos.store')
+    ->middleware('throttle:kiosk');
 
 // Pantalla
 Route::get('/pantalla', [PantallaController::class, 'index'])->name('pantalla.index');

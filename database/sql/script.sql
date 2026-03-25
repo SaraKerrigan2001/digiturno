@@ -32,8 +32,9 @@ CREATE TABLE `asesor` (
   `ase_nrocontrato` varchar(45) DEFAULT NULL,
   `ase_tipo_asesor` varchar(2) DEFAULT NULL,
   `ase_vigencia` varchar(45) DEFAULT NULL,
-  `ase_password` varchar(45) DEFAULT NULL,
-  `ase_correo` varchar(45) DEFAULT NULL,
+  `ase_password` varchar(255) DEFAULT NULL,
+  `ase_correo` varchar(100) DEFAULT NULL,
+  `ase_foto` varchar(255) DEFAULT 'images/foto de perfil.jpg',
   `PERSONA_pers_doc` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 

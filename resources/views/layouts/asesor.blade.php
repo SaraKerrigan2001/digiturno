@@ -91,7 +91,7 @@
             <div class="flex flex-col bg-gray-50 p-4 rounded-[2rem] border border-gray-100">
                 <div class="flex items-center justify-between mb-3 px-1">
                     <div class="flex items-center space-x-3">
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode(session('ase_nombre', 'Asesor')) }}&background=39A900&color=fff&bold=true" class="w-10 h-10 rounded-full border-2 border-white shadow-sm" alt="Profile">
+                        <img src="{{ asset(session('ase_foto', $asesor->ase_foto ?? 'images/foto de perfil.jpg')) }}" class="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover" alt="Profile">
                         <div>
                             <p class="text-[11px] font-black text-gray-900 leading-tight">{{ session('ase_nombre', 'Asesor') }}</p>
                             <p class="text-[9px] font-bold text-sena-500 uppercase tracking-widest">{{ session('ase_tipo_asesor', 'General') }}</p>

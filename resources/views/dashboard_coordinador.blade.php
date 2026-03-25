@@ -95,7 +95,7 @@
                     <div class="flex justify-between items-start mb-4">
                         <div class="flex items-center space-x-3">
                             <div class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center overflow-hidden shrink-0 border border-gray-100 group-hover:border-sena-100">
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode($ase['nombre']) }}&background=39A900&color=fff&bold=true" class="w-full h-full object-cover">
+                                <img src="{{ asset($ase['ase_foto'] ?? 'images/foto de perfil.jpg') }}" class="w-full h-full object-cover">
                             </div>
                             <div>
                                 <h4 class="text-xs font-black text-gray-900 leading-none">{{ explode(' ', $ase['nombre'])[0] }}</h4>

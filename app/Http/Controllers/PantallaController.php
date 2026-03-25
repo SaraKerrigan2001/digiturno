@@ -12,13 +12,14 @@ class PantallaController extends Controller
     {
         // Turno que está siendo atendido actualmente (con hora_fin null)
         $atencionActual = Atencion::whereNull('atnc_hora_fin')
-                                  ->with('turno')
+                                  ->with(['turno', 'asesor'])
                                   ->latest('atnc_hora_inicio')
                                   ->first();
 
         $turnoActual = $atencionActual ? (object)[
             'tur_numero' => $atencionActual->turno->tur_numero,
-            'modulo' => $atencionActual->ASESOR_ase_id // Simulación del módulo por ID de asesor
+            'modulo' => $atencionActual->ASESOR_ase_id,
+            'ase_foto' => $atencionActual->asesor->ase_foto ?? 'images/foto de perfil.jpg'
         ] : null;
 
         // Turnos en espera (Ordenados por prioridad SENA: Víctima > Prioritario > General)

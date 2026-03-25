@@ -48,7 +48,8 @@ class AsesorController extends Controller
             session([
                 'ase_id' => $asesor->ase_id,
                 'ase_tipo_asesor' => $asesor->ase_tipo_asesor,
-                'ase_nombre' => $asesor->persona->pers_nombres
+                'ase_nombre' => $asesor->persona->pers_nombres,
+                'ase_foto' => $asesor->ase_foto ?? 'images/foto de perfil.jpg'
             ]);
             return redirect()->route('asesor.index')->with('success', 'Bienvenido, ' . $asesor->persona->pers_nombres);
         }
@@ -95,17 +96,21 @@ class AsesorController extends Controller
                             ->with('turno.solicitante.persona')
                             ->first();
 
-        // Cola de espera filtrada por el perfil del asesor
+        // Cola de espera filtrada por el perfil del asesor (FIFO Estricto)
         $tipoAsesor = $asesor->ase_tipo_asesor ?? 'General';
         
         $queryEspera = Turno::whereDate('tur_hora_fecha', now()->today())
-                            ->whereDoesntHave('atencion')
-                            ->orderBy('tur_id', 'asc');
+                            ->whereDoesntHave('atencion');
                             
         if ($tipoAsesor === 'Especializado') {
-            $queryEspera->where('tur_tipo', 'Victimas');
+            // Asesor 1: Solo población víctima
+            $queryEspera->where('tur_tipo', 'Victimas')
+                        ->orderBy('tur_hora_fecha', 'asc');
         } else {
-            $queryEspera->whereIn('tur_tipo', ['Prioritario', 'General']);
+            // Asesor 2: Prioridad Prioritario -> General, luego FIFO
+            $queryEspera->whereIn('tur_tipo', ['Prioritario', 'General'])
+                        ->orderByRaw("FIELD(tur_tipo, 'Prioritario', 'General') ASC")
+                        ->orderBy('tur_hora_fecha', 'asc');
         }
         
         $turnosEnEspera = $queryEspera->get();
@@ -400,42 +405,51 @@ class AsesorController extends Controller
     {
         $ase_id = session('ase_id');
         $asesor = Asesor::find($ase_id);
-        $tipoAsesor = $asesor->ase_tipo_asesor ?? 'General';
+        
+        if (!$asesor) {
+            return back()->with('error', 'Sesión no válida o asesor no encontrado.');
+        }
 
-        // Lógica de Asignación SENA
-        $query = Turno::whereDate('tur_hora_fecha', now()->today())
-                    ->whereDoesntHave('atencion')
-                    ->orderBy('tur_id', 'asc');
+        return DB::transaction(function () use ($ase_id, $asesor) {
+            $tipoAsesor = $asesor->ase_tipo_asesor ?? 'General';
 
-        if ($tipoAsesor === 'Especializado') {
-            // Asesor 1: Solo población víctima
-            $turno = $query->where('tur_tipo', 'Victimas')->first();
-        } else {
-            // Asesor 2: Prioridad Prioritario -> General
-            $turno = (clone $query)->where('tur_tipo', 'Prioritario')->first();
-            if (!$turno) {
-                $turno = (clone $query)->where('tur_tipo', 'General')->first();
+            // Query base: Turnos de hoy que no han sido atendidos
+            $query = Turno::whereDate('tur_hora_fecha', now()->today())
+                        ->whereDoesntHave('atencion');
+
+            if ($tipoAsesor === 'Especializado') {
+                // Asesor 1: Solo población víctima (FIFO)
+                $turno = $query->where('tur_tipo', 'Victimas')
+                            ->orderBy('tur_hora_fecha', 'asc')
+                            ->lockForUpdate()
+                            ->first();
+            } else {
+                // Asesor 2: Prioridad Prioritario -> General, luego FIFO
+                $turno = $query->whereIn('tur_tipo', ['Prioritario', 'General'])
+                            ->orderByRaw("FIELD(tur_tipo, 'Prioritario', 'General') ASC")
+                            ->orderBy('tur_hora_fecha', 'asc')
+                            ->lockForUpdate()
+                            ->first();
             }
-        }
 
-        if (!$turno) {
-            return back()->with('error', 'No hay turnos disponibles para su perfil en este momento.');
-        }
+            if (!$turno) {
+                return back()->with('error', 'No hay turnos disponibles para su perfil en este momento.');
+            }
 
-        // Mapear el tipo de turno al enum de atención (Asegurar compatibilidad con enum de la BD)
-        $tipoAtencion = $turno->tur_tipo;
-        if ($tipoAtencion == 'Prioritario') $tipoAtencion = 'Prioritaria';
-        // Victimas y General se mantienen igual
+            // Mapear el tipo de turno al enum de atención (Asegurar compatibilidad con enum de la BD)
+            $tipoAtencion = $turno->tur_tipo;
+            if ($tipoAtencion == 'Prioritario') $tipoAtencion = 'Prioritaria';
 
-        // Crear la atención
-        Atencion::create([
-            'atnc_hora_inicio' => now(),
-            'ASESOR_ase_id' => $ase_id,
-            'TURNO_tur_id' => $turno->tur_id,
-            'atnc_tipo' => $tipoAtencion
-        ]);
+            // Crear la atención dentro de la transacción
+            Atencion::create([
+                'atnc_hora_inicio' => now(),
+                'ASESOR_ase_id' => $ase_id,
+                'TURNO_tur_id' => $turno->tur_id,
+                'atnc_tipo' => $tipoAtencion
+            ]);
 
-        return redirect()->route('asesor.index')->with('success', "Llamando al turno {$turno->tur_numero}");
+            return redirect()->route('asesor.index')->with('success', "Llamando al turno {$turno->tur_numero}");
+        });
     }
 
     public function finalizar($atnc_id)

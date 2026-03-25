@@ -131,7 +131,8 @@ class CoordinadorController extends Controller
                 'modulo' => $ase->ase_id,
                 'estado' => $estado,
                 'atencion' => $atencionActiva,
-                'inicio_sesion' => $atencionActiva ? $atencionActiva->atnc_hora_inicio->format('H:i') : '--:--'
+                'inicio_sesion' => $atencionActiva ? $atencionActiva->atnc_hora_inicio->format('H:i') : '--:--',
+                'ase_foto' => $ase->ase_foto ?? 'images/foto de perfil.jpg'
             ];
         });
 
@@ -320,14 +321,17 @@ class CoordinadorController extends Controller
         if (!$this->checkAuth()) return redirect()->route('coordinador.login');
 
         $request->validate([
-            'pers_doc'      => 'required|string|max:20',
+            'pers_doc'      => 'required|string|max:20|unique:asesor,PERSONA_pers_doc',
             'pers_tipodoc'  => 'required|string',
             'pers_nombres'  => 'required|string|max:100',
             'pers_apellidos'=> 'required|string|max:100',
             'pers_telefono' => 'nullable|string|max:20',
-            'ase_correo'    => 'required|email|max:100',
+            'ase_correo'    => 'required|email|max:100|unique:asesor,ase_correo',
             'ase_password'  => 'required|string|min:6',
             'ase_nrocontrato' => 'nullable|string|max:50',
+        ], [
+            'pers_doc.unique' => 'Este número de documento ya está registrado como asesor.',
+            'ase_correo.unique' => 'Este correo electrónico ya está en uso por otro asesor.',
         ]);
 
         \DB::beginTransaction();
@@ -349,6 +353,7 @@ class CoordinadorController extends Controller
                 'ase_nrocontrato'  => $request->ase_nrocontrato ?? 'CONT-' . now()->format('Ymd'),
                 'ase_tipo_asesor'  => 'Asesor',
                 'ase_vigencia'     => now()->addYear()->toDateString(),
+                'ase_foto'         => 'images/foto de perfil.jpg', // Default photo
             ]);
 
             \DB::commit();
@@ -367,6 +372,7 @@ class CoordinadorController extends Controller
         $asesor = \App\Models\Asesor::findOrFail($id);
         $asesor->ase_correo     = $request->ase_correo ?? $asesor->ase_correo;
         $asesor->ase_nrocontrato = $request->ase_nrocontrato ?? $asesor->ase_nrocontrato;
+        $asesor->ase_foto       = $request->ase_foto ?? $asesor->ase_foto;
         if ($request->filled('ase_password')) {
             $asesor->ase_password = bcrypt($request->ase_password);
         }

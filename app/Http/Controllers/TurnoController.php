@@ -7,6 +7,7 @@ use App\Models\Persona;
 use App\Models\Solicitante;
 use App\Models\Turno;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class TurnoController extends Controller
 {
@@ -26,18 +27,20 @@ class TurnoController extends Controller
             'sol_tipo' => 'required'
         ]);
 
-        // 1. Guardar o actualizar Persona
-        $persona = Persona::updateOrCreate(
-            ['pers_doc' => $request->pers_doc],
-            $request->only(['pers_tipodoc', 'pers_nombres', 'pers_apellidos', 'pers_telefono', 'pers_fecha_nac'])
-        );
+        return DB::transaction(function () use ($request) {
+            // 1. Guardar o actualizar Persona
+            $persona = Persona::updateOrCreate(
+                ['pers_doc' => $request->pers_doc],
+                $request->only(['pers_tipodoc', 'pers_nombres', 'pers_apellidos', 'pers_telefono', 'pers_fecha_nac'])
+            );
 
-        // 2. Crear Solicitante
-        $solicitante = Solicitante::firstOrCreate([
-            'PERSONA_pers_doc' => $persona->pers_doc,
-            'sol_tipo' => $request->sol_tipo
-        ]);
+            // 2. Crear Solicitante
+            $solicitante = Solicitante::firstOrCreate([
+                'PERSONA_pers_doc' => $persona->pers_doc,
+                'sol_tipo' => $request->sol_tipo
+            ]);
 
+<<<<<<< HEAD
         // 3. Generar tur_numero (Modelo SENA: A-Víctima, B-Prioritaria, C-General)
         $prefixMap = [
             'Victimas' => 'A',
@@ -51,15 +54,48 @@ class TurnoController extends Controller
                       ->count();
         $numero = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
         $tur_numero = "{$prefix}-{$numero}";
+=======
+            // 3. Validación de Turnos Activos (Evitar múltiples turnos el mismo día sin atender)
+            $hasActive = Turno::where('SOLICITANTE_sol_id', $solicitante->sol_id)
+                ->whereDate('tur_hora_fecha', Carbon::today())
+                ->where(function($q) {
+                    $q->whereDoesntHave('atencion') // En espera
+                      ->orWhereHas('atencion', function($q2) {
+                          $q2->whereNull('atnc_hora_fin'); // En proceso de atención
+                      });
+                })->exists();
+>>>>>>> cd1d4e4 (Enhance Advisor Management & Turn Flow: Profile photos, premium modals, FIFO optimization, and turn generation hardening)
 
-        // 4. Crear Turno
-        $turno = Turno::create([
-            'tur_hora_fecha' => now(),
-            'tur_numero' => $tur_numero,
-            'tur_tipo' => $request->tur_tipo,
-            'SOLICITANTE_sol_id' => $solicitante->sol_id
-        ]);
+            if ($hasActive) {
+                return back()->with('error', 'Ya tienes un turno activo para hoy. Por favor, espera a ser atendido.');
+            }
 
-        return back()->with('success', "Turno solicitado con éxito: {$tur_numero}");
+            // 4. Generar tur_numero (Modelo SENA: A-Víctima, B-Prioritaria, C-General)
+            // Usamos Lock Pesimista (lockForUpdate) para asegurar que el correlativo sea único
+            $prefixMap = [
+                'Victimas' => 'A',
+                'Prioritario' => 'B',
+                'General' => 'C'
+            ];
+            $prefix = $prefixMap[$request->tur_tipo] ?? 'C';
+
+            $count = Turno::whereDate('tur_hora_fecha', Carbon::today())
+                          ->where('tur_tipo', $request->tur_tipo)
+                          ->lockForUpdate() 
+                          ->count();
+            
+            $numero = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
+            $tur_numero = "{$prefix}-{$numero}";
+
+            // 5. Crear Turno
+            $turno = Turno::create([
+                'tur_hora_fecha' => now(),
+                'tur_numero' => $tur_numero,
+                'tur_tipo' => $request->tur_tipo,
+                'SOLICITANTE_sol_id' => $solicitante->sol_id
+            ]);
+
+            return back()->with('success', "Turno solicitado con éxito: {$tur_numero}");
+        });
     }
 }

@@ -56,7 +56,7 @@
         {{-- Header --}}
         <div class="flex items-start justify-between mb-5">
             <div class="flex items-center space-x-3">
-                <img src="https://ui-avatars.com/api/?name={{ urlencode($ase->persona->pers_nombres ?? 'Asesor') }}&background=39A900&color=fff&bold=true&size=80" 
+                <img src="{{ asset($ase->ase_foto ?? 'images/foto de perfil.jpg') }}" 
                      class="w-12 h-12 rounded-2xl border-2 border-sena-100 object-cover group-hover:border-sena-300 transition">
                 <div>
                     <h3 class="text-sm font-black text-gray-900 leading-snug">{{ $ase->persona->pers_nombres ?? 'N/A' }} {{ $ase->persona->pers_apellidos ?? '' }}</h3>
@@ -109,7 +109,7 @@
 <div id="modal-create" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeModal('modal-create')"></div>
     <div class="relative bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div class="bg-gradient-to-r from-sena-500 to-sena-400 p-7 rounded-t-[2.5rem] flex items-center justify-between sticky top-0 z-10">
+        <div class="bg-sena-500 p-7 rounded-t-[2.5rem] flex items-center justify-between sticky top-0 z-10">
             <div>
                 <h2 class="text-lg font-black text-white">Registrar Nuevo Asesor</h2>
                 <p class="text-sena-100 text-xs font-medium mt-0.5">Completa todos los campos requeridos</p>
@@ -118,57 +118,139 @@
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
-        <form action="{{ route('coordinador.asesores.store') }}" method="POST" class="p-7 space-y-5">
+        <form action="{{ route('coordinador.asesores.store') }}" method="POST" class="p-8 space-y-8">
             @csrf
-            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-3">Datos Personales</p>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="col-span-1">
-                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Tipo Documento *</label>
-                    <select name="pers_tipodoc" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-sena-400">
-                        <option value="CC">Cédula de Ciudadanía (CC)</option>
-                        <option value="CE">Cédula de Extranjería (CE)</option>
-                        <option value="TI">Tarjeta de Identidad (TI)</option>
-                        <option value="PAS">Pasaporte (PAS)</option>
-                    </select>
+            
+            <!-- Section 1: Personal Data -->
+            <div class="space-y-6">
+                <div class="flex items-center space-x-3 mb-4 border-b border-gray-50 pb-2">
+                    <i class="fa-solid fa-address-card text-sena-500 text-xs"></i>
+                    <h3 class="text-[10px] font-black text-gray-800 uppercase tracking-[0.15em]">Datos Personales del Asesor</h3>
                 </div>
-                <div class="col-span-1">
-                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Número de Documento *</label>
-                    <input type="text" name="pers_doc" required placeholder="Ej: 1012345678" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sena-400">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Nombres *</label>
-                    <input type="text" name="pers_nombres" required placeholder="Nombre(s) completo(s)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sena-400">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Apellidos *</label>
-                    <input type="text" name="pers_apellidos" required placeholder="Apellido(s) completo(s)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sena-400">
-                </div>
-                <div class="col-span-2">
-                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Teléfono</label>
-                    <input type="text" name="pers_telefono" placeholder="Ej: 3001234567" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sena-400">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Tipo de Documento *</label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-300 group-focus-within:text-sena-500 transition-colors">
+                                <i class="fa-solid fa-id-card-clip text-xs"></i>
+                            </div>
+                            <select name="pers_tipodoc" required class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-bold text-gray-700 focus:outline-none focus:ring-4 focus:ring-sena-500/10 focus:border-sena-500 transition-all appearance-none">
+                                <option value="CC" {{ old('pers_tipodoc') == 'CC' ? 'selected' : '' }}>Cédula de Ciudadanía</option>
+                                <option value="CE" {{ old('pers_tipodoc') == 'CE' ? 'selected' : '' }}>Cédula de Extranjería</option>
+                                <option value="TI" {{ old('pers_tipodoc') == 'TI' ? 'selected' : '' }}>Tarjeta de Identidad</option>
+                                <option value="PAS" {{ old('pers_tipodoc') == 'PAS' ? 'selected' : '' }}>Pasaporte</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-gray-300">
+                                <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Número de Identificación *</label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-300 group-focus-within:text-sena-500 transition-colors">
+                                <i class="fa-solid fa-hashtag text-xs"></i>
+                            </div>
+                            <input type="text" name="pers_doc" required value="{{ old('pers_doc') }}" placeholder="Ej: 1012345678" class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-bold text-gray-700 focus:outline-none focus:ring-4 focus:ring-sena-500/10 focus:border-sena-500 transition-all @error('pers_doc') border-red-500 @enderror">
+                        </div>
+                        @error('pers_doc') <p class="text-[9px] text-red-500 font-bold ml-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nombres *</label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-300 group-focus-within:text-sena-500 transition-colors">
+                                <i class="fa-solid fa-signature text-xs"></i>
+                            </div>
+                            <input type="text" name="pers_nombres" required value="{{ old('pers_nombres') }}" placeholder="Nombre completo" class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-bold text-gray-700 focus:outline-none focus:ring-4 focus:ring-sena-500/10 focus:border-sena-500 transition-all">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Apellidos *</label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-300 group-focus-within:text-sena-500 transition-colors">
+                                <i class="fa-solid fa-font text-xs"></i>
+                            </div>
+                            <input type="text" name="pers_apellidos" required value="{{ old('pers_apellidos') }}" placeholder="Apellidos completos" class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-bold text-gray-700 focus:outline-none focus:ring-4 focus:ring-sena-500/10 focus:border-sena-500 transition-all">
+                        </div>
+                    </div>
+
+                    <div class="col-span-full space-y-2">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Teléfono Móvil</label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-300 group-focus-within:text-sena-500 transition-colors">
+                                <i class="fa-solid fa-phone text-xs"></i>
+                            </div>
+                            <input type="text" name="pers_telefono" value="{{ old('pers_telefono') }}" placeholder="300 000 0000" class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-bold text-gray-700 focus:outline-none focus:ring-4 focus:ring-sena-500/10 focus:border-sena-500 transition-all">
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-3 pt-2">Credenciales del Sistema</p>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="col-span-2">
-                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Correo Electrónico *</label>
-                    <input type="email" name="ase_correo" required placeholder="correo@sena.edu.co" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sena-400">
+            <!-- Section 2: Account & System -->
+            <div class="space-y-6">
+                <div class="flex items-center space-x-3 mb-4 border-b border-gray-50 pb-2">
+                    <i class="fa-solid fa-laptop-code text-sena-500 text-xs"></i>
+                    <h3 class="text-[10px] font-black text-gray-800 uppercase tracking-[0.15em]">Configuración de Cuenta</h3>
                 </div>
-                <div>
-                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Contraseña *</label>
-                    <input type="password" name="ase_password" required placeholder="Mín. 6 caracteres" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sena-400">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">N° Contrato</label>
-                    <input type="text" name="ase_nrocontrato" placeholder="Ej: CONT-20260101" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sena-400">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="col-span-full space-y-2">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Correo Electrónico *</label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-300 group-focus-within:text-sena-500 transition-colors">
+                                <i class="fa-solid fa-at text-xs"></i>
+                            </div>
+                            <input type="email" name="ase_correo" required value="{{ old('ase_correo') }}" placeholder="usuario@sena.edu.co" class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-bold text-gray-700 focus:outline-none focus:ring-4 focus:ring-sena-500/10 focus:border-sena-500 transition-all @error('ase_correo') border-red-500 @enderror">
+                        </div>
+                        @error('ase_correo') <p class="text-[9px] text-red-500 font-bold ml-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Contraseña de Acceso *</label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-300 group-focus-within:text-sena-500 transition-colors">
+                                <i class="fa-solid fa-lock text-xs"></i>
+                            </div>
+                            <input type="password" name="ase_password" required placeholder="Mínimo 6 caracteres" class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-bold text-gray-700 focus:outline-none focus:ring-4 focus:ring-sena-500/10 focus:border-sena-500 transition-all @error('ase_password') border-red-500 @enderror">
+                        </div>
+                        @error('ase_password') <p class="text-[9px] text-red-500 font-bold ml-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">N° de Contrato / Ficha</label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-300 group-focus-within:text-sena-500 transition-colors">
+                                <i class="fa-solid fa-file-contract text-xs"></i>
+                            </div>
+                            <input type="text" name="ase_nrocontrato" value="{{ old('ase_nrocontrato') }}" placeholder="CONT-2026..." class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-bold text-gray-700 focus:outline-none focus:ring-4 focus:ring-sena-500/10 focus:border-sena-500 transition-all">
+                        </div>
+                    </div>
+
+                    <!-- Photo Path (Hidden or simple input for now as per previous logic) -->
+                    <div class="col-span-full space-y-2">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Ruta de Foto Perfil (Opcional)</label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-300 group-focus-within:text-sena-500 transition-colors">
+                                <i class="fa-solid fa-image text-xs"></i>
+                            </div>
+                            <input type="text" name="ase_foto" value="images/foto de perfil.jpg" class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-bold text-gray-700 focus:outline-none focus:ring-4 focus:ring-sena-500/10 focus:border-sena-500 transition-all">
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="flex space-x-3 pt-4">
-                <button type="button" onclick="closeModal('modal-create')" class="flex-1 bg-gray-50 border border-gray-200 text-gray-500 font-black py-3.5 rounded-2xl text-[11px] uppercase tracking-widest hover:bg-gray-100 transition">Cancelar</button>
-                <button type="submit" class="flex-1 bg-gradient-to-r from-sena-500 to-sena-400 text-white font-black py-3.5 rounded-2xl text-[11px] uppercase tracking-widest hover:from-sena-600 hover:to-sena-500 transition shadow-lg shadow-sena-500/20">
-                    <i class="fa-solid fa-plus mr-2"></i> Registrar Asesor
+            <!-- Footer Buttons -->
+            <div class="flex space-x-4 pt-6">
+                <button type="button" onclick="closeModal('modal-create')" class="flex-1 bg-white border-2 border-gray-100 text-gray-400 font-black py-4 rounded-2xl text-[11px] uppercase tracking-[0.2em] hover:bg-gray-50 hover:text-gray-600 transition-all">
+                    Descartar
+                </button>
+                <button type="submit" class="flex-1 bg-sena-500 text-white font-black py-4 rounded-2xl text-[11px] uppercase tracking-[0.2em] hover:bg-sena-600 transition-all shadow-xl shadow-sena-500/20 active:scale-95 flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-user-plus"></i>
+                    <span>Registrar Asesor</span>
                 </button>
             </div>
         </form>
@@ -179,47 +261,127 @@
 <div id="modal-edit" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeModal('modal-edit')"></div>
     <div class="relative bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div class="bg-gradient-to-r from-gray-800 to-gray-700 p-7 rounded-t-[2.5rem] flex items-center justify-between sticky top-0 z-10">
+        <div class="bg-sena-500 p-7 rounded-t-[2.5rem] flex items-center justify-between sticky top-0 z-10">
             <div>
                 <h2 class="text-lg font-black text-white">Editar Asesor</h2>
-                <p class="text-gray-400 text-xs font-medium mt-0.5" id="edit-modal-subtitle">Modifica los datos del asesor</p>
+                <div class="flex items-center space-x-3 mt-1">
+                    <img id="edit-preview-photo" src="{{ asset('images/foto de perfil.jpg') }}" class="w-8 h-8 rounded-lg border border-white/30 object-cover">
+                    <p class="text-sena-100 text-xs font-medium" id="edit-modal-subtitle">Modifica los datos del asesor</p>
+                </div>
             </div>
-            <button onclick="closeModal('modal-edit')" class="w-9 h-9 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center text-white transition">
+            <button onclick="closeModal('modal-edit')" class="w-9 h-9 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center text-white transition">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
-        <form id="form-edit" method="POST" class="p-7 space-y-5">
+        <form id="form-edit" method="POST" class="p-8 space-y-8">
             @csrf
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Nombres</label>
-                    <input type="text" name="pers_nombres" id="edit-pers_nombres" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sena-400">
+            
+            <!-- Profile Photo Section -->
+            <div class="flex flex-col md:flex-row items-center gap-8 bg-gray-50/50 p-6 rounded-[2.5rem] border border-gray-100 shadow-inner">
+                <div class="relative group">
+                    <img id="edit-preview-photo-large" src="{{ asset('images/foto de perfil.jpg') }}" class="w-28 h-28 rounded-[2rem] border-4 border-white shadow-2xl object-cover transition-transform group-hover:scale-105 duration-500">
+                    <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-sena-500 text-white rounded-xl flex items-center justify-center shadow-lg border-2 border-white">
+                        <i class="fa-solid fa-camera text-[10px]"></i>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Apellidos</label>
-                    <input type="text" name="pers_apellidos" id="edit-pers_apellidos" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sena-400">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Teléfono</label>
-                    <input type="text" name="pers_telefono" id="edit-pers_telefono" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sena-400">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Correo</label>
-                    <input type="email" name="ase_correo" id="edit-ase_correo" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sena-400">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Nueva Contraseña (opcional)</label>
-                    <input type="password" name="ase_password" placeholder="Dejar en blanco para no cambiar" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sena-400">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">N° Contrato</label>
-                    <input type="text" name="ase_nrocontrato" id="edit-ase_nrocontrato" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sena-400">
+                <div class="flex-1 space-y-3 w-full">
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Ruta de Foto de Perfil</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-sena-500 transition-colors">
+                            <i class="fa-solid fa-link text-xs"></i>
+                        </div>
+                        <input type="text" name="ase_foto" id="edit-ase_foto" 
+                               oninput="document.getElementById('edit-preview-photo-large').src = this.value.startsWith('http') ? this.value : '/' + this.value; document.getElementById('edit-preview-photo').src = this.value.startsWith('http') ? this.value : '/' + this.value" 
+                               class="w-full bg-white border border-gray-200 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-bold text-gray-700 focus:outline-none focus:ring-4 focus:ring-sena-500/10 focus:border-sena-500 transition-all shadow-sm"
+                               placeholder="images/foto de perfil.jpg">
+                    </div>
                 </div>
             </div>
-            <div class="flex space-x-3 pt-4">
-                <button type="button" onclick="closeModal('modal-edit')" class="flex-1 bg-gray-50 border border-gray-200 text-gray-500 font-black py-3.5 rounded-2xl text-[11px] uppercase tracking-widest hover:bg-gray-100 transition">Cancelar</button>
-                <button type="submit" class="flex-1 bg-gradient-to-r from-gray-800 to-gray-900 text-white font-black py-3.5 rounded-2xl text-[11px] uppercase tracking-widest hover:from-gray-700 hover:to-gray-800 transition shadow-lg">
-                    <i class="fa-solid fa-floppy-disk mr-2"></i> Guardar Cambios
+
+            <!-- Form Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                
+                <!-- Personal Information Header -->
+                <div class="col-span-full flex items-center space-x-3 mb-2 border-b border-gray-50 pb-2">
+                    <i class="fa-solid fa-user-tie text-sena-500 text-xs"></i>
+                    <h3 class="text-[10px] font-black text-gray-800 uppercase tracking-[0.15em]">Información Personal</h3>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nombres Completos</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-300 group-focus-within:text-sena-500 transition-colors">
+                            <i class="fa-solid fa-signature text-xs"></i>
+                        </div>
+                        <input type="text" name="pers_nombres" id="edit-pers_nombres" class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-bold text-gray-700 focus:outline-none focus:ring-4 focus:ring-sena-500/10 focus:border-sena-500 transition-all">
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Apellidos</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-300 group-focus-within:text-sena-500 transition-colors">
+                            <i class="fa-solid fa-font text-xs"></i>
+                        </div>
+                        <input type="text" name="pers_apellidos" id="edit-pers_apellidos" class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-bold text-gray-700 focus:outline-none focus:ring-4 focus:ring-sena-500/10 focus:border-sena-500 transition-all">
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Teléfono de Contacto</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-300 group-focus-within:text-sena-500 transition-colors">
+                            <i class="fa-solid fa-phone-volume text-xs"></i>
+                        </div>
+                        <input type="text" name="pers_telefono" id="edit-pers_telefono" class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-bold text-gray-700 focus:outline-none focus:ring-4 focus:ring-sena-500/10 focus:border-sena-500 transition-all">
+                    </div>
+                </div>
+
+                <!-- System Information Header -->
+                <div class="col-span-full flex items-center space-x-3 mt-4 mb-2 border-b border-gray-50 pb-2">
+                    <i class="fa-solid fa-shield-halved text-sena-500 text-xs"></i>
+                    <h3 class="text-[10px] font-black text-gray-800 uppercase tracking-[0.15em]">Credenciales & Sistema</h3>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Correo Institucional</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-300 group-focus-within:text-sena-500 transition-colors">
+                            <i class="fa-solid fa-envelope text-xs"></i>
+                        </div>
+                        <input type="email" name="ase_correo" id="edit-ase_correo" class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-bold text-gray-700 focus:outline-none focus:ring-4 focus:ring-sena-500/10 focus:border-sena-500 transition-all">
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">N° de Contrato</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-300 group-focus-within:text-sena-500 transition-colors">
+                            <i class="fa-solid fa-file-contract text-xs"></i>
+                        </div>
+                        <input type="text" name="ase_nrocontrato" id="edit-ase_nrocontrato" class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-bold text-gray-700 focus:outline-none focus:ring-4 focus:ring-sena-500/10 focus:border-sena-500 transition-all">
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Actualizar Contraseña</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-300 group-focus-within:text-sena-500 transition-colors">
+                            <i class="fa-solid fa-key text-xs"></i>
+                        </div>
+                        <input type="password" name="ase_password" placeholder="••••••••" class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-bold text-gray-700 focus:outline-none focus:ring-4 focus:ring-sena-500/10 focus:border-sena-500 transition-all">
+                    </div>
+                    <p class="text-[9px] text-gray-400 font-bold ml-1">Dejar en blanco para conservar la actual</p>
+                </div>
+            </div>
+
+            <div class="flex space-x-4 pt-6">
+                <button type="button" onclick="closeModal('modal-edit')" class="flex-1 bg-white border-2 border-gray-100 text-gray-400 font-black py-4 rounded-2xl text-[11px] uppercase tracking-[0.2em] hover:bg-gray-50 hover:text-gray-600 transition-all">
+                    Cancelar
+                </button>
+                <button type="submit" class="flex-1 bg-sena-500 text-white font-black py-4 rounded-2xl text-[11px] uppercase tracking-[0.2em] hover:bg-sena-600 transition-all shadow-xl shadow-sena-500/20 active:scale-95 flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Guardar Cambios</span>
                 </button>
             </div>
         </form>
@@ -271,6 +433,10 @@
         document.getElementById('edit-pers_telefono').value = persona?.pers_telefono ?? '';
         document.getElementById('edit-ase_correo').value = asesor.ase_correo ?? '';
         document.getElementById('edit-ase_nrocontrato').value = asesor.ase_nrocontrato ?? '';
+        document.getElementById('edit-ase_foto').value = asesor.ase_foto ?? 'images/foto de perfil.jpg';
+        const photoPath = asesor.ase_foto ?? 'images/foto de perfil.jpg';
+        document.getElementById('edit-preview-photo').src = `/${photoPath}`;
+        document.getElementById('edit-preview-photo-large').src = `/${photoPath}`;
         document.getElementById('edit-modal-subtitle').textContent = 'Editando: ' + (persona?.pers_nombres ?? 'Asesor') + ' ' + (persona?.pers_apellidos ?? '');
         document.getElementById('form-edit').action = `/coordinador/modulos/update/${asesor.ase_id}`;
         openModal('modal-edit');
@@ -289,5 +455,10 @@
         if (ts) ts.remove();
         if (te) te.remove();
     }, 4000);
+
+    // Auto-open modal if there are validation errors
+    @if ($errors->any())
+        openModal('modal-create');
+    @endif
 </script>
 @endsection

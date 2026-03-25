@@ -31,6 +31,12 @@ VALUES
 -- Credenciales:
 -- Documento: 20002000
 -- Contraseña: 123456
+<<<<<<< HEAD
 INSERT IGNORE INTO `asesor` (`ase_correo`, `ase_password`, `ase_nrocontrato`, `ase_tipo_asesor`, `ase_vigencia`, `PERSONA_pers_doc`) 
 VALUES 
 ('asesor@sena.edu.co', '123456', 'CONT-2026', 'General', '2027-12-31', '20002000');
+=======
+INSERT IGNORE INTO `asesor` (`ase_correo`, `ase_password`, `ase_nrocontrato`, `ase_tipo_asesor`, `ase_vigencia`, `PERSONA_pers_doc`, `ase_foto`) 
+VALUES 
+('asesor@sena.edu.co', '123456', 'CONT-2026', 'General', '2027-12-31', '20002000', 'images/foto de perfil.jpg');
+>>>>>>> cd1d4e4 (Enhance Advisor Management & Turn Flow: Profile photos, premium modals, FIFO optimization, and turn generation hardening)
