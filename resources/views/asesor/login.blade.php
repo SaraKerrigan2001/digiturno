@@ -16,11 +16,19 @@
                         poppins: ['Poppins', 'sans-serif'] 
                     },
                     colors: { 
-                        sena: { 50: '#f1f8e9', 100: '#dcedc8', 500: '#39A900', 600: '#2d8700', 900: '#1a4d00' } 
+                        sena: { 
+                            yellow: '#FFB500',
+                            blue: '#10069F',
+                            orange: '#FF671F',
+                            50: '#f0f0ff', 
+                            100: '#e1e1ff', 
+                            500: '#10069F', 
+                            600: '#0c047a' 
+                        } 
                     },
                     boxShadow: {
                         'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
-                        'soft': '0 10px 25px -5px rgba(57, 169, 0, 0.1), 0 8px 10px -6px rgba(57, 169, 0, 0.1)',
+                        'soft': '0 10px 25px -5px rgba(16, 6, 159, 0.1), 0 8px 10px -6px rgba(16, 6, 159, 0.1)',
                     }
                 }
             }
@@ -62,7 +70,7 @@
                 <!-- Premium White Glassmorphism Card -->
                 <div class="glass-panel bg-white/40 border-white/40 p-10 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] transition-transform duration-500 hover:scale-[1.02] backdrop-blur-xl">
                     <div class="bg-white p-4 rounded-2xl w-24 h-24 mx-auto mb-6 flex items-center justify-center shadow-xl">
-                        <img src="{{ asset('images/logoSena.png') }}" class="w-full h-auto" alt="SENA Logo">
+                        <img src="{{ asset('images/logo.jpeg') }}" class="w-full h-auto" alt="SENA Logo">
                     </div>
                     
                     <h2 class="text-3xl lg:text-4xl font-poppins font-bold text-gray-900 leading-tight mb-4 tracking-tight drop-shadow-sm">
@@ -79,7 +87,7 @@
                         v4.5.0 Stable
                     </div>
                     <div class="px-4 py-1.5 bg-white/60 backdrop-blur-md rounded-full text-gray-800 text-[10px] font-bold tracking-widest uppercase flex items-center shadow-sm">
-                        <span class="w-1.5 h-1.5 bg-sena-500 rounded-full mr-2 shadow-[0_0_8px_#39A900] animate-pulse"></span>
+                        <span class="w-1.5 h-1.5 bg-sena-blue rounded-full mr-2 shadow-[0_0_8px_#10069F] animate-pulse"></span>
                         Servidor Activo
                     </div>
                 </div>
@@ -137,7 +145,7 @@
                                 <label class="text-[11px] font-bold text-gray-500 uppercase tracking-widest ml-1">
                                     Contraseña
                                 </label>
-                                <a href="{{ url('/asesor/recuperar-clave') }}" class="text-[11px] font-bold text-sena-500 hover:text-sena-600 transition-colors">
+                                <a href="{{ url('/asesor/recuperar-clave') }}" class="text-[11px] font-bold text-sena-blue hover:text-sena-blue/80 transition-colors">
                                     ¿Olvidó su clave?
                                 </a>
                             </div>
@@ -153,7 +161,7 @@
 
                         <div class="pt-4">
                             <button type="submit" 
-                                class="w-full bg-[#39A900] hover:bg-[#2d8700] text-white font-bold py-3.5 rounded-xl shadow-md hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300 flex items-center justify-center space-x-2">
+                                class="w-full bg-sena-blue hover:bg-sena-blue/90 text-white font-bold py-3.5 rounded-xl shadow-md hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300 flex items-center justify-center space-x-2">
                                 <span>Ingresar al Sistema</span>
                                 <i class="fa-solid fa-arrow-right"></i>
                             </button>
@@ -162,7 +170,7 @@
 
                     <!-- Enlaces Adicionales de Navegación -->
                     <div class="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between">
-                        <a href="{{ url('/') }}" class="flex items-center space-x-2 text-xs font-bold text-gray-400 hover:text-sena-500 transition-colors">
+                        <a href="{{ url('/') }}" class="flex items-center space-x-2 text-xs font-bold text-gray-400 hover:text-sena-blue transition-colors">
                             <i class="fa-solid fa-arrow-left"></i>
                             <span>Volver al Kiosco</span>
                         </a>

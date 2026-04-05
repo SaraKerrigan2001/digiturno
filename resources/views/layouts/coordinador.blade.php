@@ -17,7 +17,14 @@
                         poppins: ['Poppins', 'sans-serif']
                     },
                     colors: {
-                        sena: { 500: '#39A900', 600: '#2d8700', 50: '#e8f5e9' }
+                        sena: { 
+                            yellow: '#FFB500',
+                            blue: '#10069F',
+                            orange: '#FF671F',
+                            500: '#10069F', 
+                            600: '#0c047a', 
+                            50: '#f0f0ff' 
+                        }
                     }
                 }
             }
@@ -34,11 +41,11 @@
     <header class="bg-white px-8 py-4 flex items-center justify-between border-b border-gray-100 shrink-0 z-20">
         <!-- Logo -->
         <div class="flex items-center space-x-4 w-1/4">
-            <img src="{{ asset('images/logoSena.png') }}" class="h-10 w-auto object-contain" alt="SENA Logo">
+            <img src="{{ asset('images/logo.jpeg') }}" class="h-10 w-auto object-contain" alt="SENA Logo">
             <div class="h-6 w-px bg-gray-100"></div>
             <div>
                 <h1 class="text-lg font-poppins font-bold text-gray-900 leading-tight">SENA APE</h1>
-                <p class="text-[10px] font-bold text-sena-500 tracking-wider">Sistema de Gestión de Turnos</p>
+                <p class="text-[10px] font-bold text-sena-blue tracking-wider">Sistema de Gestión de Turnos</p>
             </div>
         </div>
 
@@ -50,13 +57,13 @@
             </div>
             <div class="relative w-80">
                 <i class="fa-solid fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                <input type="text" id="globalSearchInput" placeholder="Buscar módulos o asesores..." class="w-full bg-gray-50 border border-gray-100 rounded-full py-2.5 pl-10 pr-4 text-xs focus:ring-2 focus:ring-sena-500 outline-none text-gray-700 font-medium transition-all">
+                <input type="text" id="globalSearchInput" placeholder="Buscar módulos o asesores..." class="w-full bg-gray-50 border border-gray-100 rounded-full py-2.5 pl-10 pr-4 text-xs focus:ring-2 focus:ring-sena-blue outline-none text-gray-700 font-medium transition-all">
             </div>
         </div>
 
         <!-- Actions -->
         <div class="flex items-center justify-end space-x-4 w-1/4">
-            <a href="{{ route('coordinador.export') }}" class="bg-sena-500 hover:bg-sena-600 text-white px-5 py-2.5 rounded-full text-[11px] font-bold transition flex items-center space-x-2 shadow-sm">
+            <a href="{{ route('coordinador.export') }}" class="bg-sena-blue hover:bg-sena-blue/90 text-white px-5 py-2.5 rounded-full text-[11px] font-bold transition flex items-center space-x-2 shadow-sm">
                 <i class="fa-solid fa-download"></i>
                 <span>Exportar</span>
             </a>
@@ -64,12 +71,12 @@
             <div class="flex items-center space-x-3 border-l border-gray-200 pl-4 relative" x-data="{ open: false }">
                 <div class="text-right">
                     <p class="text-xs font-bold text-gray-900">{{ session('coordinador_nombre', 'Coordinador') }}</p>
-                    <p class="text-[10px] font-semibold text-sena-500">Coordinador</p>
+                    <p class="text-[10px] font-semibold text-sena-blue">Coordinador</p>
                 </div>
                 <div class="relative">
                     <button onclick="document.getElementById('coord-user-menu').classList.toggle('hidden')" 
-                            class="w-10 h-10 rounded-full border-2 border-gray-200 hover:border-sena-300 transition overflow-hidden focus:outline-none">
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode(session('coordinador_nombre', 'C')) }}&background=e8f5e9&color=39A900&bold=true" class="w-full h-full object-cover" alt="Profile">
+                            class="w-10 h-10 rounded-full border-2 border-gray-200 hover:border-sena-blue/30 transition overflow-hidden focus:outline-none">
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode(session('coordinador_nombre', 'C')) }}&background=f0f0ff&color=10069F&bold=true" class="w-full h-full object-cover" alt="Profile">
                     </button>
                     <!-- Dropdown -->
                     <div id="coord-user-menu" class="hidden absolute right-0 top-12 bg-white border border-gray-100 rounded-2xl shadow-2xl w-52 z-50 overflow-hidden py-2">
@@ -100,22 +107,22 @@
             <nav class="flex-1 p-6 space-y-2">
                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 px-3">Principal</p>
                 
-                <a href="{{ route('coordinador.dashboard') }}" class="flex items-center space-x-3 p-3 rounded-xl {{ Request::routeIs('coordinador.dashboard') ? 'bg-sena-50 text-sena-500 font-bold' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900' }} group transition">
-                    <div class="w-8 h-8 rounded-lg {{ Request::routeIs('coordinador.dashboard') ? 'bg-white shadow-sm text-sena-500' : 'bg-gray-50 text-gray-400 group-hover:bg-white group-hover:shadow-sm group-hover:text-gray-600' }} flex items-center justify-center transition">
+                <a href="{{ route('coordinador.dashboard') }}" class="flex items-center space-x-3 p-3 rounded-xl {{ Request::routeIs('coordinador.dashboard') ? 'bg-sena-50 text-sena-blue font-bold' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900' }} group transition">
+                    <div class="w-8 h-8 rounded-lg {{ Request::routeIs('coordinador.dashboard') ? 'bg-white shadow-sm text-sena-blue' : 'bg-gray-50 text-gray-400 group-hover:bg-white group-hover:shadow-sm group-hover:text-gray-600' }} flex items-center justify-center transition">
                         <i class="fa-solid fa-house text-sm"></i>
                     </div>
                     <span class="text-sm">Dashboard</span>
                 </a>
 
-                <a href="{{ route('coordinador.reportes') }}" class="flex items-center space-x-3 p-3 rounded-xl {{ Request::routeIs('coordinador.reportes') ? 'bg-sena-50 text-sena-500 font-bold' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900' }} group transition">
-                    <div class="w-8 h-8 rounded-lg {{ Request::routeIs('coordinador.reportes') ? 'bg-white shadow-sm text-sena-500' : 'bg-gray-50 text-gray-400 group-hover:bg-white group-hover:shadow-sm group-hover:text-gray-600' }} flex items-center justify-center transition">
+                <a href="{{ route('coordinador.reportes') }}" class="flex items-center space-x-3 p-3 rounded-xl {{ Request::routeIs('coordinador.reportes') ? 'bg-sena-50 text-sena-blue font-bold' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900' }} group transition">
+                    <div class="w-8 h-8 rounded-lg {{ Request::routeIs('coordinador.reportes') ? 'bg-white shadow-sm text-sena-blue' : 'bg-gray-50 text-gray-400 group-hover:bg-white group-hover:shadow-sm group-hover:text-gray-600' }} flex items-center justify-center transition">
                         <i class="fa-solid fa-chart-line text-sm"></i>
                     </div>
                     <span class="text-sm">Reportes</span>
                 </a>
 
-                <a href="{{ route('coordinador.modulos') }}" class="flex items-center space-x-3 p-3 rounded-xl {{ Request::routeIs('coordinador.modulos') ? 'bg-sena-50 text-sena-500 font-bold' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900' }} group transition">
-                    <div class="w-8 h-8 rounded-lg {{ Request::routeIs('coordinador.modulos') ? 'bg-white shadow-sm text-sena-500' : 'bg-gray-50 text-gray-400 group-hover:bg-white group-hover:shadow-sm group-hover:text-gray-600' }} flex items-center justify-center transition">
+                <a href="{{ route('coordinador.modulos') }}" class="flex items-center space-x-3 p-3 rounded-xl {{ Request::routeIs('coordinador.modulos') ? 'bg-sena-50 text-sena-blue font-bold' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900' }} group transition">
+                    <div class="w-8 h-8 rounded-lg {{ Request::routeIs('coordinador.modulos') ? 'bg-white shadow-sm text-sena-blue' : 'bg-gray-50 text-gray-400 group-hover:bg-white group-hover:shadow-sm group-hover:text-gray-600' }} flex items-center justify-center transition">
                         <i class="fa-solid fa-grip text-sm"></i>
                     </div>
                     <span class="text-sm">Gestión Módulos</span>
@@ -123,8 +130,8 @@
 
                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-8 mb-4 px-3">Configuración</p>
 
-                <a href="{{ route('coordinador.configuracion') }}" class="flex items-center space-x-3 p-3 rounded-xl {{ Request::routeIs('coordinador.configuracion') ? 'bg-sena-50 text-sena-500 font-bold' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900' }} group transition">
-                    <div class="w-8 h-8 rounded-lg {{ Request::routeIs('coordinador.configuracion') ? 'bg-white shadow-sm text-sena-500' : 'bg-gray-50 text-gray-400 group-hover:bg-white group-hover:shadow-sm group-hover:text-gray-600' }} flex items-center justify-center transition">
+                <a href="{{ route('coordinador.configuracion') }}" class="flex items-center space-x-3 p-3 rounded-xl {{ Request::routeIs('coordinador.configuracion') ? 'bg-sena-50 text-sena-blue font-bold' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900' }} group transition">
+                    <div class="w-8 h-8 rounded-lg {{ Request::routeIs('coordinador.configuracion') ? 'bg-white shadow-sm text-sena-blue' : 'bg-gray-50 text-gray-400 group-hover:bg-white group-hover:shadow-sm group-hover:text-gray-600' }} flex items-center justify-center transition">
                         <i class="fa-solid fa-gear text-sm"></i>
                     </div>
                     <span class="text-sm">Ajustes</span>
@@ -136,7 +143,7 @@
                 <div class="bg-gray-50 rounded-2xl p-4">
                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-2">Ayuda</p>
                     <p class="text-[11px] text-gray-600 leading-relaxed">¿Necesitas ayuda con el sistema?</p>
-                    <a href="{{ route('manual.coordinador') }}" class="inline-block mt-3 text-[11px] font-bold text-sena-500 hover:underline">Manual de usuario</a>
+                    <a href="{{ route('manual.coordinador') }}" class="inline-block mt-3 text-[11px] font-bold text-sena-blue hover:underline">Manual de usuario</a>
                 </div>
                 <form action="{{ route('coordinador.logout') }}" method="POST">
                     @csrf

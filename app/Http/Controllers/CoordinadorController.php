@@ -187,7 +187,7 @@ class CoordinadorController extends Controller
             'tipo' => 'info'
         ];
 
-        return view('dashboard_coordinador', compact(
+        return view('coordinador.dashboard', compact(
             'usuariosHoy', 'enAtencion', 'satisfaccion', 'tiempoMedio', 
             'flowLabels', 'flowValues', 'docData', 'asesoresStatus', 'alertas'
         ));
@@ -300,20 +300,20 @@ class CoordinadorController extends Controller
 
         $turnos = Turno::with(['solicitante.persona', 'atencion.asesor.persona'])->orderBy('tur_hora_fecha', 'desc')->paginate(15);
 
-        return view('reportes', compact('distribucionTipos', 'metas', 'topTramites', 'feedback', 'turnos'));
+        return view('coordinador.reportes', compact('distribucionTipos', 'metas', 'topTramites', 'feedback', 'turnos'));
     }
 
     public function modulos()
     {
         if (!$this->checkAuth()) return redirect()->route('coordinador.login');
         $asesores = Asesor::with('persona')->get();
-        return view('modulos_gestion', compact('asesores'));
+        return view('coordinador.modulos', compact('asesores'));
     }
 
     public function configuracion()
     {
         if (!$this->checkAuth()) return redirect()->route('coordinador.login');
-        return view('configuracion');
+        return view('coordinador.configuracion');
     }
 
     public function storeAsesor(Request $request)
@@ -400,6 +400,34 @@ class CoordinadorController extends Controller
     public function manualCoordinador()
     {
         if (!$this->checkAuth()) return redirect()->route('coordinador.login');
-        return view('manual_coordinador');
+        return view('coordinador.manual');
+    }
+
+    public function getStats()
+    {
+        // Solo coordinadores autenticados pueden ver esto
+        if (!$this->checkAuth()) return response()->json(['error' => 'Unauthenticated'], 401);
+
+        $hoy = now()->today();
+        
+        // Contar turnos en espera (donde no existe registro en la tabla atencion)
+        $stats = Turno::whereDate('tur_hora_fecha', $hoy)
+            ->whereDoesntHave('atencion')
+            ->selectRaw('tur_tipo, count(*) as count')
+            ->groupBy('tur_tipo')
+            ->pluck('count', 'tur_tipo')
+            ->toArray();
+
+        // Asegurar que siempre devolvemos las 3 categorías fijas requeridas
+        return response()->json([
+            'success'     => true,
+            'timestamp'   => now()->format('H:i:s'),
+            'data' => [
+                'General'     => $stats['General'] ?? 0,
+                'Prioritario' => $stats['Prioritario'] ?? 0,
+                'Victimas'    => $stats['Victimas'] ?? 0,
+                'Total'       => array_sum($stats)
+            ]
+        ]);
     }
 }

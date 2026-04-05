@@ -13,7 +13,7 @@ class TurnoController extends Controller
 {
     public function index()
     {
-        return view('solicitar_turno');
+        return view('kiosco.index');
     }
 
     public function store(Request $request)
@@ -40,31 +40,16 @@ class TurnoController extends Controller
                 'sol_tipo' => $request->sol_tipo
             ]);
 
-<<<<<<< HEAD
-        // 3. Generar tur_numero (Modelo SENA: A-Víctima, B-Prioritaria, C-General)
-        $prefixMap = [
-            'Victimas' => 'A',
-            'Prioritario' => 'B',
-            'General' => 'C'
-        ];
-        $prefix = $prefixMap[$request->tur_tipo] ?? 'C';
-
-        $count = Turno::whereDate('tur_hora_fecha', Carbon::today())
-                      ->where('tur_tipo', $request->tur_tipo)
-                      ->count();
-        $numero = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
-        $tur_numero = "{$prefix}-{$numero}";
-=======
-            // 3. Validación de Turnos Activos (Evitar múltiples turnos el mismo día sin atender)
+            // 3. Validación de Turnos Activos (Una persona puede tener UN SOLO turno por cada TIPO de atención seleccionado al día)
             $hasActive = Turno::where('SOLICITANTE_sol_id', $solicitante->sol_id)
-                ->whereDate('tur_hora_fecha', Carbon::today())
+                ->where('tur_tipo', $request->tur_tipo)
+                ->whereDate('tur_hora_fecha', now()->toDateString())
                 ->where(function($q) {
                     $q->whereDoesntHave('atencion') // En espera
                       ->orWhereHas('atencion', function($q2) {
                           $q2->whereNull('atnc_hora_fin'); // En proceso de atención
                       });
                 })->exists();
->>>>>>> cd1d4e4 (Enhance Advisor Management & Turn Flow: Profile photos, premium modals, FIFO optimization, and turn generation hardening)
 
             if ($hasActive) {
                 return back()->with('error', 'Ya tienes un turno activo para hoy. Por favor, espera a ser atendido.');
@@ -79,7 +64,7 @@ class TurnoController extends Controller
             ];
             $prefix = $prefixMap[$request->tur_tipo] ?? 'C';
 
-            $count = Turno::whereDate('tur_hora_fecha', Carbon::today())
+            $count = Turno::whereDate('tur_hora_fecha', now()->toDateString())
                           ->where('tur_tipo', $request->tur_tipo)
                           ->lockForUpdate() 
                           ->count();

@@ -6,8 +6,8 @@
 
 {{-- Toasts --}}
 @if(session('success'))
-<div id="toast-success" class="fixed top-6 right-6 z-[9999] bg-white border border-emerald-100 rounded-2xl px-5 py-4 shadow-2xl flex items-center space-x-3 min-w-[280px]">
-    <div class="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500"><i class="fa-solid fa-circle-check"></i></div>
+<div id="toast-success" class="fixed top-6 right-6 z-[9999] bg-white border border-sena-blue/20 rounded-2xl px-5 py-4 shadow-2xl flex items-center space-x-3 min-w-[280px]">
+    <div class="w-9 h-9 bg-sena-blue/10 rounded-xl flex items-center justify-center text-sena-blue"><i class="fa-solid fa-circle-check"></i></div>
     <p class="text-sm font-bold text-gray-800">{{ session('success') }}</p>
     <button onclick="document.getElementById('toast-success').remove()" class="ml-auto text-gray-300 hover:text-gray-500"><i class="fa-solid fa-xmark"></i></button>
 </div>
@@ -39,11 +39,11 @@
         <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Asesores</p><p class="text-xl font-black text-gray-900">{{ count($asesores) }}</p></div>
     </div>
     <div class="bg-white rounded-2xl border border-gray-100 p-4 flex items-center space-x-3">
-        <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500"><i class="fa-solid fa-circle-dot"></i></div>
+        <div class="w-10 h-10 bg-sena-blue/10 rounded-xl flex items-center justify-center text-sena-blue"><i class="fa-solid fa-circle-dot"></i></div>
         <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Activos</p><p class="text-xl font-black text-gray-900">{{ count($asesores) }}</p></div>
     </div>
     <div class="bg-white rounded-2xl border border-gray-100 p-4 flex items-center space-x-3">
-        <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-500"><i class="fa-solid fa-grid-2"></i></div>
+        <div class="w-10 h-10 bg-sena-orange/10 rounded-xl flex items-center justify-center text-sena-orange"><i class="fa-solid fa-grid-2"></i></div>
         <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Módulos</p><p class="text-xl font-black text-gray-900">{{ count($asesores) }}/10</p></div>
     </div>
 </div>
@@ -63,7 +63,7 @@
                     <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Módulo {{ sprintf('%02d', $ase->ase_id) }}</p>
                 </div>
             </div>
-            <span class="px-2.5 py-1 rounded-full text-[9px] font-black bg-emerald-50 text-emerald-600 border border-emerald-100 tracking-widest uppercase">Activo</span>
+            <span class="px-2.5 py-1 rounded-full text-[9px] font-black bg-sena-blue/10 text-sena-blue border border-sena-blue/20 tracking-widest uppercase">Activo</span>
         </div>
 
         {{-- Info --}}

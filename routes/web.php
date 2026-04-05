@@ -5,6 +5,7 @@ use App\Http\Controllers\TurnoController;
 use App\Http\Controllers\AsesorController;
 use App\Http\Controllers\PantallaController;
 use App\Http\Controllers\CoordinadorController;
+use App\Http\Controllers\Api\ApiController;
 
 // Kiosco
 Route::get('/', [TurnoController::class, 'index'])->name('kiosco.index');
@@ -15,6 +16,7 @@ Route::post('/turno/solicitar', [TurnoController::class, 'store'])
 
 // Pantalla
 Route::get('/pantalla', [PantallaController::class, 'index'])->name('pantalla.index');
+Route::get('/api/pantalla/data', [ApiController::class, 'getPantallaData'])->name('pantalla.api.data');
 
 // Asesor Auth
 Route::get('/asesor/login', [AsesorController::class, 'showLogin'])->name('asesor.login');
@@ -38,6 +40,7 @@ Route::post('/coordinador/logout', [CoordinadorController::class, 'logout'])->na
 
 // Coordinador
 Route::get('/coordinador', [CoordinadorController::class, 'index'])->name('coordinador.index');
+Route::get('/api/coordinador/stats', [ApiController::class, 'getCoordinatorStats'])->name('coordinador.api.stats');
 Route::get('/dashboard-coordinador', [CoordinadorController::class, 'dashboard'])->name('coordinador.dashboard');
 Route::get('/coordinador/export', [CoordinadorController::class, 'export'])->name('coordinador.export');
 Route::get('/coordinador/reportes', [CoordinadorController::class, 'reportes'])->name('coordinador.reportes');

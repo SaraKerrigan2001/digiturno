@@ -6,10 +6,18 @@ use Illuminate\Http\Request;
 use App\Models\Asesor;
 use App\Models\Atencion;
 use App\Models\Turno;
+use App\Repositories\TurnoRepository;
 use Illuminate\Support\Facades\DB;
 
 class AsesorController extends Controller
 {
+    protected $turnoRepo;
+
+    public function __construct(TurnoRepository $turnoRepo)
+    {
+        $this->turnoRepo = $turnoRepo;
+    }
+
     public function showLogin()
     {
         if (session()->has('ase_id')) {
@@ -73,16 +81,17 @@ class AsesorController extends Controller
 
     public function index()
     {
-        if (!$this->checkAuth()) return redirect()->route('asesor.login');
+        if (!$this->checkAuth())
+            return redirect()->route('asesor.login');
         $ase_id = session('ase_id');
         $asesor = Asesor::with('persona')->find($ase_id);
-        
+
         // Demo Fallback: if no asesor in DB, create a mock one to avoid 500 errors
         if (!$asesor) {
             $asesor = new Asesor();
             $asesor->ase_id = $ase_id;
             $asesor->modulo = '04';
-            $asesor->persona = (object)[
+            $asesor->persona = (object) [
                 'pers_nombres' => 'Asesor',
                 'pers_apellidos' => 'Pruebas',
                 'pers_tipodoc' => 'CC',
@@ -91,39 +100,22 @@ class AsesorController extends Controller
         }
 
         // Atención en curso para este asesor
-        $atencion = Atencion::where('ASESOR_ase_id', $ase_id)
-                            ->whereNull('atnc_hora_fin')
-                            ->with('turno.solicitante.persona')
-                            ->first();
+        $atencion = $this->turnoRepo->getActiveAttentionForAsesor($ase_id);
 
         // Cola de espera filtrada por el perfil del asesor (FIFO Estricto)
         $tipoAsesor = $asesor->ase_tipo_asesor ?? 'General';
-        
-        $queryEspera = Turno::whereDate('tur_hora_fecha', now()->today())
-                            ->whereDoesntHave('atencion');
-                            
-        if ($tipoAsesor === 'Especializado') {
-            // Asesor 1: Solo población víctima
-            $queryEspera->where('tur_tipo', 'Victimas')
-                        ->orderBy('tur_hora_fecha', 'asc');
-        } else {
-            // Asesor 2: Prioridad Prioritario -> General, luego FIFO
-            $queryEspera->whereIn('tur_tipo', ['Prioritario', 'General'])
-                        ->orderByRaw("FIELD(tur_tipo, 'Prioritario', 'General') ASC")
-                        ->orderBy('tur_hora_fecha', 'asc');
-        }
-        
-        $turnosEnEspera = $queryEspera->get();
+        $turnosEnEspera = $this->turnoRepo->getWaitingForAsesor($tipoAsesor);
 
-        return view('panel_asesor', compact('asesor', 'atencion', 'turnosEnEspera'));
+        return view('asesor.panel', compact('asesor', 'atencion', 'turnosEnEspera'));
     }
 
     public function actividad(Request $request)
     {
-        if (!$this->checkAuth()) return redirect()->route('asesor.login');
+        if (!$this->checkAuth())
+            return redirect()->route('asesor.login');
         $ase_id = session('ase_id');
         $asesor = Asesor::with('persona')->find($ase_id);
-        
+
         if (!$asesor) {
             $asesor = new Asesor();
             $asesor->ase_id = $ase_id;
@@ -131,7 +123,7 @@ class AsesorController extends Controller
         }
 
         $query = Atencion::where('ASESOR_ase_id', $ase_id)
-                         ->with('turno.solicitante.persona');
+            ->with('turno.solicitante.persona');
 
         // Lógica de Filtro
         if ($request->has('estado') && $request->estado != '') {
@@ -141,15 +133,15 @@ class AsesorController extends Controller
                 $query->whereNull('atnc_hora_fin');
             }
         }
-        
+
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->whereHas('turno.solicitante.persona', function($q2) use ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('turno.solicitante.persona', function ($q2) use ($search) {
                     $q2->where('pers_doc', 'like', "%{$search}%")
-                      ->orWhere('pers_nombres', 'like', "%{$search}%")
-                      ->orWhere('pers_apellidos', 'like', "%{$search}%");
-                })->orWhereHas('turno', function($q3) use ($search) {
+                        ->orWhere('pers_nombres', 'like', "%{$search}%")
+                        ->orWhere('pers_apellidos', 'like', "%{$search}%");
+                })->orWhereHas('turno', function ($q3) use ($search) {
                     $q3->where('tur_numero', 'like', "%{$search}%");
                 });
             });
@@ -162,31 +154,31 @@ class AsesorController extends Controller
         if ($atenciones->isEmpty() && !$request->has('search') && !$request->has('estado')) {
             // Creamos un paginator fake
             $items = collect([
-                (object)[
+                (object) [
                     'atnc_id' => 1,
                     'atnc_hora_inicio' => '2026-03-20 08:20:00',
                     'atnc_hora_fin' => '2026-03-20 08:32:00',
-                    'turno' => (object)[
+                    'turno' => (object) [
                         'tur_numero' => 'G-001',
-                        'solicitante' => (object)['persona' => (object)['pers_nombres' => 'María', 'pers_apellidos' => 'Rodríguez', 'pers_doc' => '10203040']]
+                        'solicitante' => (object) ['persona' => (object) ['pers_nombres' => 'María', 'pers_apellidos' => 'Rodríguez', 'pers_doc' => '10203040']]
                     ]
                 ],
-                (object)[
+                (object) [
                     'atnc_id' => 2,
                     'atnc_hora_inicio' => '2026-03-20 09:15:00',
                     'atnc_hora_fin' => '2026-03-20 09:23:00',
-                    'turno' => (object)[
+                    'turno' => (object) [
                         'tur_numero' => 'P-042',
-                        'solicitante' => (object)['persona' => (object)['pers_nombres' => 'Juan', 'pers_apellidos' => 'Pérez', 'pers_doc' => '50607080']]
+                        'solicitante' => (object) ['persona' => (object) ['pers_nombres' => 'Juan', 'pers_apellidos' => 'Pérez', 'pers_doc' => '50607080']]
                     ]
                 ],
-                (object)[
+                (object) [
                     'atnc_id' => 3,
                     'atnc_hora_inicio' => now(),
                     'atnc_hora_fin' => null,
-                    'turno' => (object)[
+                    'turno' => (object) [
                         'tur_numero' => 'V-012',
-                        'solicitante' => (object)['persona' => (object)['pers_nombres' => 'Elena', 'pers_apellidos' => 'Gómez', 'pers_doc' => '90102030']]
+                        'solicitante' => (object) ['persona' => (object) ['pers_nombres' => 'Elena', 'pers_apellidos' => 'Gómez', 'pers_doc' => '90102030']]
                     ]
                 ]
             ]);
@@ -197,9 +189,9 @@ class AsesorController extends Controller
         if ($request->has('export') && $request->export == 'excel') {
             // Obtener TODOS los registros sin paginar para el reporte completo
             $queryExport = Atencion::where('ASESOR_ase_id', $ase_id)
-                                   ->with('turno.solicitante.persona')
-                                   ->orderBy('atnc_hora_inicio', 'desc')
-                                   ->get();
+                ->with('turno.solicitante.persona')
+                ->orderBy('atnc_hora_inicio', 'desc')
+                ->get();
 
             $nombreAsesor = $asesor->persona->pers_nombres ?? 'Asesor';
             $apellidoAsesor = $asesor->persona->pers_apellidos ?? '';
@@ -221,7 +213,7 @@ class AsesorController extends Controller
             }
             $promedioDuracion = $countConDuracion > 0 ? round($tiempoTotal / $countConDuracion, 1) : 0;
 
-            $html  = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
+            $html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
             $html .= '<head><meta charset="UTF-8"></head><body>';
             $html .= '<table border="1" style="font-family: Arial, sans-serif; border-collapse: collapse; width: 100%;">';
             $html .= '<thead>';
@@ -251,22 +243,22 @@ class AsesorController extends Controller
             // ── Filas de datos ─────────────────────────────────────────────
             $row = 1;
             foreach ($queryExport as $atn) {
-                $persona   = $atn->turno->solicitante->persona ?? null;
-                $nombres   = $persona ? ($persona->pers_nombres . ' ' . $persona->pers_apellidos) : 'Indeterminado';
-                $doc       = $persona ? $persona->pers_doc : '-';
-                $turno     = $atn->turno->tur_numero ?? '-';
+                $persona = $atn->turno->solicitante->persona ?? null;
+                $nombres = $persona ? ($persona->pers_nombres . ' ' . $persona->pers_apellidos) : 'Indeterminado';
+                $doc = $persona ? $persona->pers_doc : '-';
+                $turno = $atn->turno->tur_numero ?? '-';
 
                 $ini = is_string($atn->atnc_hora_inicio) ? \Carbon\Carbon::parse($atn->atnc_hora_inicio) : $atn->atnc_hora_inicio;
                 $finRaw = $atn->atnc_hora_fin;
                 $finCarbon = $finRaw ? (is_string($finRaw) ? \Carbon\Carbon::parse($finRaw) : $finRaw) : null;
 
-                $horaInicio  = $ini->format('d/m/Y h:i A');
-                $horaFin     = $finCarbon ? $finCarbon->format('d/m/Y h:i A') : '—';
-                $duracion    = $finCarbon ? $ini->diffInMinutes($finCarbon) . ' min' : '—';
-                $estado      = $finCarbon ? 'ATENDIDO' : 'EN PROCESO';
+                $horaInicio = $ini->format('d/m/Y h:i A');
+                $horaFin = $finCarbon ? $finCarbon->format('d/m/Y h:i A') : '—';
+                $duracion = $finCarbon ? $ini->diffInMinutes($finCarbon) . ' min' : '—';
+                $estado = $finCarbon ? 'ATENDIDO' : 'EN PROCESO';
                 $estadoColor = $finCarbon ? '#166534' : '#1e40af';
-                $estadoBg    = $finCarbon ? '#dcfce7'  : '#dbeafe';
-                $bgRow       = ($row % 2 == 0) ? '#f9fafb' : '#ffffff';
+                $estadoBg = $finCarbon ? '#dcfce7' : '#dbeafe';
+                $bgRow = ($row % 2 == 0) ? '#f9fafb' : '#ffffff';
 
                 $html .= '<tr style="height:34px; background-color:' . $bgRow . ';">';
                 $html .= '<td style="border:1px solid #e5e7eb; text-align:center; font-weight:bold; color:#6b7280; padding:4px 8px; font-size:11px;">' . $row . '</td>';
@@ -298,7 +290,7 @@ class AsesorController extends Controller
             $html .= '</tbody></table></body></html>';
 
             return response($html, 200, [
-                'Content-Type'        => 'application/vnd.ms-excel; charset=UTF-8',
+                'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
                 'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
             ]);
         }
@@ -308,7 +300,8 @@ class AsesorController extends Controller
 
     public function tramites()
     {
-        if (!$this->checkAuth()) return redirect()->route('asesor.login');
+        if (!$this->checkAuth())
+            return redirect()->route('asesor.login');
         $ase_id = session('ase_id');
         $asesor = Asesor::with('persona')->find($ase_id);
         return view('asesor.tramites', compact('asesor'));
@@ -316,10 +309,11 @@ class AsesorController extends Controller
 
     public function reportes()
     {
-        if (!$this->checkAuth()) return redirect()->route('asesor.login');
+        if (!$this->checkAuth())
+            return redirect()->route('asesor.login');
         $ase_id = session('ase_id');
         $asesor = Asesor::with('persona')->find($ase_id);
-        
+
         if (!$asesor) {
             $asesor = new Asesor();
             $asesor->ase_id = $ase_id;
@@ -327,25 +321,25 @@ class AsesorController extends Controller
         }
 
         $hoy = now()->today();
-        
+
         $atencionesHoy = Atencion::where('ASESOR_ase_id', $ase_id)
-                                ->whereDate('atnc_hora_inicio', $hoy)
-                                ->with('turno')
-                                ->get();
-        
+            ->whereDate('atnc_hora_inicio', $hoy)
+            ->with('turno')
+            ->get();
+
         $distribucionTipos = [
             'General' => $atencionesHoy->where('atnc_tipo', 'General')->count(),
             'Prioritario' => $atencionesHoy->whereIn('atnc_tipo', ['Prioritario', 'Prioritaria'])->count(),
             'Víctimas' => $atencionesHoy->where('atnc_tipo', 'Victimas')->count()
         ];
-        
+
         $tiempoTotal = 0;
         $atencionesCompletadas = $atencionesHoy->whereNotNull('atnc_hora_fin');
-        foreach($atencionesCompletadas as $at) {
+        foreach ($atencionesCompletadas as $at) {
             $tiempoTotal += $at->atnc_hora_inicio->diffInMinutes($at->atnc_hora_fin);
         }
         $tiempoPromedio = $atencionesCompletadas->count() > 0 ? round($tiempoTotal / $atencionesCompletadas->count(), 1) : 0;
-        
+
         $metas = [
             'atencion_meta' => 12,
             'atencion_actual' => $tiempoPromedio,
@@ -369,18 +363,24 @@ class AsesorController extends Controller
         ];
 
         $turnos = Atencion::where('ASESOR_ase_id', $ase_id)
-                            ->with('turno.solicitante.persona')
-                            ->orderBy('atnc_hora_inicio', 'desc')
-                            ->paginate(5);
+            ->with('turno.solicitante.persona')
+            ->orderBy('atnc_hora_inicio', 'desc')
+            ->paginate(5);
 
         return view('asesor.reportes', compact(
-            'asesor', 'distribucionTipos', 'metas', 'topTramites', 'feedback', 'turnos'
+            'asesor',
+            'distribucionTipos',
+            'metas',
+            'topTramites',
+            'feedback',
+            'turnos'
         ));
     }
 
     public function configuracion()
     {
-        if (!$this->checkAuth()) return redirect()->route('asesor.login');
+        if (!$this->checkAuth())
+            return redirect()->route('asesor.login');
         $ase_id = session('ase_id');
         $asesor = Asesor::with('persona')->find($ase_id);
 
@@ -391,7 +391,7 @@ class AsesorController extends Controller
         }
 
         if (!$asesor->persona) {
-            $asesor->persona = (object)[
+            $asesor->persona = (object) [
                 'pers_nombres' => 'Carlos',
                 'pers_apellidos' => 'Ruiz',
                 'pers_doc' => '12345678'
@@ -405,56 +405,25 @@ class AsesorController extends Controller
     {
         $ase_id = session('ase_id');
         $asesor = Asesor::find($ase_id);
-        
+
         if (!$asesor) {
             return back()->with('error', 'Sesión no válida o asesor no encontrado.');
         }
 
-        return DB::transaction(function () use ($ase_id, $asesor) {
-            $tipoAsesor = $asesor->ase_tipo_asesor ?? 'General';
+        // Usar el repositorio para manejar la transacción y el bloqueo de turno
+        $atencion = $this->turnoRepo->callNextTurn($asesor);
 
-            // Query base: Turnos de hoy que no han sido atendidos
-            $query = Turno::whereDate('tur_hora_fecha', now()->today())
-                        ->whereDoesntHave('atencion');
+        if (!$atencion) {
+            return back()->with('error', 'No hay turnos disponibles para su perfil en este momento.');
+        }
 
-            if ($tipoAsesor === 'Especializado') {
-                // Asesor 1: Solo población víctima (FIFO)
-                $turno = $query->where('tur_tipo', 'Victimas')
-                            ->orderBy('tur_hora_fecha', 'asc')
-                            ->lockForUpdate()
-                            ->first();
-            } else {
-                // Asesor 2: Prioridad Prioritario -> General, luego FIFO
-                $turno = $query->whereIn('tur_tipo', ['Prioritario', 'General'])
-                            ->orderByRaw("FIELD(tur_tipo, 'Prioritario', 'General') ASC")
-                            ->orderBy('tur_hora_fecha', 'asc')
-                            ->lockForUpdate()
-                            ->first();
-            }
-
-            if (!$turno) {
-                return back()->with('error', 'No hay turnos disponibles para su perfil en este momento.');
-            }
-
-            // Mapear el tipo de turno al enum de atención (Asegurar compatibilidad con enum de la BD)
-            $tipoAtencion = $turno->tur_tipo;
-            if ($tipoAtencion == 'Prioritario') $tipoAtencion = 'Prioritaria';
-
-            // Crear la atención dentro de la transacción
-            Atencion::create([
-                'atnc_hora_inicio' => now(),
-                'ASESOR_ase_id' => $ase_id,
-                'TURNO_tur_id' => $turno->tur_id,
-                'atnc_tipo' => $tipoAtencion
-            ]);
-
-            return redirect()->route('asesor.index')->with('success', "Llamando al turno {$turno->tur_numero}");
-        });
+        return redirect()->route('asesor.index')->with('success', "Llamando al turno {$atencion->turno->tur_numero}");
     }
 
     public function finalizar($atnc_id)
     {
-        if (!$this->checkAuth()) return redirect()->route('asesor.login');
+        if (!$this->checkAuth())
+            return redirect()->route('asesor.login');
         $atencion = Atencion::findOrFail($atnc_id);
         $atencion->update([
             'atnc_hora_fin' => now()
@@ -465,7 +434,8 @@ class AsesorController extends Controller
 
     public function ausente($atnc_id)
     {
-        if (!$this->checkAuth()) return redirect()->route('asesor.login');
+        if (!$this->checkAuth())
+            return redirect()->route('asesor.login');
         $atencion = Atencion::findOrFail($atnc_id);
         $atencion->update([
             'atnc_hora_fin' => now()
@@ -477,7 +447,8 @@ class AsesorController extends Controller
 
     public function manualAsesor()
     {
-        if (!$this->checkAuth()) return redirect()->route('asesor.login');
+        if (!$this->checkAuth())
+            return redirect()->route('asesor.login');
         $ase_id = session('ase_id');
         $asesor = Asesor::with('persona')->find($ase_id);
         if (!$asesor) {
@@ -485,12 +456,13 @@ class AsesorController extends Controller
             $asesor->ase_id = $ase_id;
             $asesor->modulo = '04';
         }
-        return view('manual_asesor', compact('asesor'));
+        return view('asesor.manual', compact('asesor'));
     }
 
     public function updatePersona(Request $request, $pers_doc)
     {
-        if (!$this->checkAuth()) return redirect()->route('asesor.login');
+        if (!$this->checkAuth())
+            return redirect()->route('asesor.login');
 
         $request->validate([
             'pers_nombres' => 'required|string|max:100',

@@ -9,8 +9,8 @@
 </div>
 
 {{-- Toast --}}
-<div id="cfg-toast" class="fixed top-6 right-6 z-[9999] bg-white border border-emerald-100 rounded-2xl px-5 py-4 shadow-2xl flex items-center space-x-3 min-w-[280px] hidden">
-    <div class="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500"><i class="fa-solid fa-circle-check"></i></div>
+<div id="cfg-toast" class="fixed top-6 right-6 z-[9999] bg-white border border-sena-blue/20 rounded-2xl px-5 py-4 shadow-2xl flex items-center space-x-3 min-w-[280px] hidden">
+    <div class="w-9 h-9 bg-sena-blue/10 rounded-xl flex items-center justify-center text-sena-blue"><i class="fa-solid fa-circle-check"></i></div>
     <p class="text-sm font-bold text-gray-800">Configuración guardada correctamente.</p>
 </div>
 
@@ -65,7 +65,7 @@
 
         {{-- Card: Alertas y Notificaciones --}}
         <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
-            <div class="bg-gradient-to-r from-amber-500 to-orange-400 px-7 py-5 flex items-center space-x-3">
+            <div class="bg-gradient-to-r from-sena-orange to-sena-orange/80 px-7 py-5 flex items-center space-x-3">
                 <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center text-white"><i class="fa-solid fa-bell"></i></div>
                 <h2 class="text-sm font-black text-white uppercase tracking-widest">Alertas y Notificaciones</h2>
             </div>
@@ -77,7 +77,7 @@
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer ml-4">
                         <input type="checkbox" id="cfg-alertas-sonoras" class="sr-only peer" checked>
-                        <div class="w-12 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-6 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500 after:shadow-sm"></div>
+                        <div class="w-12 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-sena-orange/30 rounded-full peer peer-checked:after:translate-x-6 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sena-orange after:shadow-sm"></div>
                     </label>
                 </div>
                 <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
@@ -87,7 +87,7 @@
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer ml-4">
                         <input type="checkbox" id="cfg-push-notif" class="sr-only peer">
-                        <div class="w-12 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-6 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500 after:shadow-sm"></div>
+                        <div class="w-12 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-sena-orange/30 rounded-full peer peer-checked:after:translate-x-6 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sena-orange after:shadow-sm"></div>
                     </label>
                 </div>
                 <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
@@ -133,7 +133,7 @@
         {{-- Quick Actions --}}
         <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6">
             <div class="flex items-center space-x-2 mb-5 pb-4 border-b border-gray-50">
-                <i class="fa-solid fa-bolt text-amber-500"></i>
+                <i class="fa-solid fa-bolt text-sena-yellow"></i>
                 <h3 class="text-xs font-black text-gray-700 uppercase tracking-widest">Acciones Rápidas</h3>
             </div>
             <div class="space-y-2.5">
@@ -145,9 +145,9 @@
                     <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-blue-500 text-sm shadow-sm"><i class="fa-solid fa-book-open"></i></div>
                     <span class="text-[11px] font-black text-gray-600 group-hover:text-blue-600 uppercase tracking-wide">Manual de Usuario</span>
                 </a>
-                <a href="{{ route('coordinador.modulos') }}" class="flex items-center space-x-3 p-3 bg-gray-50 hover:bg-amber-50 rounded-xl border border-gray-100 hover:border-amber-100 transition group">
-                    <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-amber-500 text-sm shadow-sm"><i class="fa-solid fa-users-gear"></i></div>
-                    <span class="text-[11px] font-black text-gray-600 group-hover:text-amber-600 uppercase tracking-wide">Gestión de Asesores</span>
+                <a href="{{ route('coordinador.modulos') }}" class="flex items-center space-x-3 p-3 bg-gray-50 hover:bg-sena-orange/10 rounded-xl border border-gray-100 hover:border-sena-orange/20 transition group">
+                    <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-sena-orange text-sm shadow-sm"><i class="fa-solid fa-users-gear"></i></div>
+                    <span class="text-[11px] font-black text-gray-600 group-hover:text-sena-orange uppercase tracking-wide">Gestión de Asesores</span>
                 </a>
                 <form action="{{ route('coordinador.logout') }}" method="POST">
                     @csrf

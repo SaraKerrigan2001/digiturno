@@ -19,37 +19,82 @@
 
     <!-- KPI 2 -->
     <div class="bg-white p-5 rounded-2xl shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)] border border-gray-100 flex items-center justify-between">
-        <div class="w-12 h-12 bg-sena-50 text-sena-500 rounded-full flex items-center justify-center text-lg shrink-0">
+        <div class="w-12 h-12 bg-sena-blue/10 text-sena-blue rounded-full flex items-center justify-center text-lg shrink-0">
             <i class="fa-solid fa-grip"></i>
         </div>
         <div class="text-right">
             <p class="text-[11px] font-semibold text-gray-400 mb-0.5">Módulos Activos</p>
             <h3 class="text-2xl font-black text-gray-800 leading-none">{{ sprintf('%02d', $enAtencion) }}/10</h3>
-            <p class="text-[10px] font-bold text-sena-500 mt-1">+2 <span class="text-gray-400 font-medium">nuevos hoy</span></p>
+            <p class="text-[10px] font-bold text-sena-blue mt-1">+2 <span class="text-gray-400 font-medium">nuevos hoy</span></p>
         </div>
     </div>
 
     <!-- KPI 3 -->
     <div class="bg-white p-5 rounded-2xl shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)] border border-gray-100 flex items-center justify-between">
-        <div class="w-12 h-12 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center text-lg shrink-0">
+        <div class="w-12 h-12 bg-sena-orange/10 text-sena-orange rounded-full flex items-center justify-center text-lg shrink-0">
             <i class="fa-solid fa-ticket"></i>
         </div>
         <div class="text-right">
             <p class="text-[11px] font-semibold text-gray-400 mb-0.5">Turnos Generados</p>
             <h3 class="text-2xl font-black text-gray-800 leading-none">{{ number_format($usuariosHoy) }}</h3>
-            <p class="text-[10px] font-bold text-sena-500 mt-1">+15% <span class="text-gray-400 font-medium">vs ayer</span></p>
+            <p class="text-[10px] font-bold text-sena-orange mt-1">+15% <span class="text-gray-400 font-medium">vs ayer</span></p>
         </div>
     </div>
 
     <!-- KPI 4 -->
     <div class="bg-white p-5 rounded-2xl shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)] border border-gray-100 flex items-center justify-between">
-        <div class="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center text-lg shrink-0">
+        <div class="w-12 h-12 bg-sena-blue/5 text-sena-blue rounded-full flex items-center justify-center text-lg shrink-0">
             <i class="fa-solid fa-face-smile"></i>
         </div>
         <div class="text-right">
             <p class="text-[11px] font-semibold text-gray-400 mb-0.5">Nivel Satisfacción</p>
             <h3 class="text-2xl font-black text-gray-800 leading-none">{{ $satisfaccion }}</h3>
-            <p class="text-[10px] font-bold text-sena-500 mt-1">+0.3% <span class="text-gray-400 font-medium">mejora</span></p>
+            <p class="text-[10px] font-bold text-sena-blue mt-1">+0.3% <span class="text-gray-400 font-medium">mejora</span></p>
+        </div>
+    </div>
+</div>
+
+<!-- Queue Waiting Status Row (New Real-time Section) -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+    <!-- Waiting General -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
+        <div class="flex items-center justify-between mb-4">
+            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">En Espera: General</span>
+            <div class="w-8 h-8 bg-blue-50 text-blue-500 rounded-lg flex items-center justify-center text-xs">
+                <i class="fa-solid fa-users"></i>
+            </div>
+        </div>
+        <div class="flex items-end justify-between">
+            <h3 id="count-general" class="text-4xl font-black text-slate-800 leading-none">0</h3>
+            <span class="text-[10px] font-bold text-slate-300 uppercase">Ciudadanos</span>
+        </div>
+    </div>
+
+    <!-- Waiting Prioritario -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
+        <div class="flex items-center justify-between mb-4">
+            <span class="text-[10px] font-black text-sena-orange uppercase tracking-widest">En Espera: Prioritario</span>
+            <div class="w-8 h-8 bg-orange-50 text-sena-orange rounded-lg flex items-center justify-center text-xs">
+                <i class="fa-solid fa-person-rays"></i>
+            </div>
+        </div>
+        <div class="flex items-end justify-between">
+            <h3 id="count-prioritario" class="text-4xl font-black text-slate-800 leading-none">0</h3>
+            <span class="text-[10px] font-bold text-slate-300 uppercase">Prioritarios</span>
+        </div>
+    </div>
+
+    <!-- Waiting Victimas -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col border-l-4 border-l-rose-500">
+        <div class="flex items-center justify-between mb-4">
+            <span class="text-[10px] font-black text-rose-500 uppercase tracking-widest">En Espera: Víctimas</span>
+            <div class="w-8 h-8 bg-rose-50 text-rose-500 rounded-lg flex items-center justify-center text-xs">
+                <i class="fa-solid fa-handshake-angle"></i>
+            </div>
+        </div>
+        <div class="flex items-end justify-between">
+            <h3 id="count-victimas" class="text-4xl font-black text-slate-800 leading-none">0</h3>
+            <span class="text-[10px] font-bold text-slate-300 uppercase">Población</span>
         </div>
     </div>
 </div>
@@ -64,11 +109,11 @@
         <div class="bg-white p-6 rounded-[1.5rem] shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)] border border-gray-100">
             <div class="flex justify-between items-center mb-6">
                 <div class="flex items-center space-x-3">
-                    <i class="fa-solid fa-chart-simple text-sena-500 text-lg"></i>
+                    <i class="fa-solid fa-chart-simple text-sena-blue text-lg"></i>
                     <h2 class="text-sm font-bold text-gray-900 tracking-wide uppercase">Monitor de Módulos (Torre de Control)</h2>
                 </div>
-                <div class="bg-sena-50 text-sena-500 px-3 py-1 rounded-full text-[10px] font-black flex items-center tracking-wider">
-                    <span class="w-2 h-2 rounded-full bg-sena-500 mr-2 animate-pulse"></span> {{ $enAtencion }} Atendiendo
+                <div class="bg-sena-blue/10 text-sena-blue px-3 py-1 rounded-full text-[10px] font-black flex items-center tracking-wider">
+                    <span class="w-2 h-2 rounded-full bg-sena-blue mr-2 animate-pulse"></span> {{ $enAtencion }} Atendiendo
                 </div>
             </div>
 
@@ -77,7 +122,7 @@
                 @foreach($asesoresStatus as $ase)
                 @php
                     $estado = strtoupper($ase['estado']);
-                    $color = $estado == 'ATENDIENDO' ? '#39A900' : ($estado == 'DESCANSO' ? '#f59e0b' : '#6b7280');
+                    $color = $estado == 'ATENDIENDO' ? '#10069F' : ($estado == 'DESCANSO' ? '#FF671F' : '#6b7280');
                     $timeLabel = $estado == 'ATENDIENDO' ? 'Sesión Actual' : ($estado == 'DESCANSO' ? 'Tiempo Descanso' : 'Tiempo Inactivo');
                     
                     // Tiempo transcurrido si está atendiendo
@@ -109,7 +154,7 @@
                             <p class="text-[9px] text-gray-400 font-black mb-0.5 tracking-wide uppercase">{{ $timeLabel }}</p>
                             <p class="text-xs font-black" style="color: {{ $color }}">{{ $timeText }}</p>
                         </div>
-                        <i class="fa-solid {{ $icon }} text-gray-100 text-lg group-hover:text-sena-50 group-hover:scale-110 transition-all"></i>
+                        <i class="fa-solid {{ $icon }} text-gray-100 text-lg group-hover:text-sena-blue/10 group-hover:scale-110 transition-all"></i>
                     </div>
                 </div>
                 @endforeach
@@ -119,7 +164,7 @@
         <!-- Geographic Map Container -->
         <div class="bg-white p-6 rounded-[1.5rem] shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)] border border-gray-100">
             <div class="flex items-center space-x-3 mb-6">
-                <i class="fa-solid fa-map-location-dot text-sena-500 text-lg"></i>
+                <i class="fa-solid fa-map-location-dot text-sena-blue text-lg"></i>
                 <h2 class="text-sm font-bold text-gray-900 tracking-wide uppercase">Distribución Geográfica de Sede</h2>
             </div>
             <div class="relative h-64 border-2 border-dashed border-gray-100 rounded-3xl flex items-center justify-center bg-gray-50/50 overflow-hidden">
@@ -143,11 +188,11 @@
                     $colorClass = 'bg-gray-400';
                     $bgClass = 'bg-gray-100';
                     if(strtoupper($ase['estado']) == 'ATENDIENDO') {
-                        $colorClass = 'bg-sena-500';
-                        $bgClass = 'bg-sena-50';
+                        $colorClass = 'bg-sena-blue';
+                        $bgClass = 'bg-sena-blue/10';
                     } else if (strtoupper($ase['estado']) == 'DESCANSO') {
-                        $colorClass = 'bg-amber-500';
-                        $bgClass = 'bg-amber-50';
+                        $colorClass = 'bg-sena-orange';
+                        $bgClass = 'bg-sena-orange/10';
                     }
                 @endphp
                 <div class="absolute flex flex-col items-center justify-center group cursor-pointer" style="left: {{ $pos['left'] ?? 'auto' }}; top: {{ $pos['top'] ?? 'auto' }}; bottom: {{ $pos['bottom'] ?? 'auto' }}; z-index: 10;">
@@ -164,8 +209,8 @@
                 <!-- Legend -->
                 <div class="absolute bottom-4 right-4 bg-white p-4 rounded-2xl shadow-xl border border-gray-50 flex flex-col space-y-2 z-10 min-w-[120px]">
                     <span class="text-[9px] font-black text-gray-900 border-b border-gray-50 pb-2 uppercase tracking-widest">Leyenda</span>
-                    <div class="flex items-center space-x-2"><span class="w-2 h-2 rounded-full bg-sena-500"></span><span class="text-[9px] font-bold text-gray-600">Activos</span></div>
-                    <div class="flex items-center space-x-2"><span class="w-2 h-2 rounded-full bg-amber-500"></span><span class="text-[9px] font-bold text-gray-600">Alerta</span></div>
+                    <div class="flex items-center space-x-2"><span class="w-2 h-2 rounded-full bg-sena-blue"></span><span class="text-[9px] font-bold text-gray-600">Activos</span></div>
+                    <div class="flex items-center space-x-2"><span class="w-2 h-2 rounded-full bg-sena-orange"></span><span class="text-[9px] font-bold text-gray-600">Alerta</span></div>
                     <div class="flex items-center space-x-2"><span class="w-2 h-2 rounded-full bg-gray-300"></span><span class="text-[9px] font-bold text-gray-600">Mantenimiento</span></div>
                 </div>
             </div>
@@ -212,7 +257,7 @@
                     @foreach($docData as $type => $count)
                     <div class="flex justify-between items-center">
                         <div class="flex items-center space-x-2">
-                            <div class="w-2 h-2 rounded-full" style="background-color: {{ $type == 'CC' ? '#39A900' : ($type == 'NIT' ? '#3b82f6' : '#d1d5db') }}"></div>
+                            <div class="w-2 h-2 rounded-full" style="background-color: {{ $type == 'CC' ? '#10069F' : ($type == 'NIT' ? '#3b82f6' : '#d1d5db') }}"></div>
                             <span class="text-[10px] font-bold text-gray-600">{{ $type }}</span>
                         </div>
                         <span class="text-[10px] font-black text-gray-900">{{ $count }}</span>
@@ -264,7 +309,7 @@
             </div>
             
             <div class="mt-auto border-t border-gray-50 pt-5 text-center">
-                <a href="#" onclick="document.getElementById('notificationsModal').classList.remove('hidden'); return false;" class="text-[10px] font-black text-sena-500 hover:text-sena-600 hover:underline uppercase tracking-widest">Ver Todas las Notificaciones</a>
+                <a href="#" onclick="document.getElementById('notificationsModal').classList.remove('hidden'); return false;" class="text-[10px] font-black text-sena-blue hover:text-sena-blue/80 hover:underline uppercase tracking-widest">Ver Todas las Notificaciones</a>
             </div>
         </div>
 
@@ -325,7 +370,7 @@
             labels: @json($flowLabels),
             datasets: [{
                 data: @json($flowValues), 
-                backgroundColor: '#39A900',
+                backgroundColor: '#10069F',
                 borderRadius: 4,
                 borderSkipped: false,
                 barPercentage: 0.7
@@ -353,7 +398,7 @@
             labels: @json(array_keys($docData)),
             datasets: [{
                 data: @json(array_values($docData)),
-                backgroundColor: ['#39A900', '#3b82f6', '#94a3b8', '#cbd5e1', '#f1f5f9'],
+                backgroundColor: ['#10069F', '#3b82f6', '#94a3b8', '#cbd5e1', '#f1f5f9'],
                 borderWidth: 0,
                 hoverOffset: 6
             }]
@@ -366,5 +411,44 @@
             layout: { padding: 5 }
         }
     });
+
+    // --- LÓGICA DE MONITOREO AUTOMÁTICO (POLLING) ---
+    async function updateDashboardStats() {
+        try {
+            console.log('Actualizando estadísticas del dashboard...');
+            const response = await fetch("{{ route('coordinador.api.stats') }}");
+            const result = await response.json();
+
+            if (result.success) {
+                // Actualizar los IDs del DOM con animación suave
+                updateValueWithAnimation('count-general', result.data.General);
+                updateValueWithAnimation('count-prioritario', result.data.Prioritario);
+                updateValueWithAnimation('count-victimas', result.data.Victimas);
+                
+                console.log(`Última actualización: ${result.timestamp}`);
+            }
+        } catch (error) {
+            console.error('Error al sincronizar estadísticas:', error);
+        }
+    }
+
+    function updateValueWithAnimation(id, newValue) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        
+        const currentValue = parseInt(el.innerText);
+        if (currentValue !== newValue) {
+            el.classList.add('animate-pulse', 'text-sena-blue');
+            setTimeout(() => {
+                el.innerText = newValue;
+                el.classList.remove('animate-pulse', 'text-sena-blue');
+            }, 500);
+        }
+    }
+
+    // Ejecutar inmediatamente al cargar y luego cada 5 minutos (300,000 ms)
+    updateDashboardStats();
+    setInterval(updateDashboardStats, 300000); 
+
 </script>
 @endsection

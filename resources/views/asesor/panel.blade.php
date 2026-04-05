@@ -15,7 +15,7 @@
         <!-- Main Attendance Card -->
         <div class="xl:col-span-2 space-y-10">
             @if($atencion)
-            <div class="bg-sena-500 rounded-[3rem] p-10 shadow-2xl shadow-sena-500/30 relative overflow-hidden group">
+            <div class="bg-sena-blue rounded-[3rem] p-10 shadow-2xl shadow-sena-blue/30 relative overflow-hidden group">
                 <i class="fa-solid fa-id-card absolute -bottom-10 -right-10 text-[200px] text-white/5 transform rotate-12 transition-transform group-hover:rotate-0 duration-700"></i>
 
                 <div class="flex justify-between items-start relative z-10">
@@ -45,7 +45,7 @@
                     <form action="{{ route('asesor.llamar') }}" method="POST" class="inline">
                         @csrf
                         <input type="hidden" name="ase_id" value="{{ $asesor->ase_id }}">
-                        <button type="submit" class="w-full bg-white text-sena-500 font-extrabold py-5 rounded-3xl hover:bg-gray-50 transition-all flex items-center justify-center space-x-3 shadow-xl active:scale-95 group">
+                        <button type="submit" class="w-full bg-white text-sena-blue font-extrabold py-5 rounded-3xl hover:bg-gray-50 transition-all flex items-center justify-center space-x-3 shadow-xl active:scale-95 group">
                             <i class="fa-solid fa-arrow-right-long group-hover:translate-x-1 transition-transform"></i>
                             <span class="uppercase tracking-widest text-xs">Llamar Siguiente</span>
                         </button>
@@ -72,7 +72,7 @@
                 <form action="{{ route('asesor.llamar') }}" method="POST" class="w-full max-w-xs">
                     @csrf
                     <input type="hidden" name="ase_id" value="{{ $asesor->ase_id }}">
-                    <button type="submit" class="w-full bg-sena-500 text-white font-black py-6 rounded-[2rem] shadow-xl hover:bg-sena-600 hover:-translate-y-1 transition-all active:scale-95 uppercase tracking-widest text-xs">
+                    <button type="submit" class="w-full bg-sena-blue text-white font-black py-6 rounded-[2rem] shadow-xl hover:bg-sena-blue/90 hover:-translate-y-1 transition-all active:scale-95 uppercase tracking-widest text-xs">
                         Llamar Siguiente Turno
                     </button>
                 </form>
@@ -102,7 +102,7 @@
                 <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-50 flex flex-col justify-between group hover:shadow-xl transition-all duration-500 relative overflow-hidden">
                     <h5 class="text-[10px] font-black text-gray-400 uppercase tracking-widest text-left px-2">Estado del Puesto</h5>
                     <div class="w-full mt-4 bg-gray-100 h-2.5 rounded-full overflow-hidden">
-                        <div class="bg-sena-500 h-full rounded-full w-[75%] transition-all duration-1000 group-hover:w-[85%]"></div>
+                        <div class="bg-sena-orange h-full rounded-full w-[75%] transition-all duration-1000 group-hover:w-[85%]"></div>
                     </div>
                     <div class="flex justify-between items-end mt-4">
                         <span class="text-[10px] font-black text-gray-600 uppercase tracking-widest">Capacidad</span>
@@ -120,7 +120,7 @@
         <div class="space-y-10">
             <div class="bg-white h-full rounded-[3rem] p-10 shadow-sm border border-gray-100">
                 <div class="flex items-center space-x-3 mb-10 pb-6 border-b border-gray-50">
-                    <i class="fa-solid fa-user-tag text-sena-500 text-lg"></i>
+                    <i class="fa-solid fa-user-tag text-sena-blue text-lg"></i>
                     <h4 class="text-sm font-black text-gray-900 tracking-wide uppercase">Detalles del Servicio</h4>
                 </div>
 
@@ -134,7 +134,7 @@
 
                     <div class="space-y-4 bg-gray-50 p-6 rounded-3xl border border-gray-100/50">
                         <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Prioridad</p>
-                        <div class="flex items-center space-x-2 {{ ($atencion && $atencion->turno->tur_tipo != 'General') ? 'text-amber-500' : 'text-sena-500' }}">
+                        <div class="flex items-center space-x-2 {{ ($atencion && $atencion->turno->tur_tipo != 'General') ? 'text-sena-orange' : 'text-sena-blue' }}">
                             <i class="fa-solid fa-circle-check"></i>
                             <span class="text-xs font-black uppercase tracking-widest">{{ $atencion->turno->tur_tipo ?? 'Normal' }}</span>
                         </div>
@@ -171,7 +171,7 @@
                     @foreach([['num'=>'NIT-044', 'name'=>'Ana María Restrepo', 'time'=>'9:15 AM'],['num'=>'NIT-043', 'name'=>'Carlos Mario Úsuga', 'time'=>'8:58 AM'],['num'=>'NIT-042', 'name'=>'Elena Beltrán', 'time'=>'8:30 AM'],['num'=>'NIT-041', 'name'=>'Pedro Duarte', 'time'=>'8:12 AM']] as $t)
                     <div class="flex items-center justify-between group cursor-pointer hover:bg-gray-50 p-2 -m-2 rounded-2xl transition-all">
                         <div class="flex items-center space-x-4">
-                            <div class="w-2 h-2 rounded-full bg-gray-200 group-hover:bg-sena-500 transition-colors"></div>
+                            <div class="w-2 h-2 rounded-full bg-gray-200 group-hover:bg-sena-blue transition-colors"></div>
                             <div>
                                 <p class="text-xs font-black text-gray-900">{{ $t['num'] }}</p>
                                 <p class="text-[10px] font-bold text-gray-400 mt-0.5">{{ $t['name'] }}</p>
@@ -207,7 +207,7 @@
             
             <!-- Left Side: Status & Action -->
             <div class="flex-1 flex flex-col justify-center text-center md:text-left">
-                <div class="w-20 h-20 bg-amber-500 rounded-[1.5rem] flex items-center justify-center text-white text-4xl shadow-lg shadow-amber-500/30 mb-8 relative border-2 border-white mx-auto md:mx-0">
+                <div class="w-20 h-20 bg-sena-orange rounded-[1.5rem] flex items-center justify-center text-white text-4xl shadow-lg shadow-sena-orange/30 mb-8 relative border-2 border-white mx-auto md:mx-0">
                     <i class="fa-solid fa-mug-hot relative z-10"></i>
                     <div class="absolute inset-0 bg-white/20 rounded-[1.5rem] animate-pulse"></div>
                 </div>
@@ -215,7 +215,7 @@
                 <h2 class="text-4xl lg:text-5xl font-black text-gray-900 tracking-tight mb-4">Atención en Pausa</h2>
                 <p class="text-sm lg:text-base font-medium text-gray-500 leading-relaxed mb-10 max-w-sm mx-auto md:mx-0">Actualmente te encuentras en tiempo de descanso programado. La asignación de turnos está temporalmente detenida.</p>
                 
-                <a href="{{ url('/asesor') }}" id="btn-resume-work" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black py-5 px-10 rounded-2xl transition-all shadow-xl shadow-amber-500/30 transform hover:-translate-y-1 active:scale-95 inline-flex items-center justify-center space-x-4 w-full md:w-max mx-auto md:mx-0 relative overflow-hidden group">
+                <a href="{{ url('/asesor') }}" id="btn-resume-work" class="bg-gradient-to-r from-sena-blue to-sena-orange hover:from-sena-blue/90 hover:to-sena-orange/90 text-white font-black py-5 px-10 rounded-2xl transition-all shadow-xl shadow-sena-blue/30 transform hover:-translate-y-1 active:scale-95 inline-flex items-center justify-center space-x-4 w-full md:w-max mx-auto md:mx-0 relative overflow-hidden group">
                     <span class="absolute inset-0 w-full h-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     <i class="fa-solid fa-play text-lg relative z-10"></i>
                     <span class="text-xs uppercase tracking-[0.2em] relative z-10">Reanudar Atención</span>
@@ -225,9 +225,9 @@
             <!-- Right Side: Timer & Stats -->
             <div class="flex-1">
                 <div class="bg-white/80 backdrop-blur-md rounded-[2.5rem] p-8 lg:p-10 shadow-sm border border-white flex flex-col items-center justify-center text-center h-full relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-amber-400 rounded-full blur-[50px] opacity-10"></div>
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-sena-yellow rounded-full blur-[50px] opacity-10"></div>
                     
-                    <p class="text-[10px] font-black text-amber-600 uppercase tracking-[0.4em] mb-8 bg-amber-50 px-4 py-1.5 rounded-xl border border-amber-100">Tiempo Transcurrido</p>
+                    <p class="text-[10px] font-black text-sena-orange uppercase tracking-[0.4em] mb-8 bg-sena-yellow/10 px-4 py-1.5 rounded-xl border border-sena-yellow/20">Tiempo Transcurrido</p>
                     
                     <div class="flex items-center justify-center space-x-3 sm:space-x-6 w-full" id="pause-timer-display">
                         <div class="flex flex-col items-center w-20 sm:w-24">
@@ -236,14 +236,14 @@
                             </div>
                             <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Horas</span>
                         </div>
-                        <span class="text-3xl sm:text-4xl font-black text-amber-500 pb-8 animate-pulse opacity-50">:</span>
+                        <span class="text-3xl sm:text-4xl font-black text-sena-orange pb-8 animate-pulse opacity-50">:</span>
                         <div class="flex flex-col items-center w-20 sm:w-24">
                             <div class="w-full aspect-square bg-gradient-to-br from-gray-50 to-white rounded-2xl sm:rounded-3xl border border-gray-100 flex items-center justify-center shadow-inner mb-3 transform hover:scale-105 transition-transform">
                                 <span class="text-4xl sm:text-5xl font-black text-gray-900 tracking-tighter" id="pause-minutes">00</span>
                             </div>
                             <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Minutos</span>
                         </div>
-                        <span class="text-3xl sm:text-4xl font-black text-amber-500 pb-8 animate-pulse opacity-50">:</span>
+                        <span class="text-3xl sm:text-4xl font-black text-sena-orange pb-8 animate-pulse opacity-50">:</span>
                         <div class="flex flex-col items-center w-20 sm:w-24">
                             <div class="w-full aspect-square bg-gradient-to-br from-gray-50 to-white rounded-2xl sm:rounded-3xl border border-gray-100 flex items-center justify-center shadow-inner mb-3 transform hover:scale-105 transition-transform">
                                 <span class="text-4xl sm:text-5xl font-black text-gray-900 tracking-tighter" id="pause-seconds">00</span>
@@ -263,10 +263,10 @@
                             </div>
                         </div>
                         <div class="text-right flex items-center space-x-3 flex-row-reverse">
-                            <div class="w-8 h-8 bg-emerald-50 rounded-lg ml-3 items-center justify-center text-emerald-500 hidden sm:flex"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                            <div class="w-8 h-8 bg-sena-blue/10 rounded-lg ml-3 items-center justify-center text-sena-blue hidden sm:flex"><i class="fa-solid fa-arrow-trend-up"></i></div>
                             <div>
                                 <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Impacto</p>
-                                <p class="text-xl font-black text-emerald-500 uppercase">+15%</p>
+                                <p class="text-xl font-black text-sena-blue uppercase">+15%</p>
                             </div>
                         </div>
                     </div>
@@ -290,7 +290,7 @@
                 <div class="bg-white px-8 pt-10 pb-8 sm:p-10">
                     <div class="flex items-center justify-between mb-8">
                         <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 bg-sena-50 rounded-2xl flex items-center justify-center text-sena-500">
+                            <div class="w-12 h-12 bg-sena-50 rounded-2xl flex items-center justify-center text-sena-blue">
                                 <i class="fa-solid fa-user-gear text-xl"></i>
                             </div>
                             <div>
@@ -308,7 +308,7 @@
                         <div class="grid grid-cols-2 gap-5">
                             <div class="space-y-1.5">
                                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Tipo Doc</label>
-                                <select name="pers_tipodoc" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-sena-500/20 focus:border-sena-500 outline-none transition-all">
+                                <select name="pers_tipodoc" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-sena-blue/20 focus:border-sena-blue outline-none transition-all">
                                     <option value="CC" {{ $atencion->turno->solicitante->persona->pers_tipodoc == 'CC' ? 'selected' : '' }}>Cédula de Ciudadanía</option>
                                     <option value="TI" {{ $atencion->turno->solicitante->persona->pers_tipodoc == 'TI' ? 'selected' : '' }}>Tarjeta de Identidad</option>
                                     <option value="CE" {{ $atencion->turno->solicitante->persona->pers_tipodoc == 'CE' ? 'selected' : '' }}>Cédula de Extranjería</option>
@@ -323,24 +323,24 @@
 
                         <div class="space-y-1.5">
                             <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nombres</label>
-                            <input type="text" name="pers_nombres" value="{{ $atencion->turno->solicitante->persona->pers_nombres }}" required class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-sena-500/20 focus:border-sena-500 outline-none transition-all">
+                            <input type="text" name="pers_nombres" value="{{ $atencion->turno->solicitante->persona->pers_nombres }}" required class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-sena-blue/20 focus:border-sena-blue outline-none transition-all">
                         </div>
 
                         <div class="space-y-1.5">
                             <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Apellidos</label>
-                            <input type="text" name="pers_apellidos" value="{{ $atencion->turno->solicitante->persona->pers_apellidos }}" required class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-sena-500/20 focus:border-sena-500 outline-none transition-all">
+                            <input type="text" name="pers_apellidos" value="{{ $atencion->turno->solicitante->persona->pers_apellidos }}" required class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-sena-blue/20 focus:border-sena-blue outline-none transition-all">
                         </div>
 
                         <div class="space-y-1.5">
                             <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Teléfono / Celular</label>
-                            <input type="text" name="pers_telefono" value="{{ $atencion->turno->solicitante->persona->pers_telefono }}" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-sena-500/20 focus:border-sena-500 outline-none transition-all" placeholder="Ej: 3001234567">
+                            <input type="text" name="pers_telefono" value="{{ $atencion->turno->solicitante->persona->pers_telefono }}" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-sena-blue/20 focus:border-sena-blue outline-none transition-all" placeholder="Ej: 3001234567">
                         </div>
 
                         <div class="flex space-x-4 pt-4">
                             <button type="button" onclick="toggleEditModal(false)" class="flex-1 bg-gray-50 text-gray-500 font-black py-4 rounded-2xl hover:bg-gray-100 transition-all text-xs uppercase tracking-widest">
                                 Cancelar
                             </button>
-                            <button type="submit" class="flex-1 bg-sena-500 text-white font-black py-4 rounded-2xl hover:bg-sena-600 transition-all text-xs uppercase tracking-widest shadow-lg shadow-sena-500/20">
+                            <button type="submit" class="flex-1 bg-sena-blue text-white font-black py-4 rounded-2xl hover:bg-sena-blue/90 transition-all text-xs uppercase tracking-widest shadow-lg shadow-sena-blue/20">
                                 Guardar Cambios
                             </button>
                         </div>
@@ -425,8 +425,8 @@
                 datasets: [{
                     label: 'Atenciones',
                     data: [2, 5, 4, 8, 3, 5],
-                    borderColor: '#39A900',
-                    backgroundColor: 'rgba(57, 169, 0, 0.1)',
+                    borderColor: '#10069F',
+                    backgroundColor: 'rgba(16, 6, 159, 0.1)',
                     fill: true,
                     tension: 0.4,
                     borderWidth: 4,
@@ -444,5 +444,18 @@
             }
         });
     }
+
+    // SINCRONIZACIÓN ENTRE ASESORES (Auto-refresco de cola)
+    // Refresca la página cada 20 segundos para mantener la lista de espera sincronizada
+    // Solo si el modal de edición no está abierto para no interrumpir al usuario
+    setInterval(() => {
+        const modal = document.getElementById('editPersonaModal');
+        const isModalOpen = modal && !modal.classList.contains('hidden');
+        
+        if (!isModalOpen) {
+            console.log('Sincronizando estado de turnos...');
+            window.location.reload();
+        }
+    }, 20000); // 20 segundos
 </script>
 @endsection

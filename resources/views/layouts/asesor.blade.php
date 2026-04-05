@@ -22,8 +22,16 @@
                         poppins: ['Poppins', 'sans-serif']
                     },
                     colors: {
-                        sena: { 50: '#e8f5e9', 100: '#c8e6c9', 500: '#39A900', 600: '#2d8700' },
-                        amber: { 50: '#fff8e1', 100: '#ffecb3', 500: '#ffb300', 600: '#ffa000' }
+                        sena: { 
+                            yellow: '#FFB500',
+                            blue: '#10069F',
+                            orange: '#FF671F',
+                            50: '#f0f0ff', 
+                            100: '#e1e1ff', 
+                            500: '#10069F', 
+                            600: '#0c047a' 
+                        },
+                        amber: { 50: '#fff8e1', 100: '#ffecb3', 500: '#FFB500', 600: '#e6a300' }
                     }
                 }
             }
@@ -32,7 +40,7 @@
     <style>
         body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
         .sidebar-item { transition: all 0.3s ease; }
-        .active-glow { box-shadow: 0 0 15px rgba(57, 169, 0, 0.2); }
+        .active-glow { box-shadow: 0 0 15px rgba(16, 6, 159, 0.2); }
     </style>
     @yield('styles')
 </head>
@@ -42,11 +50,11 @@
     <aside class="w-72 bg-white flex flex-col border-r border-gray-100 shrink-0 z-30">
         <div class="px-8 py-10 flex flex-col space-y-4">
             <div class="flex items-center space-x-3">
-                <img src="{{ asset('images/logoSena.png') }}" class="h-12 w-auto object-contain" alt="SENA Logo">
+                <img src="{{ asset('images/logo.jpeg') }}" class="h-12 w-auto object-contain" alt="SENA Logo">
                 <div class="h-8 w-px bg-gray-100 mx-2"></div>
                 <div>
                     <h1 class="text-xl font-poppins font-black text-gray-900 tracking-tight leading-none uppercase">SENA APE</h1>
-                    <p class="text-[9px] font-bold text-sena-500 uppercase tracking-wider mt-1 leading-none">Sistema de Gestión de Turnos</p>
+                    <p class="text-[9px] font-bold text-sena-blue uppercase tracking-wider mt-1 leading-none">Sistema de Gestión de Turnos</p>
                 </div>
             </div>
         </div>
@@ -72,12 +80,12 @@
 
         <div class="p-8 border-t border-gray-50 mt-auto">
             @if($isPause)
-                <a href="{{ url('/asesor') }}" class="w-full flex items-center justify-center bg-amber-500 text-white font-black py-4 rounded-full shadow-lg shadow-amber-500/30 hover:bg-amber-600 transition-all hover:scale-105 active:scale-95 space-x-3 text-xs uppercase tracking-widest mb-6">
+                <a href="{{ url('/asesor') }}" class="w-full flex items-center justify-center bg-sena-orange text-white font-black py-4 rounded-full shadow-lg shadow-sena-orange/30 hover:bg-sena-orange/90 transition-all hover:scale-105 active:scale-95 space-x-3 text-xs uppercase tracking-widest mb-6">
                     <i class="fa-solid fa-play"></i>
                     <span>Reanudar Atención</span>
                 </a>
             @else
-                <a href="{{ url('/asesor?status=pause') }}" class="w-full flex items-center justify-center border-2 border-amber-500 text-amber-500 font-black py-4 rounded-full hover:bg-amber-50 transition-all hover:scale-105 active:scale-95 space-x-3 text-xs uppercase tracking-widest mb-6 px-2">
+                <a href="{{ url('/asesor?status=pause') }}" class="w-full flex items-center justify-center border-2 border-sena-orange text-sena-orange font-black py-4 rounded-full hover:bg-sena-orange/5 transition-all hover:scale-105 active:scale-95 space-x-3 text-xs uppercase tracking-widest mb-6 px-2">
                     <i class="fa-solid fa-pause"></i>
                     <span>Pausa / Receso</span>
                 </a>
@@ -147,7 +155,7 @@
                         <div class="max-h-[300px] overflow-y-auto">
                             <!-- Item 1 -->
                             <div class="p-5 border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors relative group">
-                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 rounded-r-lg group-hover:w-2 transition-all"></div>
+                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-sena-blue rounded-r-lg group-hover:w-2 transition-all"></div>
                                 <div class="flex items-start space-x-4">
                                     <div class="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-500 shrink-0">
                                         <i class="fa-solid fa-bullhorn text-sm"></i>
@@ -192,7 +200,7 @@
         <footer class="h-10 bg-white border-t border-gray-100 px-10 flex items-center justify-between z-20 shrink-0">
             <div class="flex items-center space-x-6">
                 <div class="flex items-center space-x-2">
-                    <span class="w-2 h-2 rounded-full {{ $isPause ? 'bg-amber-500' : 'bg-emerald-500' }}"></span>
+                    <span class="w-2 h-2 rounded-full {{ $isPause ? 'bg-sena-orange' : 'bg-sena-blue' }}"></span>
                     <span class="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em]">Estado: {{ $isPause ? 'Pausa' : 'Atendiendo' }}</span>
                 </div>
                 <div class="text-[9px] font-bold text-gray-400">Último ciudadano atendido: 10:42 AM</div>

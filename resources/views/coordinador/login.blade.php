@@ -16,10 +16,14 @@
                         poppins: ['Poppins', 'sans-serif']
                     },
                     colors: {
-                        sena: {
-                            50: '#f1f8e9', 100: '#dcedc8',
-                            400: '#6bb65a', 500: '#39A900',
-                            600: '#2d8700', 900: '#1a4d00'
+                        sena: { 
+                            yellow: '#FFB500',
+                            blue: '#10069F',
+                            orange: '#FF671F',
+                            400: '#3b82f6', 
+                            500: '#10069F', 
+                            600: '#0c047a', 
+                            50: '#f0f0ff' 
                         }
                     }
                 }
@@ -57,19 +61,19 @@
             {{-- Premium White Glassmorphism Card --}}
             <div class="bg-white/40 border border-white/40 p-10 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] transition-transform duration-500 hover:scale-[1.02] backdrop-blur-xl">
                 <div class="bg-white p-4 rounded-2xl w-24 h-24 mx-auto mb-6 flex items-center justify-center shadow-xl">
-                    <img src="{{ asset('images/logoSena.png') }}" class="w-full h-auto" alt="SENA Logo">
+                    <img src="{{ asset('images/logo.jpeg') }}" class="w-full h-auto" alt="SENA Logo">
                 </div>
                 
                 {{-- Panel Badge --}}
                 <div class="inline-flex items-center space-x-2 bg-white/80 border border-sena-100 shadow-sm backdrop-blur-md rounded-full px-4 py-2 mb-6 mx-auto">
                     <div class="flex items-center justify-center w-5 h-5 bg-sena-50 rounded-full">
-                        <div class="w-2 h-2 bg-sena-500 rounded-full animate-pulse shadow-[0_0_8px_#39A900]"></div>
+                        <div class="w-2 h-2 bg-sena-blue rounded-full animate-pulse shadow-[0_0_8px_#10069F]"></div>
                     </div>
-                    <span class="text-sena-600 text-[10px] font-bold uppercase tracking-widest">Panel de Coordinación</span>
+                    <span class="text-sena-blue text-[10px] font-bold uppercase tracking-widest">Panel de Coordinación</span>
                 </div>
 
                 <h2 class="text-3xl lg:text-4xl font-poppins font-black text-gray-900 leading-tight mb-4 tracking-tight drop-shadow-sm">
-                    Control <span class="text-sena-500">Operativo</span><br>Institucional
+                    Control <span class="text-sena-blue">Operativo</span><br>Institucional
                 </h2>
                 
                 <p class="text-gray-800 text-base lg:text-lg font-medium leading-relaxed opacity-90 mx-auto max-w-md">
@@ -82,7 +86,7 @@
                     v4.9 Stable
                 </div>
                 <div class="px-4 py-1.5 bg-white/60 backdrop-blur-md rounded-full text-gray-800 text-[10px] font-bold tracking-widest uppercase flex items-center shadow-sm">
-                    <span class="w-1.5 h-1.5 bg-sena-500 rounded-full mr-2 shadow-[0_0_8px_#39A900] animate-pulse"></span>
+                    <span class="w-1.5 h-1.5 bg-sena-blue rounded-full mr-2 shadow-[0_0_8px_#10069F] animate-pulse"></span>
                     Servidor Activo
                 </div>
             </div>
@@ -106,7 +110,7 @@
             {{-- Header --}}
             <div class="mb-10">
                 <div class="flex items-center space-x-3 mb-6">
-                    <div class="w-10 h-10 bg-sena-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-sena-500/25">
+                    <div class="w-10 h-10 bg-sena-blue rounded-xl flex items-center justify-center text-white shadow-lg shadow-sena-blue/25">
                         <i class="fa-solid fa-user-tie text-sm"></i>
                     </div>
                     <div class="w-6 h-px bg-gray-200"></div>
@@ -143,7 +147,7 @@
                             <i class="fa-solid fa-envelope text-sm"></i>
                         </div>
                         <input type="email" name="email" value="{{ old('email') }}" required autofocus
-                            class="w-full bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sena-500 focus:border-transparent focus:bg-white transition-all"
+                            class="w-full bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sena-blue focus:border-transparent focus:bg-white transition-all"
                             placeholder="correo@sena.edu.co">
                     </div>
                     @error('email')<p class="text-red-500 text-[11px] font-medium ml-1 mt-1">{{ $message }}</p>@enderror
@@ -157,7 +161,7 @@
                             <i class="fa-solid fa-lock text-sm"></i>
                         </div>
                         <input type="password" name="password" id="coordPassInput" required
-                            class="w-full bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 rounded-2xl pl-11 pr-11 py-3.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sena-500 focus:border-transparent focus:bg-white transition-all"
+                            class="w-full bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 rounded-2xl pl-11 pr-11 py-3.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sena-blue focus:border-transparent focus:bg-white transition-all"
                             placeholder="••••••••">
                         <button type="button" onclick="togglePass()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-300 hover:text-gray-500 transition-colors">
                             <i class="fa-solid fa-eye text-sm" id="passEyeIcon"></i>
@@ -167,7 +171,7 @@
 
                 {{-- Submit --}}
                 <div class="pt-3">
-                    <button type="submit" class="w-full bg-gradient-to-r from-sena-500 to-sena-400 hover:from-sena-600 hover:to-sena-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-sena-500/25 hover:shadow-sena-500/40 transform hover:-translate-y-0.5 active:translate-y-0 transition-all uppercase tracking-[0.15em] text-xs flex items-center justify-center space-x-3">
+                    <button type="submit" class="w-full bg-gradient-to-r from-sena-blue to-sena-blue/80 hover:from-sena-blue/90 hover:to-sena-blue text-white font-black py-4 rounded-2xl shadow-lg shadow-sena-blue/25 hover:shadow-sena-blue/40 transform hover:-translate-y-0.5 active:translate-y-0 transition-all uppercase tracking-[0.15em] text-xs flex items-center justify-center space-x-3">
                         <i class="fa-solid fa-right-to-bracket"></i>
                         <span>Ingresar al Sistema</span>
                     </button>
@@ -176,7 +180,7 @@
 
             {{-- Footer --}}
             <div class="mt-10 pt-8 border-t border-gray-100 flex items-center justify-between">
-                <a href="{{ url('/') }}" class="flex items-center space-x-2 text-xs font-bold text-gray-400 hover:text-sena-500 transition-colors">
+                <a href="{{ url('/') }}" class="flex items-center space-x-2 text-xs font-bold text-gray-400 hover:text-sena-blue transition-colors">
                     <i class="fa-solid fa-arrow-left"></i>
                     <span>Volver al Kiosco</span>
                 </a>

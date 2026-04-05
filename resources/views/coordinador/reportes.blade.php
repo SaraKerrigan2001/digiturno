@@ -9,7 +9,7 @@
         <p class="text-gray-500 text-sm font-medium mt-1">Resumen estadístico del rendimiento general de la sede.</p>
     </div>
     <div class="flex items-center space-x-4">
-        <button onclick="downloadPDF()" class="bg-sena-500 text-white font-black px-8 py-3 rounded-2xl text-[10px] uppercase tracking-widest shadow-xl shadow-sena-500/20 hover:scale-105 active:scale-95 transition-all flex items-center space-x-2">
+        <button onclick="downloadPDF()" class="bg-sena-blue text-white font-black px-8 py-3 rounded-2xl text-[10px] uppercase tracking-widest shadow-xl shadow-sena-blue/20 hover:scale-105 active:scale-95 transition-all flex items-center space-x-2">
             <i class="fa-solid fa-file-pdf"></i>
             <span>Descargar PDF Pro</span>
         </button>
@@ -84,7 +84,7 @@
                         <span class="text-sm font-black text-emerald-500">{{ $metas['atencion_actual'] }} min</span>
                     </div>
                     <div class="w-full bg-gray-100 h-3 rounded-full overflow-hidden">
-                        <div class="bg-emerald-500 h-full rounded-full" style="width: {{ min(100, (12/max(1, $metas['atencion_actual']))*100) }}%"></div>
+                        <div class="bg-sena-blue h-full rounded-full" style="width: {{ min(100, (12/max(1, $metas['atencion_actual']))*100) }}%"></div>
                     </div>
                 </div>
                 <div>
@@ -96,8 +96,8 @@
                         <div class="bg-blue-500 h-full rounded-full" style="width: {{ ($metas['diaria_actual']/$metas['diaria_meta'])*100 }}%"></div>
                     </div>
                 </div>
-                <div class="p-5 bg-sena-50 rounded-2xl border border-sena-100">
-                    <p class="text-xs font-bold text-sena-700 leading-relaxed italic">"La sede está procesando los turnos un 15% más rápido del promedio regional. Excelente gestión de colas."</p>
+                <div class="p-5 bg-sena-blue/10 rounded-2xl border border-sena-blue/20">
+                    <p class="text-xs font-bold text-sena-blue leading-relaxed italic">"La sede está procesando los turnos un 15% más rápido del promedio regional. Excelente gestión de colas."</p>
                 </div>
             </div>
         </div>
@@ -137,7 +137,7 @@
                         @for($h=0; $h<12; $h++)
                             @php $rand = rand(10, 90); @endphp
                             <div class="group relative rounded-md transition-all hover:scale-110 cursor-pointer" 
-                                 style="background-color: rgba(57, 169, 0, {{ $rand/100 }});"
+                                 style="background-color: rgba(16, 6, 159, {{ $rand/100 }});"
                                  title="Aforo: {{ $rand }}%">
                             </div>
                         @endfor
@@ -148,10 +148,10 @@
             <div class="mt-6 flex items-center justify-end space-x-4">
                 <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Aforo Bajo</span>
                 <div class="flex space-x-1">
-                    <div class="w-4 h-4 rounded bg-sena-50"></div>
-                    <div class="w-4 h-4 rounded bg-sena-200"></div>
-                    <div class="w-4 h-4 rounded bg-sena-500"></div>
-                    <div class="w-4 h-4 rounded bg-sena-700"></div>
+                    <div class="w-4 h-4 rounded bg-sena-blue/10"></div>
+                    <div class="w-4 h-4 rounded bg-sena-blue/30"></div>
+                    <div class="w-4 h-4 rounded bg-sena-blue/60"></div>
+                    <div class="w-4 h-4 rounded bg-sena-blue"></div>
                 </div>
                 <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Aforo Alto</span>
             </div>
@@ -263,7 +263,7 @@
                     @forelse($turnos as $t)
                     <tr class="group hover:bg-gray-50/50 transition-colors">
                         <td class="py-5">
-                            <span class="text-xs font-black text-sena-600 py-1.5 px-3 bg-sena-50 rounded-lg">#{{ $t->tur_numero }}</span>
+                            <span class="text-xs font-black text-sena-blue py-1.5 px-3 bg-sena-blue/10 rounded-lg">#{{ $t->tur_numero }}</span>
                         </td>
                         <td class="py-5">
                             <div class="text-xs font-bold text-gray-900">{{ $t->solicitante->persona->pers_nombres ?? 'Indeterminado' }} {{ $t->solicitante->persona->pers_apellidos ?? '' }}</div>
@@ -366,7 +366,7 @@
             labels: ['General', 'Prioritario', 'Víctimas'],
             datasets: [{
                 data: [{{ $distribucionTipos['General'] }}, {{ $distribucionTipos['Prioritario'] }}, {{ $distribucionTipos['Víctimas'] }}],
-                backgroundColor: ['#39A900', '#F6AD55', '#3182CE'],
+                backgroundColor: ['#10069F', '#FF671F', '#FFB500', '#3182CE'],
                 borderWidth: 0,
                 cutout: '70%'
             }]
@@ -387,14 +387,14 @@
             datasets: [{
                 label: 'Atenciones Sedes',
                 data: [132, 145, 138, 152, 148, 130],
-                borderColor: '#39A900',
-                backgroundColor: 'rgba(57, 169, 0, 0.1)',
+                borderColor: '#10069F',
+                backgroundColor: 'rgba(16, 6, 159, 0.1)',
                 fill: true,
                 tension: 0.4,
                 pointRadius: 4,
                 pointBackgroundColor: '#fff',
                 pointBorderWidth: 2,
-                pointBorderColor: '#39A900'
+                pointBorderColor: '#10069F'
             }]
         },
         options: {
