@@ -103,8 +103,10 @@ class AsesorController extends Controller
         // Atención en curso para este asesor
         $atencion = $this->turnoRepo->getActiveAttentionForAsesor($ase_id);
 
-        // Cola de espera filtrada por el perfil del asesor (FIFO Estricto)
-        $tipoAsesor = $asesor->ase_tipo_asesor ?? 'General';
+        // Cola de espera filtrada por el rol del asesor según CU-02
+        // OT = Orientador Técnico → General + Prioritario
+        // OV = Orientador de Víctimas → Victima + Empresario
+        $tipoAsesor = $asesor->ase_tipo_asesor ?? 'OT';
         $turnosEnEspera = $this->turnoRepo->getWaitingForAsesor($tipoAsesor);
 
         return view('asesor.panel', compact('asesor', 'atencion', 'turnosEnEspera'));

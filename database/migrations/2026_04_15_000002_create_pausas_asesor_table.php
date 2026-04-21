@@ -11,7 +11,7 @@ return new class extends Migration
         if (!Schema::hasTable('pausas_asesor')) {
             Schema::create('pausas_asesor', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedInteger('ASESOR_ase_id');
+                $table->integer('ASESOR_ase_id');
                 $table->dateTime('hora_inicio');
                 $table->dateTime('hora_fin')->nullable();
                 $table->unsignedInteger('duracion')->nullable()->comment('Duracion en minutos');

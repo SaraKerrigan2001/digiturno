@@ -8,6 +8,7 @@ use App\Models\Atencion;
 use App\Models\Asesor;
 use App\Models\Turno;
 use App\Models\PausaAsesor;
+use App\Repositories\TurnoRepository;
 use Carbon\Carbon;
 
 class CoordinadorController extends Controller
@@ -492,12 +493,16 @@ class CoordinadorController extends Controller
             ];
         }
 
-        // ── Meta semanal de emprendedores (meta: 6/semana) ───────────────────
+        // ── Meta semanal de emprendedores — SOLO módulos 15 y 19 (CU-04) ────────
+        // El spec indica explícitamente que la meta de ~6 emprendedores/semana
+        // corresponde a los módulos 15 y 19 (ruta de víctimas/emprendimiento).
         $metaEmprendedores = 6;
-        $emprendedoresSemana = Turno::whereBetween('tur_hora_fecha', [$inicioSemana . ' 00:00:00', $finSemana . ' 23:59:59'])
-            ->where('tur_servicio', 'Emprendimiento')
-            ->count();
+        $turnoRepo = app(TurnoRepository::class);
+        $emprendedoresSemana = $turnoRepo->getEmprendedoresModulosVigilancia($inicioSemana, $finSemana);
         $porcentajeMeta = min(100, round(($emprendedoresSemana / $metaEmprendedores) * 100));
+
+        // ── Tiempos medios del ciclo de vida (CU-01 / CU-04) ─────────────────
+        $tiemposMedios = $turnoRepo->getTiemposMedios($hoy);
 
         // ── Turnos en espera con tiempo > 20 minutos (alerta visual) ─────────
         $turnosEspera20 = Turno::whereDate('tur_hora_fecha', $hoy)
@@ -539,7 +544,8 @@ class CoordinadorController extends Controller
             'porcentajeMeta',
             'turnosEspera20',
             'asesoresRotacion',
-            'modulosVigilancia'
+            'modulosVigilancia',
+            'tiemposMedios'
         ));
     }
 }

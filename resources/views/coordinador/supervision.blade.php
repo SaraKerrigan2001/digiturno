@@ -1,482 +1,374 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Supervisión de Módulos — DigiTurno APE SENA</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --sena-green:  #39A900;
-            --sena-dark:   #1e3a1e;
-            --sena-orange: #FF6B00;
-            --bg:          #0d1117;
-            --surface:     #161b22;
-            --surface2:    #1c2128;
-            --border:      #30363d;
-            --text:        #e6edf3;
-            --text-muted:  #8b949e;
-            --danger:      #f85149;
-            --warning:     #d29922;
-            --success:     #3fb950;
-            --info:        #388bfd;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-        }
+@extends('layouts.coordinador')
 
-        /* ── Header ── */
-        .header {
-            background: linear-gradient(135deg, var(--sena-dark) 0%, #0d2a0d 100%);
-            border-bottom: 2px solid var(--sena-green);
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .header-brand { display: flex; align-items: center; gap: 1rem; }
-        .header-brand img { width: 48px; height: 48px; object-fit: contain; }
-        .header-brand h1 { font-size: 1.25rem; font-weight: 700; color: var(--sena-green); }
-        .header-brand p { font-size: 0.75rem; color: var(--text-muted); }
-        .header-nav { display: flex; gap: 0.75rem; }
-        .btn-nav {
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 0.8rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .btn-secondary { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
-        .btn-secondary:hover { color: var(--text); border-color: var(--sena-green); }
+@section('title', 'Supervisión de Piso — DigiTurno APE SENA')
 
-        /* ── Layout ── */
-        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
-        .section-title {
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--text-muted);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .section-title::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--border);
-        }
-        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
-        .grid-full { grid-column: 1 / -1; }
+@section('content')
 
-        /* ── Cards ── */
-        .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-        }
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1.25rem;
-        }
-        .card-title { font-size: 0.9rem; font-weight: 600; color: var(--text); }
-        .card-subtitle { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
+<!-- Page Header -->
+<div class="flex items-center justify-between mb-8">
+    <div>
+        <h2 class="text-xl font-black text-gray-900 uppercase tracking-wide">Supervisión de Piso</h2>
+        <p class="text-[11px] font-semibold text-gray-400 mt-0.5">CU-04 · Monitoreo en tiempo real · Módulos 15 y 19</p>
+    </div>
+    <div class="flex items-center space-x-3">
+        <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Hora:</span>
+        <span id="reloj" class="text-sm font-black text-sena-blue">--:--:--</span>
+        <a href="{{ route('coordinador.supervision') }}" class="bg-sena-blue/10 hover:bg-sena-blue/20 text-sena-blue px-4 py-2 rounded-full text-[11px] font-bold transition flex items-center space-x-2">
+            <i class="fa-solid fa-rotate-right"></i>
+            <span>Actualizar</span>
+        </a>
+    </div>
+</div>
 
-        /* ── Estado Módulos ── */
-        .modulo-card {
-            background: var(--surface2);
-            border-radius: 10px;
-            padding: 1.25rem;
-            border: 1px solid var(--border);
-            position: relative;
-            overflow: hidden;
-            transition: border-color 0.3s;
-        }
-        .modulo-card.atendiendo { border-color: var(--success); }
-        .modulo-card.pausa      { border-color: var(--warning); }
-        .modulo-card.libre      { border-color: var(--info); }
-        .modulo-card.sin-asignar{ border-color: var(--border); }
-
-        .modulo-badge {
-            position: absolute;
-            top: 0.75rem;
-            right: 0.75rem;
-            font-size: 0.65rem;
-            font-weight: 700;
-            padding: 0.2rem 0.6rem;
-            border-radius: 999px;
-            text-transform: uppercase;
-        }
-        .badge-atendiendo { background: rgba(63,185,80,0.15); color: var(--success); }
-        .badge-pausa      { background: rgba(210,153,34,0.15); color: var(--warning); }
-        .badge-libre      { background: rgba(56,139,253,0.15); color: var(--info); }
-        .badge-sin-asignar{ background: rgba(139,148,158,0.15); color: var(--text-muted); }
-
-        .modulo-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
-        .modulo-avatar {
-            width: 52px; height: 52px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--border);
-        }
-        .modulo-id {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--sena-green);
-        }
-        .modulo-name { font-size: 0.85rem; font-weight: 600; }
-        .modulo-sub  { font-size: 0.7rem; color: var(--text-muted); }
-
-        .modulo-stats { display: flex; gap: 1rem; }
-        .stat-item { text-align: center; }
-        .stat-value { font-size: 1.25rem; font-weight: 700; color: var(--text); }
-        .stat-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; }
-
-        .turno-activo {
-            background: rgba(56,139,253,0.08);
-            border: 1px solid rgba(56,139,253,0.2);
-            border-radius: 8px;
-            padding: 0.6rem 0.9rem;
-            margin-top: 0.75rem;
-            font-size: 0.78rem;
-        }
-        .turno-numero { font-weight: 700; color: var(--sena-green); font-size: 1rem; }
-
-        /* ── Meta Emprendedores ── */
-        .meta-progress-bg {
-            height: 12px;
-            background: var(--surface2);
-            border-radius: 999px;
-            overflow: hidden;
-            margin: 0.75rem 0;
-        }
-        .meta-progress-fill {
-            height: 100%;
-            border-radius: 999px;
-            transition: width 1s ease;
-            background: linear-gradient(90deg, var(--sena-green), #5cd600);
-        }
-        .meta-numbers {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-        }
-        .meta-actual { font-size: 2.5rem; font-weight: 800; color: var(--sena-green); }
-        .meta-total  { font-size: 0.8rem; color: var(--text-muted); }
-        .meta-pct    { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); }
-
-        /* ── Alertas Espera >20 min ── */
-        .alerta-turno {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            border: 1px solid rgba(248,81,73,0.3);
-            background: rgba(248,81,73,0.06);
-            margin-bottom: 0.6rem;
-            animation: pulse-alert 2s infinite;
-        }
-        @keyframes pulse-alert {
-            0%, 100% { border-color: rgba(248,81,73,0.3); }
-            50%       { border-color: rgba(248,81,73,0.7); }
-        }
-        .alerta-turno-num { font-weight: 700; color: var(--danger); font-size: 1rem; }
-        .alerta-turno-info { font-size: 0.78rem; color: var(--text-muted); }
-        .alerta-tiempo {
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: var(--danger);
-            background: rgba(248,81,73,0.12);
-            padding: 0.25rem 0.6rem;
-            border-radius: 6px;
-        }
-        .no-alertas {
-            text-align: center;
-            padding: 2rem;
-            color: var(--success);
-            font-size: 0.9rem;
-        }
-        .no-alertas .icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
-
-        /* ── Rotación Personal ── */
-        .rotacion-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.65rem 0;
-            border-bottom: 1px solid var(--border);
-        }
-        .rotacion-row:last-child { border-bottom: none; }
-        .rotacion-nombre { font-size: 0.82rem; font-weight: 500; }
-        .rotacion-vigencia { font-size: 0.72rem; color: var(--text-muted); }
-        .dias-pill {
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 0.2rem 0.65rem;
-            border-radius: 999px;
-        }
-        .dias-ok      { background: rgba(63,185,80,0.12);  color: var(--success); }
-        .dias-warning { background: rgba(210,153,34,0.12); color: var(--warning); }
-        .dias-danger  { background: rgba(248,81,73,0.12);  color: var(--danger);  }
-        .rotacion-alerta {
-            font-size: 0.65rem;
-            font-weight: 700;
-            padding: 0.15rem 0.5rem;
-            border-radius: 4px;
-            background: rgba(248,81,73,0.15);
-            color: var(--danger);
-            text-transform: uppercase;
-        }
-
-        /* ── Timestamp ── */
-        .timestamp-bar {
-            text-align: center;
-            padding: 0.75rem;
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            border-top: 1px solid var(--border);
-            margin-top: 2rem;
-        }
-        #reloj { color: var(--sena-green); font-weight: 600; }
-
-        @media (max-width: 900px) {
-            .grid-2, .grid-3 { grid-template-columns: 1fr; }
-        }
-    </style>
-</head>
-<body>
-
-<!-- Header -->
-<header class="header">
-    <div class="header-brand">
-        <div>
-            <h1>🎯 Supervisión de Módulos — CU-04</h1>
-            <p>APE SENA · Panel de Coordinación en Tiempo Real</p>
+<!-- KPIs Ciclo de Vida (CU-01 / CU-04) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+    <div class="bg-white p-5 rounded-2xl shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)] border border-gray-100 flex items-center justify-between">
+        <div class="w-12 h-12 bg-blue-50 text-sena-blue rounded-full flex items-center justify-center text-lg shrink-0">
+            <i class="fa-solid fa-hourglass-half"></i>
+        </div>
+        <div class="text-right">
+            <p class="text-[11px] font-semibold text-gray-400 mb-0.5">Tiempo Medio de Espera</p>
+            <h3 class="text-2xl font-black text-gray-800 leading-none">
+                {{ $tiemposMedios['tiempo_espera_medio'] > 0 ? $tiemposMedios['tiempo_espera_medio'] . ' min' : '—' }}
+            </h3>
+            <p class="text-[10px] font-bold mt-1 {{ $tiemposMedios['tiempo_espera_medio'] > 20 ? 'text-red-500' : 'text-green-500' }}">
+                {{ $tiemposMedios['tiempo_espera_medio'] > 20 ? '⚠ Supera límite (20 min)' : '✓ Dentro del límite' }}
+            </p>
         </div>
     </div>
-    <nav class="header-nav">
-        <a href="{{ route('coordinador.dashboard') }}" class="btn-nav btn-secondary">← Dashboard</a>
-        <a href="{{ route('coordinador.modulos') }}"   class="btn-nav btn-secondary">Módulos</a>
-    </nav>
-</header>
+    <div class="bg-white p-5 rounded-2xl shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)] border border-gray-100 flex items-center justify-between">
+        <div class="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center text-lg shrink-0">
+            <i class="fa-solid fa-stopwatch"></i>
+        </div>
+        <div class="text-right">
+            <p class="text-[11px] font-semibold text-gray-400 mb-0.5">Tiempo Medio de Atención</p>
+            <h3 class="text-2xl font-black text-gray-800 leading-none">
+                {{ $tiemposMedios['tiempo_atencion_medio'] > 0 ? $tiemposMedios['tiempo_atencion_medio'] . ' min' : '—' }}
+            </h3>
+            <p class="text-[10px] font-bold text-gray-400 mt-1">Promedio hoy</p>
+        </div>
+    </div>
+</div>
 
-<div class="container">
-
-    <!-- ── SECCIÓN 1: Estado de Módulos 15 y 19 ── -->
-    <div class="section-title">🖥️ Estado de Módulos en Tiempo Real</div>
-    <div class="grid-2" style="margin-bottom:2rem;">
-        @foreach($modulosVigilancia as $modId)
-        @php
-            $mod    = $estadoModulos[$modId];
-            $estado = strtolower(str_replace(' ', '-', $mod['estado']));
-            $badgeClass = match($mod['estado']) {
-                'Atendiendo'  => 'badge-atendiendo',
-                'Pausa'       => 'badge-pausa',
-                'Libre'       => 'badge-libre',
-                default       => 'badge-sin-asignar',
-            };
-            $cardClass = match($mod['estado']) {
-                'Atendiendo' => 'atendiendo',
-                'Pausa'      => 'pausa',
-                'Libre'      => 'libre',
-                default      => 'sin-asignar',
-            };
-        @endphp
-        <div class="modulo-card {{ $cardClass }}">
-            <span class="modulo-badge {{ $badgeClass }}">{{ $mod['estado'] }}</span>
-
-            <div class="modulo-header">
-                <div class="modulo-id">{{ $modId }}</div>
+<!-- ── SECCIÓN 1: Estado de Módulos ── -->
+<p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">
+    <i class="fa-solid fa-display mr-2"></i>Estado de Módulos en Tiempo Real
+</p>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+    @foreach($modulosVigilancia as $modId)
+    @php
+        $mod = $estadoModulos[$modId];
+        $estado = $mod['estado'];
+        $colorBorder = match($estado) {
+            'Atendiendo'  => 'border-l-4 border-l-green-500',
+            'Pausa'       => 'border-l-4 border-l-yellow-500',
+            'Libre'       => 'border-l-4 border-l-sena-blue',
+            default       => 'border-l-4 border-l-gray-200',
+        };
+        $badgeBg = match($estado) {
+            'Atendiendo'  => 'bg-green-50 text-green-600',
+            'Pausa'       => 'bg-yellow-50 text-yellow-600',
+            'Libre'       => 'bg-blue-50 text-sena-blue',
+            default       => 'bg-gray-50 text-gray-400',
+        };
+        $dotColor = match($estado) {
+            'Atendiendo'  => 'bg-green-500',
+            'Pausa'       => 'bg-yellow-500',
+            'Libre'       => 'bg-sena-blue',
+            default       => 'bg-gray-300',
+        };
+    @endphp
+    <div class="bg-white rounded-2xl shadow-[0_2px_10px_-3px_rgba(0,0,0,0.04)] border border-gray-100 {{ $colorBorder }} p-6 hover:shadow-md transition-all duration-300">
+        <div class="flex items-start justify-between mb-4">
+            <div class="flex items-center space-x-4">
+                <div class="w-14 h-14 bg-sena-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <span class="text-2xl font-black text-sena-blue">{{ $modId }}</span>
+                </div>
                 <div>
-                    <div class="modulo-name">{{ $mod['nombre'] }}</div>
-                    <div class="modulo-sub">Módulo de Vigilancia</div>
+                    <h4 class="text-sm font-black text-gray-900">{{ $mod['nombre'] }}</h4>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">Módulo de Vigilancia</p>
                 </div>
             </div>
+            <span class="flex items-center space-x-1.5 text-[10px] font-black px-3 py-1.5 rounded-full {{ $badgeBg }}">
+                <span class="w-1.5 h-1.5 rounded-full {{ $dotColor }} {{ $estado === 'Atendiendo' ? 'animate-pulse' : '' }}"></span>
+                <span>{{ $estado }}</span>
+            </span>
+        </div>
 
-            <div class="modulo-stats">
-                <div class="stat-item">
-                    <div class="stat-value">{{ $mod['atencionesDia'] }}</div>
-                    <div class="stat-label">Atend. Hoy</div>
-                </div>
-                @if($mod['pausaActiva'])
-                <div class="stat-item">
-                    <div class="stat-value" style="color:var(--warning);">
-                        ☕
-                    </div>
-                    <div class="stat-label">En receso desde {{ \Carbon\Carbon::parse($mod['pausaActiva']->hora_inicio)->format('H:i') }}</div>
-                </div>
-                @endif
+        <div class="flex items-center space-x-6 mb-4">
+            <div class="text-center">
+                <p class="text-2xl font-black text-gray-900">{{ $mod['atencionesDia'] }}</p>
+                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Atend. Hoy</p>
             </div>
+            @if($mod['pausaActiva'])
+            <div class="text-center">
+                <p class="text-2xl font-black text-yellow-500">☕</p>
+                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Receso desde {{ \Carbon\Carbon::parse($mod['pausaActiva']->hora_inicio)->format('H:i') }}</p>
+            </div>
+            @endif
+        </div>
 
-            @if($mod['atencionActiva'])
-            <div class="turno-activo">
-                <div class="turno-numero">{{ $mod['atencionActiva']->turno->tur_numero ?? '—' }}</div>
-                <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">
-                    @php
-                        $persona = $mod['atencionActiva']->turno->solicitante->persona ?? null;
-                    @endphp
+        @if($mod['atencionActiva'])
+        @php
+            $persona = $mod['atencionActiva']->turno->solicitante->persona ?? null;
+        @endphp
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 flex items-center justify-between">
+            <div>
+                <p class="text-base font-black text-sena-blue">{{ $mod['atencionActiva']->turno->tur_numero ?? '—' }}</p>
+                <p class="text-[10px] text-gray-500 mt-0.5">
                     {{ $persona ? $persona->pers_nombres . ' ' . $persona->pers_apellidos : 'Ciudadano en atención' }}
                     · Inició {{ \Carbon\Carbon::parse($mod['atencionActiva']->atnc_hora_inicio)->format('H:i') }}
-                </div>
+                </p>
             </div>
-            @endif
+            <i class="fa-solid fa-message text-sena-blue/20 text-2xl"></i>
         </div>
-        @endforeach
+        @endif
+    </div>
+    @endforeach
+</div>
+
+<!-- ── SECCIÓN 2: Meta + Alertas ── -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+
+    <!-- Meta Emprendedores -->
+    <div class="bg-white p-6 rounded-2xl shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)] border border-gray-100">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Meta Semanal — Emprendedores</h3>
+                <p class="text-xs font-bold text-gray-600 mt-1">Semana {{ now()->startOfWeek()->format('d/m') }} – {{ now()->endOfWeek()->format('d/m/Y') }}</p>
+            </div>
+            <div class="w-10 h-10 bg-green-50 text-green-600 rounded-xl flex items-center justify-center">
+                <i class="fa-solid fa-rocket text-sm"></i>
+            </div>
+        </div>
+
+        <div class="flex items-end justify-between mb-3">
+            <div>
+                <span class="text-4xl font-black text-gray-900">{{ $emprendedoresSemana }}</span>
+                <span class="text-sm font-bold text-gray-400 ml-1">/ {{ $metaEmprendedores }}</span>
+            </div>
+            <span class="text-sm font-black text-gray-500">{{ $porcentajeMeta }}%</span>
+        </div>
+
+        <div class="h-2.5 bg-gray-100 rounded-full overflow-hidden mb-3">
+            <div class="h-full rounded-full transition-all duration-1000"
+                 style="width: {{ $porcentajeMeta }}%; background: linear-gradient(90deg, #10069F, #3b82f6);">
+            </div>
+        </div>
+
+        @if($porcentajeMeta >= 100)
+            <p class="text-[11px] font-bold text-green-600 text-center"><i class="fa-solid fa-check-circle mr-1"></i>¡Meta cumplida esta semana!</p>
+        @elseif($porcentajeMeta >= 75)
+            <p class="text-[11px] font-bold text-yellow-600 text-center"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Faltan {{ $metaEmprendedores - $emprendedoresSemana }} para completar la meta</p>
+        @else
+            <p class="text-[11px] text-gray-400 text-center">Faltan {{ $metaEmprendedores - $emprendedoresSemana }} emprendedores para alcanzar la meta</p>
+        @endif
+
+        <div class="mt-4 pt-4 border-t border-gray-50">
+            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Servicio: Emprendimiento</p>
+            <p class="text-[11px] text-gray-400 leading-relaxed">Los turnos con servicio "Emprendimiento" cuentan hacia esta meta. Módulos 15 y 19 son los responsables.</p>
+        </div>
     </div>
 
-    <!-- ── SECCIÓN 2: Meta Emprendedores + Alertas ── -->
-    <div class="grid-2" style="margin-bottom:2rem;">
-
-        <!-- Meta Emprendedores -->
-        <div class="card">
-            <div class="card-header">
-                <div>
-                    <div class="card-title">🚀 Meta Semanal — Emprendedores</div>
-                    <div class="card-subtitle">Semana {{ now()->startOfWeek()->format('d/m') }} – {{ now()->endOfWeek()->format('d/m/Y') }}</div>
-                </div>
-                <span style="font-size:1.8rem;">📊</span>
+    <!-- Alertas Espera >20 min -->
+    <div class="bg-white p-6 rounded-2xl shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)] border border-gray-100 {{ $turnosEspera20->count() > 0 ? 'border-l-4 border-l-red-500' : '' }}">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-[10px] font-black {{ $turnosEspera20->count() > 0 ? 'text-red-500' : 'text-gray-400' }} uppercase tracking-widest">Alertas de Espera &gt; 20 min</h3>
+                <p class="text-xs font-bold text-gray-600 mt-1">{{ $turnosEspera20->count() }} turno(s) con espera crítica</p>
             </div>
-            <div class="meta-numbers">
-                <div>
-                    <span class="meta-actual">{{ $emprendedoresSemana }}</span>
-                    <span class="meta-total"> / {{ $metaEmprendedores }} ciudadanos</span>
-                </div>
-                <div class="meta-pct">{{ $porcentajeMeta }}%</div>
-            </div>
-            <div class="meta-progress-bg">
-                <div class="meta-progress-fill" style="width: {{ $porcentajeMeta }}%;"></div>
-            </div>
-            @if($porcentajeMeta >= 100)
-                <div style="font-size:0.8rem;color:var(--success);font-weight:600;text-align:center;margin-top:0.5rem;">✅ ¡Meta cumplida esta semana!</div>
-            @elseif($porcentajeMeta >= 75)
-                <div style="font-size:0.8rem;color:var(--warning);text-align:center;margin-top:0.5rem;">⚠️ Falta{{ $metaEmprendedores - $emprendedoresSemana }} para completar la meta</div>
-            @else
-                <div style="font-size:0.8rem;color:var(--text-muted);text-align:center;margin-top:0.5rem;">Faltan {{ $metaEmprendedores - $emprendedoresSemana }} emprendedores para alcanzar la meta</div>
-            @endif
-            <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);">
-                <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:0.5rem;text-transform:uppercase;font-weight:600;">Servicio: Emprendimiento</div>
-                <div style="font-size:0.78rem;color:var(--text-muted);">Los turnos con servicio "Emprendimiento" cuentan hacia esta meta. Módulos 15 y 19 son los responsables de este proceso.</div>
+            <div class="w-10 h-10 {{ $turnosEspera20->count() > 0 ? 'bg-red-50 text-red-500 animate-bounce' : 'bg-green-50 text-green-500' }} rounded-xl flex items-center justify-center">
+                <i class="fa-solid {{ $turnosEspera20->count() > 0 ? 'fa-bell' : 'fa-check' }} text-sm"></i>
             </div>
         </div>
 
-        <!-- Alertas Espera >20 min -->
-        <div class="card">
-            <div class="card-header">
-                <div>
-                    <div class="card-title" style="color:{{ $turnosEspera20->count() > 0 ? 'var(--danger)' : 'var(--text)' }}">
-                        ⏱️ Alertas de Espera &gt; 20 min
-                    </div>
-                    <div class="card-subtitle">
-                        {{ $turnosEspera20->count() }} turno(s) con espera crítica ahora
-                    </div>
-                </div>
-                @if($turnosEspera20->count() > 0)
-                    <span style="font-size:1.8rem;animation:pulse-alert 1.5s infinite;">🚨</span>
-                @else
-                    <span style="font-size:1.8rem;">✅</span>
-                @endif
-            </div>
+        <div class="space-y-3 max-h-52 overflow-y-auto pr-1">
             @forelse($turnosEspera20 as $t)
-            <div class="alerta-turno">
+            @php $per = $t->solicitante->persona ?? null; @endphp
+            <div class="flex items-center justify-between p-3 bg-red-50 border border-red-100 rounded-xl">
                 <div>
-                    <div class="alerta-turno-num">{{ $t->tur_numero }}</div>
-                    <div class="alerta-turno-info">
-                        @php $per = $t->solicitante->persona ?? null; @endphp
+                    <p class="text-sm font-black text-red-600">{{ $t->tur_numero }}</p>
+                    <p class="text-[10px] text-gray-500 mt-0.5">
                         {{ $per ? $per->pers_nombres . ' ' . $per->pers_apellidos : 'Ciudadano' }}
                         — {{ $t->tur_perfil }} | {{ $t->tur_servicio }}
-                    </div>
+                    </p>
                 </div>
-                <div class="alerta-tiempo">{{ $t->minutos_espera }} min</div>
+                <span class="text-[11px] font-black text-red-600 bg-red-100 px-3 py-1 rounded-full">{{ $t->minutos_espera }} min</span>
             </div>
             @empty
-            <div class="no-alertas">
-                <div class="icon">✅</div>
-                <div>Todos los turnos en espera son <strong>&lt; 20 minutos</strong>.</div>
-                <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.4rem;">Operación dentro de los parámetros normales</div>
+            <div class="text-center py-8">
+                <div class="w-14 h-14 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-check text-green-500 text-xl"></i>
+                </div>
+                <p class="text-xs font-black text-gray-900 uppercase tracking-wide">Todo en orden</p>
+                <p class="text-[10px] text-gray-400 mt-1">Todos los turnos en espera son &lt; 20 minutos</p>
             </div>
             @endforelse
         </div>
     </div>
+</div>
 
-    <!-- ── SECCIÓN 3: Rotación Bimestral ── -->
-    <div class="section-title">🔄 Indicador de Rotación Bimestral del Personal</div>
-    <div class="card" style="margin-bottom:2rem;">
-        <div class="card-header">
-            <div>
-                <div class="card-title">Personal — Vigencia de Contrato</div>
-                <div class="card-subtitle">Se marca como "Rotación requerida" cuando la vigencia es ≤ 60 días • Para el personal de vigilancia</div>
-            </div>
-            @php $requierenRotacion = $asesoresRotacion->where('requiere_rotacion', true)->count(); @endphp
-            @if($requierenRotacion > 0)
-                <span style="font-size:0.8rem;font-weight:700;color:var(--danger);background:rgba(248,81,73,0.1);padding:0.3rem 0.8rem;border-radius:6px;">
-                    ⚠️ {{ $requierenRotacion }} requiere(n) rotación
-                </span>
-            @else
-                <span style="font-size:0.8rem;font-weight:700;color:var(--success);background:rgba(63,185,80,0.1);padding:0.3rem 0.8rem;border-radius:6px;">
-                    ✅ Sin rotaciones pendientes
-                </span>
-            @endif
+<!-- ── SECCIÓN 3: Rotación Bimestral ── -->
+<p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">
+    <i class="fa-solid fa-rotate mr-2"></i>Indicador de Rotación Bimestral del Personal
+</p>
+<div class="bg-white p-6 rounded-2xl shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)] border border-gray-100 mb-8">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h3 class="text-sm font-black text-gray-900">Personal — Vigencia de Contrato</h3>
+            <p class="text-[10px] text-gray-400 mt-0.5">Se marca "Rotación requerida" cuando la vigencia es ≤ 60 días</p>
         </div>
+        @php $requierenRotacion = $asesoresRotacion->where('requiere_rotacion', true)->count(); @endphp
+        @if($requierenRotacion > 0)
+            <span class="text-[11px] font-black text-red-500 bg-red-50 border border-red-100 px-4 py-2 rounded-full">
+                <i class="fa-solid fa-triangle-exclamation mr-1"></i>{{ $requierenRotacion }} requiere(n) rotación
+            </span>
+        @else
+            <span class="text-[11px] font-black text-green-600 bg-green-50 border border-green-100 px-4 py-2 rounded-full">
+                <i class="fa-solid fa-check mr-1"></i>Sin rotaciones pendientes
+            </span>
+        @endif
+    </div>
 
+    <div class="divide-y divide-gray-50">
         @forelse($asesoresRotacion as $ase)
-        <div class="rotacion-row">
-            <div>
-                <div class="rotacion-nombre">{{ $ase['nombre'] }}</div>
-                <div class="rotacion-vigencia">Vigencia: {{ $ase['vigencia'] }} · ID asesor: {{ $ase['ase_id'] }}</div>
+        @php
+            $dias = $ase['dias_restantes'];
+            $pillBg = $dias > 90 ? 'bg-green-50 text-green-600' : ($dias > 30 ? 'bg-yellow-50 text-yellow-600' : 'bg-red-50 text-red-500');
+        @endphp
+        <div class="flex items-center justify-between py-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 bg-sena-50 rounded-xl flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-user text-sena-blue text-xs"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-bold text-gray-900">{{ $ase['nombre'] }}</p>
+                    <p class="text-[10px] text-gray-400">Vigencia: {{ $ase['vigencia'] }} · ID: {{ $ase['ase_id'] }}</p>
+                </div>
             </div>
-            <div style="display:flex;align-items:center;gap:0.75rem;">
-                @php
-                    $dias = $ase['dias_restantes'];
-                    $pillClass = $dias > 90 ? 'dias-ok' : ($dias > 30 ? 'dias-warning' : 'dias-danger');
-                @endphp
-                <span class="dias-pill {{ $pillClass }}">
+            <div class="flex items-center space-x-3">
+                <span class="text-[11px] font-black px-3 py-1 rounded-full {{ $pillBg }}">
                     {{ $dias >= 0 ? $dias . ' días' : 'Vencido' }}
                 </span>
                 @if($ase['requiere_rotacion'])
-                    <span class="rotacion-alerta">Rotar</span>
+                    <span class="text-[10px] font-black text-red-500 bg-red-50 border border-red-100 px-2 py-1 rounded-lg uppercase tracking-wider">Rotar</span>
                 @endif
             </div>
         </div>
         @empty
-        <div style="text-align:center;padding:2rem;color:var(--text-muted);font-size:0.85rem;">
-            No hay asesores con vigencia registrada.
+        <div class="text-center py-10">
+            <p class="text-sm text-gray-400">No hay asesores con vigencia registrada.</p>
         </div>
         @endforelse
     </div>
-
 </div>
 
-<!-- Barra de timestamp -->
-<div class="timestamp-bar">
-    DigiTurno APE SENA — Actualizado automáticamente cada 60 seg &nbsp;|&nbsp; Hora local: <span id="reloj">--:--:--</span>
-    &nbsp;|&nbsp; <a href="{{ route('coordinador.supervision') }}" style="color:var(--sena-green);text-decoration:none;">🔄 Actualizar</a>
+<!-- Auto-refresh note -->
+<p class="text-center text-[10px] text-gray-400 pb-6">
+    Actualización automática cada 60 seg &nbsp;·&nbsp; <a href="{{ route('coordinador.supervision') }}" class="text-sena-blue font-bold hover:underline">Actualizar ahora</a>
+</p>
+
+<!-- MODAL DE ALERTA CRÍTICA (ESPERA > 20 MIN) -->
+<div id="criticoModal" class="fixed inset-0 z-[200] hidden items-center justify-center p-6 bg-red-900/40 backdrop-blur-sm transition-all duration-500">
+    <div class="bg-white w-full max-w-xl rounded-[2.5rem] shadow-[0_35px_60px_-15px_rgba(220,38,38,0.3)] border-4 border-red-500 overflow-hidden animate-in zoom-in duration-300">
+        <div class="bg-red-500 p-8 flex flex-col items-center text-center text-white relative">
+            <div class="absolute top-4 right-4">
+                <button onclick="cerrarAlertModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition shadow-sm"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-4 animate-bounce">
+                <i class="fa-solid fa-bell text-4xl"></i>
+            </div>
+            <h3 class="text-2xl font-black uppercase tracking-tighter italic">Alerta de Espera Crítica</h3>
+            <p class="text-[10px] font-bold uppercase tracking-[0.3em] opacity-80 mt-1">Supervisión en tiempo real — CU-04</p>
+        </div>
+        <div class="p-8 space-y-6">
+            <div class="space-y-3">
+                <p class="text-center text-xs font-bold text-gray-400 uppercase tracking-widest">Turnos sin llamar por > 20 minutos:</p>
+                <div class="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                    @foreach($turnosEspera20 as $t)
+                    <div class="flex items-center justify-between p-4 bg-red-50 border border-red-100 rounded-2xl">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-10 h-10 bg-red-500 text-white rounded-xl flex items-center justify-center font-black text-xs shadow-sm">{{ $t->tur_numero }}</span>
+                            <div>
+                                <p class="text-sm font-black text-gray-800">{{ $t->solicitante->persona->pers_nombres ?? 'Ciudadano' }}</p>
+                                <p class="text-[9px] font-bold text-red-500 uppercase tracking-widest">{{ $t->tur_perfil }} · {{ $t->tur_servicio }}</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-black text-red-600 bg-white border border-red-100 px-3 py-1 rounded-full">{{ $t->minutos_espera }}m</span>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            <div class="flex flex-col space-y-3">
+                <button onclick="cerrarAlertModal()" class="w-full py-5 bg-gray-900 text-white font-black rounded-2xl shadow-xl hover:bg-black transition-all active:scale-95 uppercase tracking-widest text-xs">Entendido, atender ahora</button>
+                <div class="flex items-center justify-center space-x-2 text-[9px] font-bold text-gray-300 uppercase tracking-widest">
+                    <i class="fa-solid fa-clock"></i>
+                    <span>Siguiente verificación en 60 segundos</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
+@endsection
+
+@section('scripts')
 <script>
-    // Reloj en tiempo real
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playAlertSound() {
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.1);
+        osc.frequency.exponentialRampToValueAtTime(440, now + 0.2);
+        
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start(now);
+        osc.stop(now + 0.8);
+    }
+
+    function toggleAlertModal(show) {
+        const modal = document.getElementById('criticoModal');
+        if (show) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            try { playAlertSound(); } catch(e) { console.log("Audio interaction required"); }
+        } else {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    }
+
+    function cerrarAlertModal() {
+        toggleAlertModal(false);
+    }
+
     function actualizarReloj() {
         const ahora = new Date();
         document.getElementById('reloj').textContent =
             ahora.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     }
-    actualizarReloj();
-    setInterval(actualizarReloj, 1000);
 
-    // Auto-refresh cada 60 segundos
-    setTimeout(() => location.reload(), 60000);
+    window.onload = () => {
+        actualizarReloj();
+        setInterval(actualizarReloj, 1000);
+        
+        // Disparar alerta si hay turnos críticos (>0)
+        @if($turnosEspera20->count() > 0)
+            setTimeout(() => toggleAlertModal(true), 500);
+        @endif
+
+        // Auto-refresh cada 60s
+        setTimeout(() => location.reload(), 60000);
+    };
 </script>
-</body>
-</html>
+@endsection

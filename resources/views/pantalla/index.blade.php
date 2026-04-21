@@ -315,22 +315,6 @@
         }
     </style>
 
-    <!-- Botón flotante volver al Kiosco -->
-    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex gap-3">
-        <a href="{{ route('kiosco.index') }}"
-           class="flex items-center gap-2 px-5 py-3 bg-white/90 hover:bg-white text-gray-700 text-xs font-black rounded-2xl shadow-lg border border-gray-200 transition-all hover:-translate-y-0.5 uppercase tracking-widest backdrop-blur">
-            <i class="fa-solid fa-tablet-screen-button text-sena-500"></i> Kiosco
-        </a>
-        <a href="{{ route('asesor.login') }}"
-           class="flex items-center gap-2 px-5 py-3 bg-white/90 hover:bg-white text-gray-700 text-xs font-black rounded-2xl shadow-lg border border-gray-200 transition-all hover:-translate-y-0.5 uppercase tracking-widest backdrop-blur">
-            <i class="fa-solid fa-headset text-sena-500"></i> Asesor
-        </a>
-        <a href="{{ route('coordinador.login') }}"
-           class="flex items-center gap-2 px-5 py-3 bg-white/90 hover:bg-white text-gray-700 text-xs font-black rounded-2xl shadow-lg border border-gray-200 transition-all hover:-translate-y-0.5 uppercase tracking-widest backdrop-blur">
-            <i class="fa-solid fa-user-tie text-sena-500"></i> Coordinador
-        </a>
-    </div>
-
     <!-- Scripts: Reloj, Video y Lógica de Notificaciones -->
     <script>
         // --- CONFIGURACIÓN Y ESTADO ---

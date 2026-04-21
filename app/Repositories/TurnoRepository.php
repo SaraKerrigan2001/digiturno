@@ -43,24 +43,24 @@ class TurnoRepository
 
     /**
      * Obtiene turnos en espera según el perfil del asesor (CU-02).
+     * Orientador Técnico (OT): General + Prioritario
+     * Orientador de Víctimas (OV): Victima + Empresario
      */
     public function getWaitingForAsesor($tipoAsesor)
     {
         $query = Turno::whereDate('tur_hora_fecha', now()->toDateString())
                       ->whereDoesntHave('atencion');
 
-        if ($tipoAsesor === 'Especializado') {
-            // Asesor especializado: Víctimas primero
-            return $query->whereIn('tur_perfil', ['Víctima'])
+        if ($tipoAsesor === 'OV') {
+            // Orientador de Víctimas: Víctima primero, luego Empresario
+            return $query->whereIn('tur_perfil', ['Victima', 'Empresario'])
+                         ->orderByRaw("CASE WHEN tur_perfil = 'Victima' THEN 1 ELSE 2 END ASC")
                          ->orderBy('tur_id', 'asc')
                          ->get();
         } else {
-            // Asesor general: Prioridad Víctima → Empresario → Prioritario → General
-            return $query->orderByRaw("CASE
-                            WHEN tur_perfil = 'Victima'     THEN 1
-                            WHEN tur_perfil = 'Empresario'  THEN 2
-                            WHEN tur_perfil = 'Prioritario' THEN 3
-                            ELSE 4 END ASC")
+            // Orientador Técnico (OT) o General: Prioritario primero, luego General
+            return $query->whereIn('tur_perfil', ['Prioritario', 'General'])
+                         ->orderByRaw("CASE WHEN tur_perfil = 'Prioritario' THEN 1 ELSE 2 END ASC")
                          ->orderBy('tur_id', 'asc')
                          ->get();
         }
@@ -68,50 +68,53 @@ class TurnoRepository
 
     /**
      * Lógica transaccional para llamar al siguiente turno en la fila (CU-02).
-     * Prioriza el turno MÁS ANTIGUO del grupo de mayor prioridad:
-     * Víctima → Empresario → Prioritario → General.
+     * Orientador Técnico (OT): Prioritario → General (FIFO)
+     * Orientador de Víctimas (OV): Victima → Empresario (FIFO)
+     * Registra tur_hora_llamado para calcular tiempo de espera real.
      */
     public function callNextTurn(Asesor $asesor)
     {
         return DB::transaction(function () use ($asesor) {
-            $tipoAsesor = $asesor->ase_tipo_asesor ?? 'General';
+            $tipoAsesor = $asesor->ase_tipo_asesor ?? 'OT';
             $ase_id     = $asesor->ase_id;
 
-            // Verificar si el asesor tiene una pausa activa — no se puede llamar durante receso
+            // Verificar si el asesor tiene una pausa activa
             $pausaActiva = PausaAsesor::where('ASESOR_ase_id', $ase_id)
                                       ->whereNull('hora_fin')
                                       ->exists();
             if ($pausaActiva) {
-                return null; // Bloqueado por pausa activa
+                return null;
             }
 
             $query = Turno::whereDate('tur_hora_fecha', now()->toDateString())
-                        ->whereDoesntHave('atencion');
+                          ->whereDoesntHave('atencion');
 
-            if ($tipoAsesor === 'Especializado') {
-                $turno = $query->where('tur_perfil', 'Victima')
+            if ($tipoAsesor === 'OV') {
+                // Orientador de Víctimas: Victima → Empresario
+                $turno = $query->whereIn('tur_perfil', ['Victima', 'Empresario'])
+                               ->orderByRaw("CASE WHEN tur_perfil = 'Victima' THEN 1 ELSE 2 END ASC")
                                ->orderBy('tur_id', 'asc')
                                ->lockForUpdate()
                                ->first();
             } else {
-                // CU-02: Priorizar el turno más antiguo del grupo prioritario
-                $turno = $query->orderByRaw("CASE
-                                    WHEN tur_perfil = 'Victima'     THEN 1
-                                    WHEN tur_perfil = 'Empresario'  THEN 2
-                                    WHEN tur_perfil = 'Prioritario' THEN 3
-                                    ELSE 4 END ASC")
-                               ->orderBy('tur_id', 'asc')   // FIFO dentro de cada grupo
+                // Orientador Técnico (OT): Prioritario → General
+                $turno = $query->whereIn('tur_perfil', ['Prioritario', 'General'])
+                               ->orderByRaw("CASE WHEN tur_perfil = 'Prioritario' THEN 1 ELSE 2 END ASC")
+                               ->orderBy('tur_id', 'asc')
                                ->lockForUpdate()
                                ->first();
             }
 
             if (!$turno) return null;
 
-            // Mapear perfil al enum de atencion (compatibilidad con tabla existente)
+            // Registrar hora de llamado para calcular tiempo de espera real (CU-01/CU-04)
+            $turno->update(['tur_hora_llamado' => now()]);
+
+            // Mapear perfil al enum de atencion
             $tipoAtencion = match ($turno->tur_perfil) {
-                'Victima'    => 'Victimas',
-                'Empresario', 'Prioritario' => 'Prioritaria',
-                default      => 'General',
+                'Victima'                    => 'Victimas',
+                'Empresario', 'Prioritario'  => 'Prioritaria',
+                default                      => 'General',
             };
 
             $atencion = Atencion::create([
@@ -205,5 +208,55 @@ class TurnoRepository
                        ->whereNull('atnc_hora_fin')
                        ->with('turno.solicitante.persona')
                        ->first();
+    }
+
+    /**
+     * CU-01 / CU-04: Calcula tiempos medios del ciclo de vida del turno.
+     * - tiempo_espera_medio:  promedio de (tur_hora_llamado - tur_hora_fecha) en minutos
+     * - tiempo_atencion_medio: promedio de (atnc_hora_fin - atnc_hora_inicio) en minutos
+     *
+     * @param  string|null $fecha  Fecha en formato Y-m-d (default: hoy)
+     * @return array{tiempo_espera_medio: float, tiempo_atencion_medio: float}
+     */
+    public function getTiemposMedios(?string $fecha = null): array
+    {
+        $fecha = $fecha ?? now()->toDateString();
+
+        // Tiempo medio de espera (tur_hora_llamado - tur_hora_fecha)
+        $espera = Turno::whereDate('tur_hora_fecha', $fecha)
+            ->whereNotNull('tur_hora_llamado')
+            ->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, tur_hora_fecha, tur_hora_llamado)) as promedio')
+            ->value('promedio');
+
+        // Tiempo medio de atención (atnc_hora_fin - atnc_hora_inicio)
+        $atencion = Atencion::whereDate('atnc_hora_inicio', $fecha)
+            ->whereNotNull('atnc_hora_fin')
+            ->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, atnc_hora_inicio, atnc_hora_fin)) as promedio')
+            ->value('promedio');
+
+        return [
+            'tiempo_espera_medio'   => round((float) $espera, 1),
+            'tiempo_atencion_medio' => round((float) $atencion, 1),
+        ];
+    }
+
+    /**
+     * CU-04: Cuenta emprendedores atendidos en la semana SOLO por módulos 15 y 19.
+     *
+     * @param  string $inicioSemana  Y-m-d
+     * @param  string $finSemana     Y-m-d
+     * @return int
+     */
+    public function getEmprendedoresModulosVigilancia(string $inicioSemana, string $finSemana): int
+    {
+        return Turno::whereBetween('tur_hora_fecha', [
+                        $inicioSemana . ' 00:00:00',
+                        $finSemana    . ' 23:59:59',
+                    ])
+                    ->where('tur_servicio', 'Emprendimiento')
+                    ->whereHas('atencion', function ($q) {
+                        $q->whereIn('ASESOR_ase_id', [15, 19]);
+                    })
+                    ->count();
     }
 }
