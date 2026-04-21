@@ -455,16 +455,27 @@
         function mostrarNuevoTurno(turno) {
             const modal = document.getElementById('nuevo-turno-modal');
             document.getElementById('nuevo-turno-numero').textContent = turno.tur_numero;
-            const tipo = turno.tur_tipo === 'Victimas' ? 'Víctimas' : (turno.tur_tipo === 'Prioritario' ? 'Prioritario' : 'General');
-            document.getElementById('nuevo-turno-tipo').textContent = tipo;
+
+            const tipoMap = {
+                'Victimas':    { label: 'Víctimas',    color: 'bg-rose-50 text-rose-500' },
+                'Prioritario': { label: 'Prioritario', color: 'bg-orange-50 text-orange-500' },
+                'General':     { label: 'General',     color: 'bg-sena-50 text-sena-500' },
+                'Empresario':  { label: 'Empresario',  color: 'bg-blue-50 text-blue-500' },
+            };
+            const info = tipoMap[turno.tur_tipo] || { label: turno.tur_tipo, color: 'bg-gray-50 text-gray-500' };
+
+            const tipoEl = document.getElementById('nuevo-turno-tipo');
+            tipoEl.textContent = info.label;
+            tipoEl.className = `px-6 py-2 rounded-full text-base font-black uppercase tracking-widest ${info.color}`;
 
             modal.classList.remove('opacity-0', 'pointer-events-none');
             modal.classList.add('opacity-100');
 
             // Anunciar por voz
             if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
                 const msg = new SpeechSynthesisUtterance(
-                    `Turno ${turno.tur_numero.replace('-', ' ')}. Tipo ${tipo}. Por favor espere su llamado.`
+                    `Turno ${turno.tur_numero.replace('-', ' ')}. Tipo ${info.label}. Por favor espere su llamado.`
                 );
                 msg.lang = 'es-ES'; msg.rate = 0.9;
                 window.speechSynthesis.speak(msg);
@@ -506,19 +517,20 @@
 
             let html = '';
             turnos.forEach(t => {
-                const isUrgent = t.tur_tipo === 'Victimas';
-                const isPriority = t.tur_tipo === 'Prioritario';
-                
-                const sideColor = isUrgent ? 'bg-rose-500' : (isPriority ? 'bg-sena-orange' : 'bg-sena-blue');
-                const badgeClass = isUrgent ? 'bg-rose-500 text-white' : (isPriority ? 'bg-sena-orange text-white' : 'bg-sena-yellow/20 text-sena-blue');
-                const badgeLabel = isUrgent ? 'Víctimas' : (isPriority ? 'Prioritario' : 'General');
+                const tipoMap = {
+                    'Victimas':    { side: 'bg-rose-500',   badge: 'bg-rose-500 text-white',          label: 'Víctimas' },
+                    'Prioritario': { side: 'bg-orange-500', badge: 'bg-orange-500 text-white',        label: 'Prioritario' },
+                    'General':     { side: 'bg-sena-blue',  badge: 'bg-sena-yellow/20 text-sena-blue',label: 'General' },
+                    'Empresario':  { side: 'bg-blue-500',   badge: 'bg-blue-100 text-blue-600',       label: 'Empresario' },
+                };
+                const info = tipoMap[t.tur_tipo] || { side: 'bg-gray-400', badge: 'bg-gray-100 text-gray-600', label: t.tur_tipo };
 
                 html += `
                     <div class="grid grid-cols-5 px-6 py-6 border-b border-gray-100 items-center hover:bg-gray-50 transition relative animate-fade-in" data-id="${t.tur_id}">
-                        <div class="absolute left-0 top-2 bottom-2 w-1.5 ${sideColor} rounded-r-full"></div>
+                        <div class="absolute left-0 top-2 bottom-2 w-1.5 ${info.side} rounded-r-full"></div>
                         <div class="col-span-2 text-[2.75rem] font-black text-[#2e384d] tracking-tight ml-4">${t.tur_numero}</div>
                         <div class="col-span-3 text-lg font-semibold text-[#4a5568] leading-tight">
-                            <span class="text-xs font-black uppercase tracking-widest px-2 py-1 rounded ${badgeClass} mb-2 inline-block">${badgeLabel}</span><br>
+                            <span class="text-xs font-black uppercase tracking-widest px-2 py-1 rounded ${info.badge} mb-2 inline-block">${info.label}</span><br>
                             <span class="text-base font-medium text-gray-400">En espera</span>
                         </div>
                     </div>
