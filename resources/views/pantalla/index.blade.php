@@ -321,11 +321,31 @@
         let audioEnabled = false;
         let lastTurnIds = @json($turnosEnEspera->pluck('tur_id'));
         let lastCurrentAtncId = @json($turnoActual->atnc_id ?? null);
-        const pollingInterval = 3000; // 3 segundos para mayor respuesta
+        const pollingInterval = 3000;
 
-        // --- SISTEMA DE AUDIO ROBUSTO (WEB AUDIO API) ---
+        // --- SISTEMA DE AUDIO ---
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioCtx = null;
+
+        // Activar audio automáticamente al primer clic/toque en la pantalla
+        function initAudioOnInteraction() {
+            if (audioEnabled) return;
+            try {
+                audioCtx = new AudioContext();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                audioEnabled = true;
+                document.removeEventListener('click', initAudioOnInteraction);
+                document.removeEventListener('touchstart', initAudioOnInteraction);
+            } catch(e) {}
+        }
+        document.addEventListener('click', initAudioOnInteraction);
+        document.addEventListener('touchstart', initAudioOnInteraction);
+
+        // También intentar activar sin interacción (funciona en algunos navegadores)
+        try {
+            audioCtx = new AudioContext();
+            audioEnabled = true;
+        } catch(e) {}
 
         function playDing() {
             if (!audioCtx) return;
@@ -333,13 +353,11 @@
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-            
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(880, audioCtx.currentTime); // Nota La (A5)
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime);
             gain.gain.setValueAtTime(0, audioCtx.currentTime);
             gain.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.1);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1);
-            
             osc.start();
             osc.stop(audioCtx.currentTime + 1);
         }
@@ -350,50 +368,39 @@
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-            
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(440, audioCtx.currentTime); 
+            osc.frequency.setValueAtTime(440, audioCtx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
-            
             gain.gain.setValueAtTime(0, audioCtx.currentTime);
             gain.gain.linearRampToValueAtTime(0.6, audioCtx.currentTime + 0.1);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
-            
             osc.start();
             osc.stop(audioCtx.currentTime + 1.5);
         }
 
-        // --- LÓGICA DE AUDIO (WEB SPEECH API) ---
         function enableAudio() {
-            try {
-                audioCtx = new AudioContext(); // Activar el contexto de audio
-                audioEnabled = true;
-                document.getElementById('audio-activation-overlay').style.display = 'none';
-                
-                // Prueba inmediata vinculada al clic
-                playBell(); 
-                
-                const testMsg = new SpeechSynthesisUtterance("Sistema de audio activado");
-                testMsg.lang = 'es-ES';
-                window.speechSynthesis.speak(testMsg);
-
-                console.log("Sistema de audio activado con Web Audio API.");
-            } catch (e) {
-                alert("Error al activar audio: " + e.message);
-            }
+            initAudioOnInteraction();
         }
 
-        // Iniciar polling inmediatamente al cargar la página
+        // Iniciar polling
         setInterval(checkUpdates, pollingInterval);
 
         function anunciarTurno(numero, modulo) {
-            if (!audioEnabled || !audioCtx) return;
-            
-            // Sonido de alerta generado por el navegador
+            // Intentar activar audio si aún no está activo
+            if (!audioEnabled || !audioCtx) {
+                try {
+                    audioCtx = new AudioContext();
+                    audioEnabled = true;
+                } catch(e) { return; }
+            }
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
             playDing();
-            
+
             setTimeout(() => {
-                const mensaje = new SpeechSynthesisUtterance(`Turno ${numero.replace('-', ' ')}, por favor dirigirse al módulo ${modulo}`);
+                const mensaje = new SpeechSynthesisUtterance(
+                    `Turno ${numero.replace('-', ' ')}, por favor dirigirse al módulo ${modulo}`
+                );
                 mensaje.lang = 'es-ES';
                 mensaje.rate = 0.9;
                 mensaje.pitch = 1;
