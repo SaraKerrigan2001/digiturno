@@ -203,6 +203,19 @@
         </div>
     </main>
 
+    <!-- Modal Nuevo Turno -->
+    <div id="nuevo-turno-modal" class="fixed inset-0 z-40 flex items-center justify-center p-10 bg-black/40 backdrop-blur-sm transition-all duration-500 opacity-0 pointer-events-none">
+        <div class="bg-white rounded-[3rem] px-16 py-12 shadow-2xl flex flex-col items-center text-center space-y-6 border-4 border-sena-500/20">
+            <div class="w-16 h-16 bg-sena-500 rounded-2xl flex items-center justify-center text-white text-3xl shadow-lg">
+                <i class="fa-solid fa-ticket"></i>
+            </div>
+            <p class="text-sm font-black text-sena-500 uppercase tracking-[0.3em]">Turno Registrado</p>
+            <h3 id="nuevo-turno-numero" class="text-[7rem] font-poppins font-black text-[#1e293b] tracking-tighter leading-none">---</h3>
+            <span id="nuevo-turno-tipo" class="px-6 py-2 rounded-full bg-sena-50 text-sena-500 text-base font-black uppercase tracking-widest"></span>
+            <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Por favor espere su llamado</p>
+        </div>
+    </div>
+
     <!-- Modal de Llamado (Turno que va a ser atendido) -->
     <div id="llamado-modal" class="fixed inset-0 z-50 flex items-center justify-center p-10 bg-[#10069FB3] backdrop-blur-md transition-all duration-500 opacity-0 pointer-events-none scale-110">
         <div class="bg-white w-full max-w-5xl rounded-[4rem] p-16 shadow-2xl flex flex-col items-center text-center space-y-12 border-8 border-sena-orange/20 relative overflow-hidden">
@@ -413,9 +426,15 @@
                                    currentTurnIds.some((id, index) => id !== lastTurnIds[index]);
                 
                 if (listChanged) {
+                    const newIds = currentTurnIds.filter(id => !lastTurnIds.includes(id));
                     if (audioEnabled) playBell();
                     updateWaitingList(data.turnosEnEspera);
                     lastTurnIds = currentTurnIds;
+
+                    if (newIds.length > 0) {
+                        const newT = data.turnosEnEspera.find(t => t.tur_id === newIds[0]);
+                        if (newT) mostrarNuevoTurno(newT);
+                    }
                 }
 
                 // 2. Detectar Nuevo Turno Llamado (Frecuente)
@@ -431,6 +450,30 @@
             } catch (error) {
                 console.error("Error al obtener actualizaciones:", error);
             }
+        }
+
+        function mostrarNuevoTurno(turno) {
+            const modal = document.getElementById('nuevo-turno-modal');
+            document.getElementById('nuevo-turno-numero').textContent = turno.tur_numero;
+            const tipo = turno.tur_tipo === 'Victimas' ? 'Víctimas' : (turno.tur_tipo === 'Prioritario' ? 'Prioritario' : 'General');
+            document.getElementById('nuevo-turno-tipo').textContent = tipo;
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.classList.add('opacity-100');
+
+            // Anunciar por voz
+            if (window.speechSynthesis) {
+                const msg = new SpeechSynthesisUtterance(
+                    `Turno ${turno.tur_numero.replace('-', ' ')}. Tipo ${tipo}. Por favor espere su llamado.`
+                );
+                msg.lang = 'es-ES'; msg.rate = 0.9;
+                window.speechSynthesis.speak(msg);
+            }
+
+            setTimeout(() => {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                modal.classList.remove('opacity-100');
+            }, 6000);
         }
 
         function mostrarModalLlamado(turno) {
