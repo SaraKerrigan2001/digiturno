@@ -204,34 +204,7 @@
     </main>
 
     <!-- Modal de Llamado (Turno que va a ser atendido) -->
-    <!-- Modal Nuevo Turno Registrado -->
-    <div id="nuevo-turno-modal" class="fixed inset-0 z-50 flex items-center justify-center p-10 bg-[#39A90099] backdrop-blur-md transition-all duration-500 opacity-0 pointer-events-none scale-110">
-        <div class="bg-white w-full max-w-3xl rounded-[4rem] p-14 shadow-2xl flex flex-col items-center text-center space-y-8 border-8 border-sena-500/20 relative overflow-hidden">
-            <div class="absolute -top-20 -right-20 w-64 h-64 bg-sena-500/10 rounded-full blur-3xl"></div>
-            <div class="absolute -bottom-20 -left-20 w-64 h-64 bg-sena-500/10 rounded-full blur-3xl"></div>
-
-            <div class="relative">
-                <div class="absolute inset-0 bg-sena-500/20 rounded-full animate-ping"></div>
-                <div class="w-20 h-20 bg-sena-500 rounded-3xl flex items-center justify-center text-white text-4xl shadow-lg relative z-10">
-                    <i class="fa-solid fa-ticket"></i>
-                </div>
-            </div>
-
-            <div class="space-y-3">
-                <p class="text-xl font-black text-sena-500 uppercase tracking-[0.4em]">Nuevo Turno Registrado</p>
-                <h3 id="nuevo-turno-numero" class="text-[9rem] font-poppins font-black text-[#1e293b] tracking-tighter leading-none italic">---</h3>
-                <span id="nuevo-turno-tipo" class="inline-block px-6 py-2 rounded-full bg-sena-50 text-sena-500 text-lg font-black uppercase tracking-widest"></span>
-            </div>
-
-            <div class="flex items-center space-x-3 text-sena-500 animate-pulse">
-                <div class="w-3 h-3 rounded-full bg-sena-500"></div>
-                <span class="text-base font-bold uppercase tracking-widest">Por favor espere su llamado</span>
-                <div class="w-3 h-3 rounded-full bg-sena-500"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Llamado por Asesor -->
+    <div id="llamado-modal" class="fixed inset-0 z-50 flex items-center justify-center p-10 bg-[#10069FB3] backdrop-blur-md transition-all duration-500 opacity-0 pointer-events-none scale-110">
         <div class="bg-white w-full max-w-5xl rounded-[4rem] p-16 shadow-2xl flex flex-col items-center text-center space-y-12 border-8 border-sena-orange/20 relative overflow-hidden">
             <!-- Decorative Elements -->
             <div class="absolute -top-20 -right-20 w-64 h-64 bg-[#FFB5001A] rounded-full blur-3xl"></div>
@@ -348,31 +321,11 @@
         let audioEnabled = false;
         let lastTurnIds = @json($turnosEnEspera->pluck('tur_id'));
         let lastCurrentAtncId = @json($turnoActual->atnc_id ?? null);
-        const pollingInterval = 3000;
+        const pollingInterval = 3000; // 3 segundos para mayor respuesta
 
-        // --- SISTEMA DE AUDIO ---
+        // --- SISTEMA DE AUDIO ROBUSTO (WEB AUDIO API) ---
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioCtx = null;
-
-        // Activar audio automáticamente al primer clic/toque en la pantalla
-        function initAudioOnInteraction() {
-            if (audioEnabled) return;
-            try {
-                audioCtx = new AudioContext();
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                audioEnabled = true;
-                document.removeEventListener('click', initAudioOnInteraction);
-                document.removeEventListener('touchstart', initAudioOnInteraction);
-            } catch(e) {}
-        }
-        document.addEventListener('click', initAudioOnInteraction);
-        document.addEventListener('touchstart', initAudioOnInteraction);
-
-        // También intentar activar sin interacción (funciona en algunos navegadores)
-        try {
-            audioCtx = new AudioContext();
-            audioEnabled = true;
-        } catch(e) {}
 
         function playDing() {
             if (!audioCtx) return;
@@ -380,11 +333,13 @@
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
+            
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime); // Nota La (A5)
             gain.gain.setValueAtTime(0, audioCtx.currentTime);
             gain.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.1);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1);
+            
             osc.start();
             osc.stop(audioCtx.currentTime + 1);
         }
@@ -395,78 +350,55 @@
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
+            
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(440, audioCtx.currentTime); 
             osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
+            
             gain.gain.setValueAtTime(0, audioCtx.currentTime);
             gain.gain.linearRampToValueAtTime(0.6, audioCtx.currentTime + 0.1);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
+            
             osc.start();
             osc.stop(audioCtx.currentTime + 1.5);
         }
 
+        // --- LÓGICA DE AUDIO (WEB SPEECH API) ---
         function enableAudio() {
-            initAudioOnInteraction();
+            try {
+                audioCtx = new AudioContext(); // Activar el contexto de audio
+                audioEnabled = true;
+                document.getElementById('audio-activation-overlay').style.display = 'none';
+                
+                // Prueba inmediata vinculada al clic
+                playBell(); 
+                
+                const testMsg = new SpeechSynthesisUtterance("Sistema de audio activado");
+                testMsg.lang = 'es-ES';
+                window.speechSynthesis.speak(testMsg);
+
+                console.log("Sistema de audio activado con Web Audio API.");
+            } catch (e) {
+                alert("Error al activar audio: " + e.message);
+            }
         }
 
-        // Iniciar polling
+        // Iniciar polling inmediatamente al cargar la página
         setInterval(checkUpdates, pollingInterval);
 
         function anunciarTurno(numero, modulo) {
-            // Intentar activar audio si aún no está activo
-            if (!audioEnabled || !audioCtx) {
-                try {
-                    audioCtx = new AudioContext();
-                    audioEnabled = true;
-                } catch(e) { return; }
-            }
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-
+            if (!audioEnabled || !audioCtx) return;
+            
+            // Sonido de alerta generado por el navegador
             playDing();
-
+            
             setTimeout(() => {
-                const mensaje = new SpeechSynthesisUtterance(
-                    `Turno ${numero.replace('-', ' ')}, por favor dirigirse al módulo ${modulo}`
-                );
+                const mensaje = new SpeechSynthesisUtterance(`Turno ${numero.replace('-', ' ')}, por favor dirigirse al módulo ${modulo}`);
                 mensaje.lang = 'es-ES';
                 mensaje.rate = 0.9;
                 mensaje.pitch = 1;
                 window.speechSynthesis.speak(mensaje);
             }, 500);
-        }
-
-        function anunciarNuevoTurno(numero, tipo) {
-            if (!audioEnabled || !audioCtx) {
-                try { audioCtx = new AudioContext(); audioEnabled = true; } catch(e) { return; }
-            }
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-
-            // Mostrar modal de nuevo turno
-            const modal = document.getElementById('nuevo-turno-modal');
-            document.getElementById('nuevo-turno-numero').textContent = numero;
-            const tipoTexto = tipo === 'Victimas' ? 'Víctimas' : (tipo === 'Prioritario' ? 'Prioritario' : 'General');
-            document.getElementById('nuevo-turno-tipo').textContent = tipoTexto;
-
-            modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-110');
-            modal.classList.add('opacity-100', 'scale-100');
-
-            playBell();
-
-            setTimeout(() => {
-                const msg = new SpeechSynthesisUtterance(
-                    `Turno ${numero.replace('-', ' ')}. Tipo ${tipoTexto}. Por favor espere su llamado.`
-                );
-                msg.lang = 'es-ES';
-                msg.rate = 0.9;
-                msg.pitch = 1;
-                window.speechSynthesis.speak(msg);
-            }, 400);
-
-            // Ocultar tras 6 segundos
-            setTimeout(() => {
-                modal.classList.add('opacity-0', 'pointer-events-none', 'scale-110');
-                modal.classList.remove('opacity-100', 'scale-100');
-            }, 6000);
         }
 
         // --- POLLING Y ACTUALIZACIÓN ---
@@ -481,21 +413,9 @@
                                    currentTurnIds.some((id, index) => id !== lastTurnIds[index]);
                 
                 if (listChanged) {
-                    // Detectar turnos nuevos (que no estaban antes)
-                    const newTurnIds = currentTurnIds.filter(id => !lastTurnIds.includes(id));
                     if (audioEnabled) playBell();
                     updateWaitingList(data.turnosEnEspera);
                     lastTurnIds = currentTurnIds;
-
-                    // Anunciar cada turno nuevo que llegó
-                    if (newTurnIds.length > 0) {
-                        const newTurnos = data.turnosEnEspera.filter(t => newTurnIds.includes(t.tur_id));
-                        newTurnos.forEach((t, i) => {
-                            setTimeout(() => {
-                                anunciarNuevoTurno(t.tur_numero, t.tur_tipo);
-                            }, i * 2000);
-                        });
-                    }
                 }
 
                 // 2. Detectar Nuevo Turno Llamado (Frecuente)
