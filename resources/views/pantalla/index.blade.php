@@ -204,7 +204,34 @@
     </main>
 
     <!-- Modal de Llamado (Turno que va a ser atendido) -->
-    <div id="llamado-modal" class="fixed inset-0 z-50 flex items-center justify-center p-10 bg-[#10069FB3] backdrop-blur-md transition-all duration-500 opacity-0 pointer-events-none scale-110">
+    <!-- Modal Nuevo Turno Registrado -->
+    <div id="nuevo-turno-modal" class="fixed inset-0 z-50 flex items-center justify-center p-10 bg-[#39A90099] backdrop-blur-md transition-all duration-500 opacity-0 pointer-events-none scale-110">
+        <div class="bg-white w-full max-w-3xl rounded-[4rem] p-14 shadow-2xl flex flex-col items-center text-center space-y-8 border-8 border-sena-500/20 relative overflow-hidden">
+            <div class="absolute -top-20 -right-20 w-64 h-64 bg-sena-500/10 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-20 -left-20 w-64 h-64 bg-sena-500/10 rounded-full blur-3xl"></div>
+
+            <div class="relative">
+                <div class="absolute inset-0 bg-sena-500/20 rounded-full animate-ping"></div>
+                <div class="w-20 h-20 bg-sena-500 rounded-3xl flex items-center justify-center text-white text-4xl shadow-lg relative z-10">
+                    <i class="fa-solid fa-ticket"></i>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <p class="text-xl font-black text-sena-500 uppercase tracking-[0.4em]">Nuevo Turno Registrado</p>
+                <h3 id="nuevo-turno-numero" class="text-[9rem] font-poppins font-black text-[#1e293b] tracking-tighter leading-none italic">---</h3>
+                <span id="nuevo-turno-tipo" class="inline-block px-6 py-2 rounded-full bg-sena-50 text-sena-500 text-lg font-black uppercase tracking-widest"></span>
+            </div>
+
+            <div class="flex items-center space-x-3 text-sena-500 animate-pulse">
+                <div class="w-3 h-3 rounded-full bg-sena-500"></div>
+                <span class="text-base font-bold uppercase tracking-widest">Por favor espere su llamado</span>
+                <div class="w-3 h-3 rounded-full bg-sena-500"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Llamado por Asesor -->
         <div class="bg-white w-full max-w-5xl rounded-[4rem] p-16 shadow-2xl flex flex-col items-center text-center space-y-12 border-8 border-sena-orange/20 relative overflow-hidden">
             <!-- Decorative Elements -->
             <div class="absolute -top-20 -right-20 w-64 h-64 bg-[#FFB5001A] rounded-full blur-3xl"></div>
@@ -414,18 +441,32 @@
             }
             if (audioCtx.state === 'suspended') audioCtx.resume();
 
+            // Mostrar modal de nuevo turno
+            const modal = document.getElementById('nuevo-turno-modal');
+            document.getElementById('nuevo-turno-numero').textContent = numero;
+            const tipoTexto = tipo === 'Victimas' ? 'Víctimas' : (tipo === 'Prioritario' ? 'Prioritario' : 'General');
+            document.getElementById('nuevo-turno-tipo').textContent = tipoTexto;
+
+            modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-110');
+            modal.classList.add('opacity-100', 'scale-100');
+
             playBell();
 
             setTimeout(() => {
-                const tipoTexto = tipo === 'Victimas' ? 'Víctimas' : (tipo === 'Prioritario' ? 'Prioritario' : 'General');
                 const msg = new SpeechSynthesisUtterance(
-                    `Nuevo turno registrado: ${numero.replace('-', ' ')}. Tipo ${tipoTexto}. Por favor espere su llamado.`
+                    `Turno ${numero.replace('-', ' ')}. Tipo ${tipoTexto}. Por favor espere su llamado.`
                 );
                 msg.lang = 'es-ES';
                 msg.rate = 0.9;
                 msg.pitch = 1;
                 window.speechSynthesis.speak(msg);
             }, 400);
+
+            // Ocultar tras 6 segundos
+            setTimeout(() => {
+                modal.classList.add('opacity-0', 'pointer-events-none', 'scale-110');
+                modal.classList.remove('opacity-100', 'scale-100');
+            }, 6000);
         }
 
         // --- POLLING Y ACTUALIZACIÓN ---
