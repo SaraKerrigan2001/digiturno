@@ -95,7 +95,7 @@
                             <div class="col-span-2 text-[2.75rem] font-black text-[#2e384d] tracking-tight ml-4">{{ $turno->tur_numero }}</div>
                             <div class="col-span-3 text-lg font-semibold text-[#4a5568] leading-tight">
                                 <span class="text-xs font-black uppercase tracking-widest px-2 py-1 rounded {{ $turno->tur_tipo == 'Victimas' ? 'bg-rose-500 text-white' : ($turno->tur_tipo == 'Prioritario' ? 'bg-sena-orange text-white' : 'bg-sena-yellow/20 text-sena-blue') }} mb-2 inline-block">
-                                    {{ $turno->tur_tipo == 'Victimas' ? 'Urgente' : ($turno->tur_tipo == 'Prioritario' ? 'Prioridad' : 'General') }}
+                                    {{ $turno->tur_tipo == 'Victimas' ? 'Víctimas' : ($turno->tur_tipo == 'Prioritario' ? 'Prioritario' : 'General') }}
                                 </span><br>
                                 <span class="text-base font-medium text-gray-400">En espera</span>
                             </div>
@@ -241,8 +241,8 @@
         </div>
     </div>
 
-    <!-- Overlay Activar Sonido -->
-    <div id="audio-activation-overlay" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#10069F] p-6">
+    <!-- Overlay Activar Sonido (desactivado) -->
+    <div id="audio-activation-overlay" class="hidden">
         <div class="bg-white rounded-[3rem] p-12 text-center max-w-lg shadow-2xl space-y-8">
             <div class="w-24 h-24 bg-[#FFB50033] rounded-full flex items-center justify-center mx-auto">
                 <i class="fa-solid fa-volume-high text-sena-orange text-4xl animate-bounce"></i>
@@ -468,7 +468,7 @@
                 
                 const sideColor = isUrgent ? 'bg-rose-500' : (isPriority ? 'bg-sena-orange' : 'bg-sena-blue');
                 const badgeClass = isUrgent ? 'bg-rose-500 text-white' : (isPriority ? 'bg-sena-orange text-white' : 'bg-sena-yellow/20 text-sena-blue');
-                const badgeLabel = isUrgent ? 'Urgente' : (isPriority ? 'Prioridad' : 'General');
+                const badgeLabel = isUrgent ? 'Víctimas' : (isPriority ? 'Prioritario' : 'General');
 
                 html += `
                     <div class="grid grid-cols-5 px-6 py-6 border-b border-gray-100 items-center hover:bg-gray-50 transition relative animate-fade-in" data-id="${t.tur_id}">
