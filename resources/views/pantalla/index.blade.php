@@ -408,6 +408,26 @@
             }, 500);
         }
 
+        function anunciarNuevoTurno(numero, tipo) {
+            if (!audioEnabled || !audioCtx) {
+                try { audioCtx = new AudioContext(); audioEnabled = true; } catch(e) { return; }
+            }
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            playBell();
+
+            setTimeout(() => {
+                const tipoTexto = tipo === 'Victimas' ? 'Víctimas' : (tipo === 'Prioritario' ? 'Prioritario' : 'General');
+                const msg = new SpeechSynthesisUtterance(
+                    `Nuevo turno registrado: ${numero.replace('-', ' ')}. Tipo ${tipoTexto}. Por favor espere su llamado.`
+                );
+                msg.lang = 'es-ES';
+                msg.rate = 0.9;
+                msg.pitch = 1;
+                window.speechSynthesis.speak(msg);
+            }, 400);
+        }
+
         // --- POLLING Y ACTUALIZACIÓN ---
         async function checkUpdates() {
             try {
@@ -420,9 +440,21 @@
                                    currentTurnIds.some((id, index) => id !== lastTurnIds[index]);
                 
                 if (listChanged) {
+                    // Detectar turnos nuevos (que no estaban antes)
+                    const newTurnIds = currentTurnIds.filter(id => !lastTurnIds.includes(id));
                     if (audioEnabled) playBell();
                     updateWaitingList(data.turnosEnEspera);
                     lastTurnIds = currentTurnIds;
+
+                    // Anunciar cada turno nuevo que llegó
+                    if (newTurnIds.length > 0) {
+                        const newTurnos = data.turnosEnEspera.filter(t => newTurnIds.includes(t.tur_id));
+                        newTurnos.forEach((t, i) => {
+                            setTimeout(() => {
+                                anunciarNuevoTurno(t.tur_numero, t.tur_tipo);
+                            }, i * 2000);
+                        });
+                    }
                 }
 
                 // 2. Detectar Nuevo Turno Llamado (Frecuente)
