@@ -14,27 +14,29 @@
         body {
             background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url("{{ asset('images/fondo.jpg') }}");
             background-size: cover; background-position: center; background-attachment: fixed;
-            overflow-x: hidden; overflow-y: auto;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .main-card {
-            background-color: rgba(255,255,255,0.85);
+            background-color: rgba(255,255,255,0.92);
             backdrop-filter: blur(25px);
             box-shadow: 0 50px 100px -20px rgba(0,0,0,0.2);
             border: 1px solid rgba(255,255,255,0.5);
         }
         .step-content { display: none; width: 100%; }
-        .step-content.active { display: flex; animation: fadeInScale 0.7s cubic-bezier(0.23,1,0.32,1) forwards; }
-        @keyframes fadeInScale { from { opacity: 0; transform: scale(1.02); } to { opacity: 1; transform: scale(1); } }
-        .progress-dot { @apply w-2.5 h-2.5 rounded-full bg-gray-200 transition-all duration-500; }
-        .progress-dot.active { @apply bg-sena-500 w-8; }
+        .step-content.active { display: flex; animation: fadeInScale 0.5s cubic-bezier(0.23,1,0.32,1) forwards; }
+        @keyframes fadeInScale { from { opacity: 0; transform: scale(1.01); } to { opacity: 1; transform: scale(1); } }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #10069F; border-radius: 10px; }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center relative p-2 md:p-6 bg-fixed bg-cover">
+<body class="p-3">
 
 <!-- Alerts -->
-<div class="fixed top-8 left-1/2 transform -translate-x-1/2 z-[100] w-full max-w-2xl px-4 space-y-4">
+<div class="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] w-full max-w-2xl px-4 space-y-3">
     @if(session('success'))
     <div class="bg-emerald-500 text-white p-6 rounded-[2rem] shadow-2xl flex items-center space-x-4 animate-[bounce_1s_ease-in-out_1] border-4 border-white">
         <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl shrink-0"><i class="fa-solid fa-check"></i></div>
@@ -49,22 +51,22 @@
     @endif
 </div>
 
-<div class="w-full max-w-4xl mx-auto main-card rounded-[2.5rem] flex flex-col items-center relative shadow-2xl overflow-y-auto overflow-x-hidden" style="max-height: 92vh;">
+<div class="w-full max-w-4xl mx-auto main-card rounded-[2.5rem] flex flex-col items-center relative shadow-2xl overflow-y-auto overflow-x-hidden" style="height: calc(100vh - 24px); max-height: calc(100vh - 24px);">
 
     <!-- Header -->
-    <header class="w-full px-8 py-5 flex flex-col items-center justify-center space-y-3 z-10 shrink-0">
-        <div class="flex flex-col items-center space-y-2">
-            <div class="w-10 h-10 bg-sena-500 rounded-xl flex items-center justify-center shadow-lg">
-                <i class="fa-solid fa-landmark text-white text-lg"></i>
+    <header class="w-full px-8 py-3 flex flex-col items-center justify-center space-y-2 z-10 shrink-0 border-b border-gray-100/50">
+        <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 bg-sena-500 rounded-lg flex items-center justify-center shadow-md">
+                <i class="fa-solid fa-landmark text-white text-sm"></i>
             </div>
-            <h1 class="text-xl font-poppins font-black text-sena-500 tracking-tight leading-none">SENA Digital Turnos</h1>
+            <h1 class="text-lg font-poppins font-black text-sena-500 tracking-tight leading-none">SENA Digital Turnos</h1>
         </div>
-        <div class="flex items-center space-x-8 text-[9px] font-black text-gray-400 uppercase tracking-[0.3em]">
-            <div onclick="toggleLanguage(); playKey();" class="flex items-center space-x-2 cursor-pointer hover:text-sena-500 transition-colors">
+        <div class="flex items-center space-x-6 text-[9px] font-black text-gray-400 uppercase tracking-[0.3em]">
+            <div onclick="toggleLanguage(); playKey();" class="flex items-center space-x-1 cursor-pointer hover:text-sena-500 transition-colors">
                 <i class="fa-solid fa-globe text-xs"></i><span id="langLabel">ES / EN</span>
             </div>
             <div class="w-px h-3 bg-gray-200"></div>
-            <div onclick="showHelp(); playKey();" class="flex items-center space-x-2 cursor-pointer hover:text-sena-500 transition-colors">
+            <div onclick="showHelp(); playKey();" class="flex items-center space-x-1 cursor-pointer hover:text-sena-500 transition-colors">
                 <i class="fa-solid fa-circle-question text-xs"></i><span id="helpLabel">AYUDA</span>
             </div>
         </div>
@@ -75,18 +77,18 @@
         @csrf
 
         <!-- STEP 1: BIENVENIDA -->
-        <div id="step1" class="step-content active w-full flex-col items-center justify-center text-center p-10 space-y-8">
-            <div class="w-24 h-24 bg-white rounded-[1.5rem] shadow-xl flex items-center justify-center p-4 relative mx-auto">
+        <div id="step1" class="step-content active w-full flex-col items-center justify-center text-center p-6 space-y-5">
+            <div class="w-20 h-20 bg-white rounded-[1.5rem] shadow-xl flex items-center justify-center p-3 relative mx-auto">
                 <div class="absolute -inset-2 bg-sena-500/10 blur-xl rounded-[2rem] -z-10 animate-pulse"></div>
                 <img src="{{ asset('images/logoSena.png') }}" class="w-full h-auto" alt="Logo SENA">
             </div>
-            <div class="space-y-3">
-                <h1 id="welcomeTitle" class="text-5xl font-black text-slate-800 tracking-tighter leading-tight uppercase">Bienvenido al <br><span class="text-sena-500">Centro de Atención</span></h1>
-                <p id="welcomeDescription" class="text-sm font-bold text-slate-400 uppercase tracking-[0.3em]">Por favor toca el botón para iniciar tu proceso</p>
+            <div class="space-y-2">
+                <h1 id="welcomeTitle" class="text-4xl font-black text-slate-800 tracking-tighter leading-tight uppercase">Bienvenido al <br><span class="text-sena-500">Centro de Atención</span></h1>
+                <p id="welcomeDescription" class="text-xs font-bold text-slate-400 uppercase tracking-[0.3em]">Por favor toca el botón para iniciar tu proceso</p>
             </div>
-            <button type="button" onclick="nextStep(2); playKey();" class="group relative px-16 py-7 bg-gray-900 rounded-[2rem] overflow-hidden hover:scale-105 active:scale-95 transition-all duration-500 shadow-2xl shadow-gray-900/40 mx-auto">
+            <button type="button" onclick="nextStep(2); playKey();" class="group relative px-14 py-5 bg-gray-900 rounded-[2rem] overflow-hidden hover:scale-105 active:scale-95 transition-all duration-500 shadow-2xl shadow-gray-900/40 mx-auto">
                 <div class="absolute inset-0 bg-gradient-to-r from-sena-500 to-sena-orange opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <span id="startButton" class="relative text-white font-black text-xl uppercase tracking-[0.3em]">Empezar Aquí</span>
+                <span id="startButton" class="relative text-white font-black text-lg uppercase tracking-[0.3em]">Empezar Aquí</span>
             </button>
             <div class="flex flex-wrap items-center justify-center gap-4">
                 <div class="flex items-center space-x-2 bg-white/60 backdrop-blur-md px-4 py-2 rounded-xl border border-white/50 shadow-sm">
