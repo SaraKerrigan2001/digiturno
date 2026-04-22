@@ -234,13 +234,13 @@
             </div>
             <div class="grid grid-cols-3 gap-2 w-full">
                 @for($i=1;$i<=9;$i++)
-                <button type="button" onclick="pressNum('{{ $i }}'); playKey();" class="h-16 bg-slate-50 hover:bg-white border-2 border-transparent hover:border-sena-100 rounded-xl flex items-center justify-center text-2xl font-black text-slate-700 shadow-sm transition-all active:scale-95">{{ $i }}</button>
+                <button type="button" onclick="pressNum('{{ $i }}'); playKey();" class="h-12 bg-slate-50 hover:bg-white border-2 border-transparent hover:border-sena-100 rounded-xl flex items-center justify-center text-xl font-black text-slate-700 shadow-sm transition-all active:scale-95">{{ $i }}</button>
                 @endfor
-                <button type="button" onclick="clearNum(); playKey();" class="h-16 bg-rose-50 hover:bg-rose-100 rounded-xl flex items-center justify-center text-xl text-rose-500 shadow-sm transition-all active:scale-95"><i class="fa-solid fa-trash-can"></i></button>
-                <button type="button" onclick="pressNum('0'); playKey();" class="h-16 bg-slate-50 hover:bg-white border-2 border-transparent hover:border-sena-100 rounded-xl flex items-center justify-center text-2xl font-black text-slate-700 shadow-sm transition-all active:scale-95">0</button>
-                <button type="button" onclick="backspace(); playKey();" class="h-16 bg-slate-50 hover:bg-white rounded-xl flex items-center justify-center text-xl text-slate-400 shadow-sm transition-all active:scale-95"><i class="fa-solid fa-delete-left"></i></button>
+                <button type="button" onclick="clearNum(); playKey();" class="h-12 bg-rose-50 hover:bg-rose-100 rounded-xl flex items-center justify-center text-lg text-rose-500 shadow-sm transition-all active:scale-95"><i class="fa-solid fa-trash-can"></i></button>
+                <button type="button" onclick="pressNum('0'); playKey();" class="h-12 bg-slate-50 hover:bg-white border-2 border-transparent hover:border-sena-100 rounded-xl flex items-center justify-center text-xl font-black text-slate-700 shadow-sm transition-all active:scale-95">0</button>
+                <button type="button" onclick="backspace(); playKey();" class="h-12 bg-slate-50 hover:bg-white rounded-xl flex items-center justify-center text-lg text-slate-400 shadow-sm transition-all active:scale-95"><i class="fa-solid fa-delete-left"></i></button>
             </div>
-            <button type="button" onclick="validateDoc(); playKey();" class="w-full py-4 bg-sena-orange text-white font-black text-base rounded-2xl shadow-xl hover:-translate-y-0.5 transition-all active:scale-95 flex items-center justify-center gap-3 uppercase tracking-widest">
+            <button type="button" onclick="validateDoc(); playKey();" class="w-full py-3 bg-sena-orange text-white font-black text-sm rounded-xl shadow-xl hover:-translate-y-0.5 transition-all active:scale-95 flex items-center justify-center gap-3 uppercase tracking-widest">
                 <span>CONTINUAR</span><i class="fa-solid fa-arrow-right"></i>
             </button>
         </div>
