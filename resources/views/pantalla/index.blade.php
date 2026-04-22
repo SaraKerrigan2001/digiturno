@@ -194,16 +194,16 @@
         </div>
     </main>
 
-    <!-- Modal Nuevo Turno -->
-    <div id="nuevo-turno-modal" class="fixed inset-0 z-40 flex items-center justify-center p-10 bg-black/40 backdrop-blur-sm transition-all duration-500 opacity-0 pointer-events-none">
-        <div class="bg-white rounded-[3rem] px-16 py-12 shadow-2xl flex flex-col items-center text-center space-y-6 border-4 border-sena-500/20">
-            <div class="w-16 h-16 bg-sena-500 rounded-2xl flex items-center justify-center text-white text-3xl shadow-lg">
+    <!-- Modal Nuevo Turno — pequeño, centrado, fondo oscuro -->
+    <div id="nuevo-turno-modal" class="fixed inset-0 z-40 flex items-center justify-center bg-black/50 transition-all duration-300 opacity-0 pointer-events-none">
+        <div class="bg-white rounded-2xl px-8 py-6 shadow-2xl flex flex-col items-center text-center space-y-3 border border-gray-100 min-w-[220px]">
+            <div class="w-10 h-10 bg-sena-500 rounded-xl flex items-center justify-center text-white text-lg shadow">
                 <i class="fa-solid fa-ticket"></i>
             </div>
-            <p class="text-sm font-black text-sena-500 uppercase tracking-[0.3em]">Turno Registrado</p>
-            <h3 id="nuevo-turno-numero" class="text-[7rem] font-poppins font-black text-[#1e293b] tracking-tighter leading-none">---</h3>
-            <span id="nuevo-turno-tipo" class="px-6 py-2 rounded-full bg-sena-50 text-sena-500 text-base font-black uppercase tracking-widest"></span>
-            <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Por favor espere su llamado</p>
+            <p class="text-[10px] font-black text-sena-500 uppercase tracking-[0.3em]">Turno Registrado</p>
+            <h3 id="nuevo-turno-numero" class="text-5xl font-poppins font-black text-[#1e293b] tracking-tighter leading-none whitespace-nowrap">---</h3>
+            <span id="nuevo-turno-tipo" class="px-4 py-1 rounded-full bg-sena-50 text-sena-500 text-xs font-black uppercase tracking-widest"></span>
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Por favor espere su llamado</p>
         </div>
     </div>
 
@@ -490,12 +490,20 @@
 
             const tipoEl = document.getElementById('nuevo-turno-tipo');
             tipoEl.textContent = info.label;
-            tipoEl.className = `px-6 py-2 rounded-full text-base font-black uppercase tracking-widest ${info.color}`;
+            tipoEl.className = `px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest ${info.color}`;
 
+            // Mostrar modal
             modal.classList.remove('opacity-0', 'pointer-events-none');
             modal.classList.add('opacity-100');
 
-            // Anunciar por voz
+            // Sonido inmediato
+            if (!audioCtx) {
+                try { audioCtx = new AudioContext(); audioEnabled = true; } catch(e) {}
+            }
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            playBell();
+
+            // Voz
             if (window.speechSynthesis) {
                 window.speechSynthesis.cancel();
                 const msg = new SpeechSynthesisUtterance(
@@ -505,10 +513,11 @@
                 window.speechSynthesis.speak(msg);
             }
 
+            // Cerrar tras 5 segundos
             setTimeout(() => {
                 modal.classList.add('opacity-0', 'pointer-events-none');
                 modal.classList.remove('opacity-100');
-            }, 6000);
+            }, 5000);
         }
 
         function mostrarModalLlamado(turno) {
