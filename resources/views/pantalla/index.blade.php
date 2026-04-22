@@ -434,18 +434,17 @@
                 const response = await fetch('{{ route("pantalla.api.data") }}');
                 const data = await response.json();
                 
-                // 1. Detectar Cambios en la lista de espera (Detección profunda)
+                // 1. Detectar turnos NUEVOS (IDs que no estaban antes)
                 const currentTurnIds = data.turnosEnEspera.map(t => t.tur_id);
-                const listChanged = currentTurnIds.length !== lastTurnIds.length || 
-                                   currentTurnIds.some((id, index) => id !== lastTurnIds[index]);
-                
+                const newIds = currentTurnIds.filter(id => !lastTurnIds.includes(id));
+                const removedIds = lastTurnIds.filter(id => !currentTurnIds.includes(id));
+                const listChanged = newIds.length > 0 || removedIds.length > 0;
+
                 if (listChanged) {
-                    const newIds = currentTurnIds.filter(id => !lastTurnIds.includes(id));
-                    if (audioEnabled) playBell();
                     updateWaitingList(data.turnosEnEspera);
                     lastTurnIds = currentTurnIds;
 
-                    // Mostrar/ocultar caja próximo según si hay turnos
+                    // Mostrar/ocultar caja próximo
                     const proximoContainer = document.getElementById('box-proximo-container');
                     if (proximoContainer) {
                         if (data.turnosEnEspera.length > 0 || data.turnoActual) {
@@ -459,13 +458,18 @@
                         }
                     }
 
+                    // Mostrar modal para cada turno nuevo
                     if (newIds.length > 0) {
-                        const newT = data.turnosEnEspera.find(t => newIds.includes(t.tur_id));
-                        if (newT) mostrarNuevoTurno(newT);
+                        newIds.forEach((id, i) => {
+                            const newT = data.turnosEnEspera.find(t => t.tur_id === id);
+                            if (newT) {
+                                setTimeout(() => mostrarNuevoTurno(newT), i * 7000);
+                            }
+                        });
                     }
                 }
 
-                // 2. Detectar Nuevo Turno Llamado (Frecuente)
+                // 2. Detectar Turno Llamado por Asesor
                 if (data.turnoActual && data.turnoActual.atnc_id !== lastCurrentAtncId) {
                     mostrarModalLlamado(data.turnoActual);
                     updateCurrentTurnBox(data.turnoActual);
@@ -475,18 +479,13 @@
                     updateCurrentTurnBox(null);
                 }
 
-                // 3. Re-anunciar turnos en espera cada 20 minutos
+                // 3. Re-anunciar turnos en espera cada 10 segundos
                 const ahora = Date.now();
                 data.turnosEnEspera.forEach(t => {
                     const ultimoAnuncio = lastReanuncioTime[t.tur_id] || 0;
                     if (ahora - ultimoAnuncio >= REANUNCIO_INTERVAL) {
                         lastReanuncioTime[t.tur_id] = ahora;
-                        // Solo re-anunciar si ya pasaron al menos 20 min desde que llegó
-                        const llegada = new Date(t.tur_hora_fecha).getTime();
-                        const minutosEspera = (ahora - llegada) / 60000;
-                        if (minutosEspera >= 20) {
-                            setTimeout(() => mostrarNuevoTurno(t), 1000);
-                        }
+                        setTimeout(() => mostrarNuevoTurno(t), 500);
                     }
                 });
 
