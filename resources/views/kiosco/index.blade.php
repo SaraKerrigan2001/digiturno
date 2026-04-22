@@ -109,15 +109,15 @@
         </div>
 
         <!-- STEP 2: TRATAMIENTO DE DATOS -->
-        <div id="step2" class="step-content w-full flex-col items-center justify-center p-10 md:p-14 space-y-8">
-            <div class="text-center space-y-3">
-                <h3 class="text-5xl font-poppins font-black text-[#1e293b] tracking-tighter leading-none">Tratamiento de Datos</h3>
-                <p class="text-base text-slate-500 font-medium">Para brindarte un servicio personalizado, requerimos procesar tu información institucional.</p>
-                <div class="inline-block bg-sena-50 px-5 py-2 rounded-xl border border-sena-100">
-                    <span class="text-[10px] font-black text-sena-500 uppercase tracking-[0.2em]">Aceptación de Términos Institucionales</span>
+        <div id="step2" class="step-content w-full flex-col items-center justify-center p-5 space-y-4">
+            <div class="text-center space-y-1">
+                <h3 class="text-3xl font-poppins font-black text-[#1e293b] tracking-tighter leading-none">Tratamiento de Datos</h3>
+                <p class="text-xs text-slate-500 font-medium">Para brindarte un servicio personalizado, requerimos procesar tu información institucional.</p>
+                <div class="inline-block bg-sena-50 px-4 py-1 rounded-xl border border-sena-100">
+                    <span class="text-[9px] font-black text-sena-500 uppercase tracking-[0.2em]">Aceptación de Términos Institucionales</span>
                 </div>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-5 w-full max-w-4xl">
+            <div class="grid grid-cols-4 gap-3 w-full">
                 @php $newTerms = [
                     ['icon'=>'fa-shield-heart',    'title'=>'Privacidad',        'desc'=>'Datos protegidos bajo estándares internacionales.',    'color'=>'bg-sena-50 text-sena-500'],
                     ['icon'=>'fa-user-check',       'title'=>'Seguridad',         'desc'=>'Protocolos robustos contra acceso no autorizado.',     'color'=>'bg-sena-50 text-sena-500'],
@@ -125,25 +125,25 @@
                     ['icon'=>'fa-fingerprint',      'title'=>'Identidad Digital', 'desc'=>'Perfil digital para agilizar futuros accesos.',         'color'=>'bg-sena-50 text-sena-500'],
                 ]; @endphp
                 @foreach($newTerms as $t)
-                <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col items-center text-center space-y-3">
-                    <div class="w-12 h-12 {{ $t['color'] }} rounded-2xl flex items-center justify-center text-xl"><i class="fa-solid {{ $t['icon'] }}"></i></div>
-                    <h4 class="text-base font-black text-slate-800">{{ $t['title'] }}</h4>
-                    <p class="text-[11px] text-slate-400 font-medium leading-relaxed">{{ $t['desc'] }}</p>
+                <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center text-center space-y-2">
+                    <div class="w-9 h-9 {{ $t['color'] }} rounded-xl flex items-center justify-center text-base"><i class="fa-solid {{ $t['icon'] }}"></i></div>
+                    <h4 class="text-xs font-black text-slate-800">{{ $t['title'] }}</h4>
+                    <p class="text-[9px] text-slate-400 font-medium leading-relaxed">{{ $t['desc'] }}</p>
                 </div>
                 @endforeach
             </div>
-            <div class="w-full max-w-3xl bg-white border-2 border-gray-100 rounded-[2.5rem] p-8 shadow-sm">
-                <label class="flex items-center gap-6 cursor-pointer group" for="termsCheck">
+            <div class="w-full bg-white border-2 border-gray-100 rounded-2xl p-5 shadow-sm">
+                <label class="flex items-center gap-4 cursor-pointer" for="termsCheck">
                     <div class="relative shrink-0">
-                        <input type="checkbox" id="termsCheck" onchange="toggleBtn(this)" class="peer appearance-none w-14 h-14 rounded-2xl bg-gray-100 border-2 border-gray-200 checked:bg-sena-500 checked:border-sena-500 transition-all cursor-pointer">
-                        <i class="fa-solid fa-check absolute inset-0 flex items-center justify-center text-white text-2xl scale-0 peer-checked:scale-100 transition-transform pointer-events-none"></i>
+                        <input type="checkbox" id="termsCheck" onchange="toggleBtn(this)" class="peer appearance-none w-10 h-10 rounded-xl bg-gray-100 border-2 border-gray-200 checked:bg-sena-500 checked:border-sena-500 transition-all cursor-pointer">
+                        <i class="fa-solid fa-check absolute inset-0 flex items-center justify-center text-white text-lg scale-0 peer-checked:scale-100 transition-transform pointer-events-none"></i>
                     </div>
-                    <span class="text-xl font-black text-slate-700 leading-snug">Autorizo el tratamiento de mis datos personales según las políticas del SENA.</span>
+                    <span class="text-base font-black text-slate-700 leading-snug">Autorizo el tratamiento de mis datos personales según las políticas del SENA.</span>
                 </label>
             </div>
-            <div class="flex gap-4 w-full max-w-3xl">
-                <button type="button" onclick="nextStep(1)" class="px-10 py-5 bg-white border border-gray-200 rounded-2xl text-gray-400 font-black uppercase tracking-widest text-sm hover:bg-gray-50 active:scale-95 transition-all">Volver</button>
-                <button type="button" id="nextBtn" onclick="nextStep(3)" disabled class="flex-1 py-5 rounded-2xl bg-gray-200 text-gray-400 font-black flex items-center justify-center gap-3 cursor-not-allowed opacity-50 transition-all text-sm uppercase tracking-widest">
+            <div class="flex gap-3 w-full">
+                <button type="button" onclick="nextStep(1)" class="px-8 py-3 bg-white border border-gray-200 rounded-xl text-gray-400 font-black uppercase tracking-widest text-xs hover:bg-gray-50 active:scale-95 transition-all">Volver</button>
+                <button type="button" id="nextBtn" onclick="nextStep(3)" disabled class="flex-1 py-3 rounded-xl bg-gray-200 text-gray-400 font-black flex items-center justify-center gap-2 cursor-not-allowed opacity-50 transition-all text-xs uppercase tracking-widest">
                     <span>ACEPTAR Y CONTINUAR</span><i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
@@ -211,53 +211,53 @@
         </div>
 
         <!-- STEP 4: IDENTIDAD -->
-        <div id="step4" class="step-content w-full flex-col items-center justify-center p-6 md:p-10 space-y-6">
-            <div class="text-center space-y-2">
-                <h3 class="text-5xl font-poppins font-black text-[#1e293b] tracking-tighter leading-none">Ingrese su <span class="text-sena-500">Documento</span></h3>
-                <p class="text-base text-slate-500 font-medium">Seleccione el tipo e ingrese su número de identificación.</p>
+        <div id="step4" class="step-content w-full flex-col items-center justify-center p-5 space-y-4">
+            <div class="text-center space-y-1">
+                <h3 class="text-3xl font-poppins font-black text-[#1e293b] tracking-tighter leading-none">Ingrese su <span class="text-sena-500">Documento</span></h3>
+                <p class="text-xs text-slate-500 font-medium">Seleccione el tipo e ingrese su número de identificación.</p>
             </div>
-            <div class="flex gap-3 w-full max-w-2xl">
+            <div class="flex gap-2 w-full">
                 @foreach(['CC'=>'Cédula','CE'=>'Extranjería','TI'=>'Tarjeta Identidad'] as $val=>$label)
-                <button type="button" onclick="setDocType('{{ $val }}', this); playKey();" class="doc-tab-btn flex-1 py-4 rounded-2xl border-2 font-black text-sm uppercase tracking-widest transition-all {{ $val=='CC' ? 'border-sena-500 bg-sena-50 text-sena-500 shadow-md' : 'border-gray-100 text-slate-400 hover:border-gray-200' }}">{{ $label }}</button>
+                <button type="button" onclick="setDocType('{{ $val }}', this); playKey();" class="doc-tab-btn flex-1 py-3 rounded-xl border-2 font-black text-xs uppercase tracking-widest transition-all {{ $val=='CC' ? 'border-sena-500 bg-sena-50 text-sena-500 shadow-md' : 'border-gray-100 text-slate-400 hover:border-gray-200' }}">{{ $label }}</button>
                 @endforeach
             </div>
-            <div class="w-full max-w-2xl bg-white border-4 border-gray-100 rounded-[2rem] px-8 py-6 flex items-center justify-between shadow-inner">
-                <span id="docDisplay" class="text-6xl font-black text-[#1e293b] tracking-widest flex-1 text-center truncate">_ _ _ _ _ _ _ _ _ _</span>
-                <div class="w-1 h-12 bg-sena-500 animate-pulse rounded-full ml-2 shrink-0"></div>
+            <div class="w-full bg-white border-4 border-gray-100 rounded-2xl px-6 py-4 flex items-center justify-between shadow-inner">
+                <span id="docDisplay" class="text-5xl font-black text-[#1e293b] tracking-widest flex-1 text-center truncate">_ _ _ _ _ _ _ _ _ _</span>
+                <div class="w-1 h-10 bg-sena-500 animate-pulse rounded-full ml-2 shrink-0"></div>
             </div>
-            <div class="grid grid-cols-3 gap-3 w-full max-w-2xl">
+            <div class="grid grid-cols-3 gap-2 w-full">
                 @for($i=1;$i<=9;$i++)
-                <button type="button" onclick="pressNum('{{ $i }}'); playKey();" class="h-20 bg-slate-50 hover:bg-white border-2 border-transparent hover:border-sena-100 rounded-2xl flex items-center justify-center text-3xl font-black text-slate-700 shadow-sm hover:shadow-md transition-all active:scale-95">{{ $i }}</button>
+                <button type="button" onclick="pressNum('{{ $i }}'); playKey();" class="h-16 bg-slate-50 hover:bg-white border-2 border-transparent hover:border-sena-100 rounded-xl flex items-center justify-center text-2xl font-black text-slate-700 shadow-sm transition-all active:scale-95">{{ $i }}</button>
                 @endfor
-                <button type="button" onclick="clearNum(); playKey();" class="h-20 bg-rose-50 hover:bg-rose-100 rounded-2xl flex items-center justify-center text-2xl text-rose-500 shadow-sm transition-all active:scale-95"><i class="fa-solid fa-trash-can"></i></button>
-                <button type="button" onclick="pressNum('0'); playKey();" class="h-20 bg-slate-50 hover:bg-white border-2 border-transparent hover:border-sena-100 rounded-2xl flex items-center justify-center text-3xl font-black text-slate-700 shadow-sm hover:shadow-md transition-all active:scale-95">0</button>
-                <button type="button" onclick="backspace(); playKey();" class="h-20 bg-slate-50 hover:bg-white rounded-2xl flex items-center justify-center text-2xl text-slate-400 shadow-sm transition-all active:scale-95"><i class="fa-solid fa-delete-left"></i></button>
+                <button type="button" onclick="clearNum(); playKey();" class="h-16 bg-rose-50 hover:bg-rose-100 rounded-xl flex items-center justify-center text-xl text-rose-500 shadow-sm transition-all active:scale-95"><i class="fa-solid fa-trash-can"></i></button>
+                <button type="button" onclick="pressNum('0'); playKey();" class="h-16 bg-slate-50 hover:bg-white border-2 border-transparent hover:border-sena-100 rounded-xl flex items-center justify-center text-2xl font-black text-slate-700 shadow-sm transition-all active:scale-95">0</button>
+                <button type="button" onclick="backspace(); playKey();" class="h-16 bg-slate-50 hover:bg-white rounded-xl flex items-center justify-center text-xl text-slate-400 shadow-sm transition-all active:scale-95"><i class="fa-solid fa-delete-left"></i></button>
             </div>
-            <button type="button" onclick="validateDoc(); playKey();" class="w-full max-w-2xl py-6 bg-sena-orange text-white font-black text-xl rounded-[2rem] shadow-xl hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-4 uppercase tracking-widest">
+            <button type="button" onclick="validateDoc(); playKey();" class="w-full py-4 bg-sena-orange text-white font-black text-base rounded-2xl shadow-xl hover:-translate-y-0.5 transition-all active:scale-95 flex items-center justify-center gap-3 uppercase tracking-widest">
                 <span>CONTINUAR</span><i class="fa-solid fa-arrow-right"></i>
             </button>
         </div>
 
         <!-- STEP 5: CONTACTO -->
-        <div id="step5" class="step-content w-full flex-col items-center justify-center p-6 md:p-8 space-y-5">
+        <div id="step5" class="step-content w-full flex-col items-center justify-center p-5 space-y-4">
             <div class="text-center space-y-1">
                 <h3 class="text-3xl font-poppins font-black text-[#1e293b] tracking-tight">Datos de <span class="text-sena-500">Contacto</span></h3>
-                <p class="text-sm text-slate-500 font-medium uppercase tracking-wider">Ingrese su número celular para el turno</p>
+                <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Ingrese su número celular para el turno</p>
             </div>
-            <div class="w-full max-w-2xl bg-white border-4 border-gray-100 rounded-[2rem] px-6 py-5 flex items-center shadow-inner">
-                <span class="text-3xl font-black text-sena-500 opacity-50 mr-4 shrink-0">+57</span>
+            <div class="w-full bg-white border-4 border-gray-100 rounded-2xl px-6 py-4 flex items-center shadow-inner">
+                <span class="text-2xl font-black text-sena-500 opacity-50 mr-3 shrink-0">+57</span>
                 <span id="phoneDisplay" class="text-4xl font-black text-[#1e293b] tracking-widest flex-1 text-center">300 000 0000</span>
                 <div class="w-1 h-10 bg-sena-500 animate-pulse rounded-full ml-2 shrink-0"></div>
             </div>
-            <div class="grid grid-cols-3 gap-3 w-full max-w-2xl">
+            <div class="grid grid-cols-3 gap-2 w-full">
                 @for($i=1;$i<=9;$i++)
-                <button type="button" onclick="pressPhone('{{ $i }}'); playKey();" class="h-16 bg-white hover:bg-slate-50 border-2 border-transparent hover:border-sena-100 rounded-2xl flex items-center justify-center text-2xl font-black text-slate-700 shadow-sm hover:shadow-md transition-all active:scale-95">{{ $i }}</button>
+                <button type="button" onclick="pressPhone('{{ $i }}'); playKey();" class="h-16 bg-white hover:bg-slate-50 border-2 border-transparent hover:border-sena-100 rounded-xl flex items-center justify-center text-2xl font-black text-slate-700 shadow-sm transition-all active:scale-95">{{ $i }}</button>
                 @endfor
-                <button type="button" onclick="phoneNumber=''; updatePhoneDisplay(); playKey();" class="h-16 bg-white rounded-2xl flex items-center justify-center text-xl text-slate-300 shadow-sm hover:text-rose-500 transition-colors"><i class="fa-solid fa-rotate-right"></i></button>
-                <button type="button" onclick="pressPhone('0'); playKey();" class="h-16 bg-white hover:bg-slate-50 border-2 border-transparent hover:border-sena-100 rounded-2xl flex items-center justify-center text-2xl font-black text-slate-700 shadow-sm hover:shadow-md transition-all active:scale-95">0</button>
-                <button type="button" onclick="backspacePhone(); playKey();" class="h-16 bg-white rounded-2xl flex items-center justify-center text-xl text-slate-300 shadow-sm hover:text-amber-500 transition-colors"><i class="fa-solid fa-delete-left"></i></button>
+                <button type="button" onclick="phoneNumber=''; updatePhoneDisplay(); playKey();" class="h-16 bg-white rounded-xl flex items-center justify-center text-xl text-slate-300 shadow-sm hover:text-rose-500 transition-colors"><i class="fa-solid fa-rotate-right"></i></button>
+                <button type="button" onclick="pressPhone('0'); playKey();" class="h-16 bg-white hover:bg-slate-50 border-2 border-transparent hover:border-sena-100 rounded-xl flex items-center justify-center text-2xl font-black text-slate-700 shadow-sm transition-all active:scale-95">0</button>
+                <button type="button" onclick="backspacePhone(); playKey();" class="h-16 bg-white rounded-xl flex items-center justify-center text-xl text-slate-300 shadow-sm hover:text-amber-500 transition-colors"><i class="fa-solid fa-delete-left"></i></button>
             </div>
-            <button type="button" onclick="nextStep(6); playKey();" class="w-full max-w-2xl py-5 bg-sena-orange text-white font-black text-lg rounded-[2rem] shadow-xl hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-3 uppercase tracking-widest">
+            <button type="button" onclick="nextStep(6); playKey();" class="w-full py-4 bg-sena-orange text-white font-black text-base rounded-2xl shadow-xl hover:-translate-y-0.5 transition-all active:scale-95 flex items-center justify-center gap-3 uppercase tracking-widest">
                 <span>CONTINUAR</span><i class="fa-solid fa-chevron-right"></i>
             </button>
         </div>
