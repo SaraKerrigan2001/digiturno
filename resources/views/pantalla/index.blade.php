@@ -123,8 +123,8 @@
                 </div>
             </div>
 
-            <!-- Bottom Fixed Box (Próximo en llamado) -->
-            <div class="absolute bottom-6 left-6 right-6 bg-[#0f172a] rounded-2xl p-6 flex justify-between items-center text-white shadow-2xl overflow-hidden">
+            <!-- Bottom Fixed Box (Próximo en llamado) — solo visible cuando hay turno -->
+            <div id="box-proximo-container" class="{{ ($turnoActual || $turnosEnEspera->first()) ? '' : 'hidden' }} absolute bottom-6 left-6 right-6 bg-[#0f172a] rounded-2xl p-6 flex justify-between items-center text-white shadow-2xl overflow-hidden">
                 <div class="absolute inset-0 bg-gradient-to-r from-[#0f172a] to-[#1e293b] z-0"></div>
                 <div class="relative z-10 flex flex-col justify-center">
                     <p class="text-gray-400 text-sm font-semibold tracking-wider uppercase mb-1">Próximo en llamado:</p>
@@ -169,33 +169,24 @@
                 </div>
             </div>
 
-            <!-- Bottom Cards Row (Fixed Height) -->
-            <div class="flex gap-6 h-36 shrink-0">
-                <!-- Card 1 -->
-                <div
-                    class="flex-1 bg-white rounded-[2rem] p-6 flex items-center gap-6 shadow-sm border border-gray-200 hover:shadow-md transition">
-                    <div class="w-16 h-16 rounded-[1.2rem] bg-[#e8f5e9] flex items-center justify-center shrink-0">
-                        <i class="fa-solid fa-qrcode text-sena-500 text-3xl"></i>
+            <!-- Bottom Cards Row -->
+            <div class="flex gap-4 h-24 shrink-0">
+                <div class="flex-1 bg-white rounded-2xl px-4 py-3 flex items-center gap-4 shadow-sm border border-gray-200">
+                    <div class="w-10 h-10 rounded-xl bg-[#e8f5e9] flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-qrcode text-sena-500 text-xl"></i>
                     </div>
-                    <div class="flex flex-col justify-center">
-                        <h3 class="text-lg font-bold text-gray-900 mb-1 leading-none tracking-tight">Descarga nuestra
-                            App</h3>
-                        <p class="text-sm text-gray-500 font-medium leading-[1.25]">Gestiona tus turnos
-                            y<br>certificados desde tu celular.</p>
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-900 leading-tight">Descarga nuestra App</h3>
+                        <p class="text-xs text-gray-500 font-medium leading-tight mt-0.5">Gestiona tus turnos y certificados desde tu celular.</p>
                     </div>
                 </div>
-
-                <!-- Card 2 -->
-                <div
-                    class="flex-1 bg-white rounded-[2rem] p-6 flex items-center gap-6 shadow-sm border border-gray-200 hover:shadow-md transition">
-                    <div class="w-16 h-16 rounded-[1.2rem] bg-[#e8f5e9] flex items-center justify-center shrink-0">
-                        <i class="fa-solid fa-headset text-sena-500 text-3xl"></i>
+                <div class="flex-1 bg-white rounded-2xl px-4 py-3 flex items-center gap-4 shadow-sm border border-gray-200">
+                    <div class="w-10 h-10 rounded-xl bg-[#e8f5e9] flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-headset text-sena-500 text-xl"></i>
                     </div>
-                    <div class="flex flex-col justify-center">
-                        <h3 class="text-lg font-bold text-gray-900 mb-1 leading-none tracking-tight">¿Necesitas ayuda?
-                        </h3>
-                        <p class="text-sm text-gray-500 font-medium leading-[1.25]">Escanea el código QR en
-                            los<br>módulos para asistencia.</p>
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-900 leading-tight">¿Necesitas ayuda?</h3>
+                        <p class="text-xs text-gray-500 font-medium leading-tight mt-0.5">Escanea el código QR en los módulos para asistencia.</p>
                     </div>
                 </div>
             </div>
@@ -431,8 +422,22 @@
                     updateWaitingList(data.turnosEnEspera);
                     lastTurnIds = currentTurnIds;
 
+                    // Mostrar/ocultar caja próximo según si hay turnos
+                    const proximoContainer = document.getElementById('box-proximo-container');
+                    if (proximoContainer) {
+                        if (data.turnosEnEspera.length > 0 || data.turnoActual) {
+                            proximoContainer.classList.remove('hidden');
+                            const proximoNum = document.getElementById('box-proximo-numero');
+                            if (proximoNum && data.turnosEnEspera.length > 0) {
+                                proximoNum.textContent = data.turnosEnEspera[0].tur_numero;
+                            }
+                        } else {
+                            proximoContainer.classList.add('hidden');
+                        }
+                    }
+
                     if (newIds.length > 0) {
-                        const newT = data.turnosEnEspera.find(t => t.tur_id === newIds[0]);
+                        const newT = data.turnosEnEspera.find(t => newIds.includes(t.tur_id));
                         if (newT) mostrarNuevoTurno(newT);
                     }
                 }
@@ -542,16 +547,19 @@
         function updateCurrentTurnBox(turno) {
             const container = document.getElementById('contenedor-atencion');
             const proximoDisplay = document.getElementById('box-proximo-numero');
+            const proximoContainer = document.getElementById('box-proximo-container');
 
             if (!turno) {
                 container.innerHTML = '';
+                // Ocultar caja si no hay turnos en espera tampoco
+                if (proximoContainer) proximoContainer.classList.add('hidden');
                 return;
             }
 
-            // Actualizar cuadro verde inferior
+            // Mostrar caja y actualizar número
+            if (proximoContainer) proximoContainer.classList.remove('hidden');
             if (proximoDisplay) proximoDisplay.textContent = turno.tur_numero;
 
-            // Actualizar zona de atención activa
             const moduloFormatted = String(turno.modulo).padStart(2, '0');
             container.innerHTML = `
                 <div class="grid grid-cols-5 px-6 py-6 border-b border-gray-100 items-center bg-[#f0fdf4] relative animate-pulse">
