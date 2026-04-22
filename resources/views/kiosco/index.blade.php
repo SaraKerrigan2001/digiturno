@@ -297,13 +297,13 @@
                     <input type="email" id="email-input" name="pers_email" placeholder="ejemplo@correo.com" class="w-full bg-white border-2 border-blue-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:border-sena-500 transition-all text-center">
                     <p class="text-xs text-slate-400 text-center">Recibirá su turno en este correo.</p>
                 </div>
-                <div id="panel-QR" class="channel-content hidden bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col items-center space-y-3">
-                    <p class="text-sm font-bold text-slate-600">Escanee este código QR con su celular</p>
-                    <div id="qr-container" class="w-40 h-40 bg-white rounded-2xl flex items-center justify-center border-2 border-slate-200 shadow-inner">
+                <div id="panel-QR" class="channel-content hidden bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col items-center space-y-2">
+                    <p class="text-xs font-bold text-slate-600">Escanee este código QR con su celular</p>
+                    <div id="qr-container" class="w-24 h-24 bg-white rounded-xl flex items-center justify-center border-2 border-slate-200 shadow-inner">
                         <img id="qr-image" src="" alt="QR" class="w-full h-full rounded-xl hidden">
-                        <i class="fa-solid fa-qrcode text-5xl text-slate-300" id="qr-placeholder"></i>
+                        <i class="fa-solid fa-qrcode text-3xl text-slate-300" id="qr-placeholder"></i>
                     </div>
-                    <p class="text-xs text-slate-400 text-center">El QR contiene la información de su turno.</p>
+                    <p class="text-[10px] text-slate-400 text-center">El QR contiene la información de su turno.</p>
                 </div>
                 <div id="panel-SMS" class="channel-content hidden bg-slate-50 border border-slate-200 rounded-2xl p-5 text-center space-y-2">
                     <i class="fa-solid fa-comment-sms text-3xl text-sena-500"></i>
@@ -530,7 +530,7 @@ function selectChannel(method, btn) {
     if (method === 'WhatsApp') document.getElementById('wa-number').textContent = '+57 ' + phone;
     if (method === 'SMS') document.getElementById('sms-number').textContent = '+57 ' + phone;
     if (method === 'QR') {
-        const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + encodeURIComponent('SENA APE - Doc: ' + doc + ' | Tel: ' + phone);
+        const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=96x96&data=' + encodeURIComponent('SENA APE - Doc: ' + doc + ' | Tel: ' + phone);
         const img = document.getElementById('qr-image'); const placeholder = document.getElementById('qr-placeholder');
         img.src = qrUrl; img.classList.remove('hidden'); placeholder.classList.add('hidden');
     }
