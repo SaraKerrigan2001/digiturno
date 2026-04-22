@@ -132,7 +132,7 @@
                 </div>
                 @endforeach
             </div>
-            <div class="w-full bg-white border-2 border-gray-100 rounded-2xl p-4 shadow-sm">
+            <div class="w-full max-w-lg mx-auto bg-white border-2 border-gray-100 rounded-2xl p-4 shadow-sm">
                 <label class="flex items-center gap-3 cursor-pointer" for="termsCheck">
                     <div class="relative shrink-0">
                         <input type="checkbox" id="termsCheck" onchange="toggleBtn(this)" class="peer appearance-none w-7 h-7 rounded-lg bg-gray-100 border-2 border-gray-200 checked:bg-sena-500 checked:border-sena-500 transition-all cursor-pointer">
