@@ -132,13 +132,13 @@
                 </div>
                 @endforeach
             </div>
-            <div class="w-full bg-white border-2 border-gray-100 rounded-2xl p-5 shadow-sm">
-                <label class="flex items-center gap-4 cursor-pointer" for="termsCheck">
+            <div class="w-full bg-white border-2 border-gray-100 rounded-2xl p-4 shadow-sm">
+                <label class="flex items-center gap-3 cursor-pointer" for="termsCheck">
                     <div class="relative shrink-0">
-                        <input type="checkbox" id="termsCheck" onchange="toggleBtn(this)" class="peer appearance-none w-10 h-10 rounded-xl bg-gray-100 border-2 border-gray-200 checked:bg-sena-500 checked:border-sena-500 transition-all cursor-pointer">
-                        <i class="fa-solid fa-check absolute inset-0 flex items-center justify-center text-white text-lg scale-0 peer-checked:scale-100 transition-transform pointer-events-none"></i>
+                        <input type="checkbox" id="termsCheck" onchange="toggleBtn(this)" class="peer appearance-none w-7 h-7 rounded-lg bg-gray-100 border-2 border-gray-200 checked:bg-sena-500 checked:border-sena-500 transition-all cursor-pointer">
+                        <i class="fa-solid fa-check absolute inset-0 flex items-center justify-center text-white text-sm scale-0 peer-checked:scale-100 transition-transform pointer-events-none"></i>
                     </div>
-                    <span class="text-base font-black text-slate-700 leading-snug">Autorizo el tratamiento de mis datos personales según las políticas del SENA.</span>
+                    <span class="text-sm font-bold text-slate-600 leading-snug">Autorizo el tratamiento de mis datos personales según las políticas del SENA.</span>
                 </label>
             </div>
             <div class="flex gap-3 w-full">
