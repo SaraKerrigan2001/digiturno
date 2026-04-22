@@ -141,11 +141,13 @@
                     <span class="text-sm font-bold text-slate-600 leading-snug">Autorizo el tratamiento de mis datos personales según las políticas del SENA.</span>
                 </label>
             </div>
-            <div class="flex gap-3 w-full">
-                <button type="button" onclick="nextStep(1)" class="px-8 py-3 bg-white border border-gray-200 rounded-xl text-gray-400 font-black uppercase tracking-widest text-xs hover:bg-gray-50 active:scale-95 transition-all">Volver</button>
-                <button type="button" id="nextBtn" onclick="nextStep(3)" disabled class="flex-1 py-3 rounded-xl bg-gray-200 text-gray-400 font-black flex items-center justify-center gap-2 cursor-not-allowed opacity-50 transition-all text-xs uppercase tracking-widest">
+            <div class="w-full max-w-lg mx-auto">
+                <button type="button" id="nextBtn" onclick="nextStep(3)" disabled class="w-full py-3 rounded-xl bg-gray-200 text-gray-400 font-black flex items-center justify-center gap-2 cursor-not-allowed opacity-50 transition-all text-xs uppercase tracking-widest">
                     <span>ACEPTAR Y CONTINUAR</span><i class="fa-solid fa-arrow-right"></i>
                 </button>
+            </div>
+            <div class="w-full max-w-lg mx-auto">
+                <button type="button" onclick="nextStep(1)" class="px-8 py-3 bg-white border border-gray-200 rounded-xl text-gray-400 font-black uppercase tracking-widest text-xs hover:bg-gray-50 active:scale-95 transition-all">Volver</button>
             </div>
         </div>
 
