@@ -194,19 +194,6 @@
         </div>
     </main>
 
-    <!-- Modal Nuevo Turno — pequeño, centrado, fondo oscuro -->
-    <div id="nuevo-turno-modal" class="fixed inset-0 z-40 flex items-center justify-center bg-black/50 transition-all duration-300 opacity-0 pointer-events-none">
-        <div class="bg-white rounded-2xl px-8 py-6 shadow-2xl flex flex-col items-center text-center space-y-3 border border-gray-100 min-w-[220px]">
-            <div class="w-10 h-10 bg-sena-500 rounded-xl flex items-center justify-center text-white text-lg shadow">
-                <i class="fa-solid fa-ticket"></i>
-            </div>
-            <p class="text-[10px] font-black text-sena-500 uppercase tracking-[0.3em]">Turno Registrado</p>
-            <h3 id="nuevo-turno-numero" class="text-5xl font-poppins font-black text-[#1e293b] tracking-tighter leading-none whitespace-nowrap">---</h3>
-            <span id="nuevo-turno-tipo" class="px-4 py-1 rounded-full bg-sena-50 text-sena-500 text-xs font-black uppercase tracking-widest"></span>
-            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Por favor espere su llamado</p>
-        </div>
-    </div>
-
     <!-- Modal de Llamado (Turno que va a ser atendido) -->
     <div id="llamado-modal" class="fixed inset-0 z-50 flex items-center justify-center p-10 bg-[#10069FB3] backdrop-blur-md transition-all duration-500 opacity-0 pointer-events-none scale-110">
         <div class="bg-white w-full max-w-5xl rounded-[4rem] p-16 shadow-2xl flex flex-col items-center text-center space-y-12 border-8 border-sena-orange/20 relative overflow-hidden">
@@ -327,8 +314,8 @@
         let lastCurrentAtncId = @json($turnoActual->atnc_id ?? null);
         const pollingInterval = 3000;
 
-        // Re-anuncio cada 20 minutos para turnos en espera
-        const REANUNCIO_INTERVAL = 20 * 60 * 1000; // 20 minutos en ms
+        // Re-anuncio cada 10 segundos para turnos en espera
+        const REANUNCIO_INTERVAL = 10 * 1000; // 10 segundos en ms
         let lastReanuncioTime = {}; // { tur_id: timestamp }
 
         // --- SISTEMA DE AUDIO ROBUSTO (WEB AUDIO API) ---
@@ -496,26 +483,15 @@
         }
 
         function mostrarNuevoTurno(turno) {
-            const modal = document.getElementById('nuevo-turno-modal');
-            document.getElementById('nuevo-turno-numero').textContent = turno.tur_numero;
-
             const tipoMap = {
-                'Victimas':    { label: 'Víctimas',    color: 'bg-rose-50 text-rose-500' },
-                'Prioritario': { label: 'Prioritario', color: 'bg-orange-50 text-orange-500' },
-                'General':     { label: 'General',     color: 'bg-sena-50 text-sena-500' },
-                'Empresario':  { label: 'Empresario',  color: 'bg-blue-50 text-blue-500' },
+                'Victimas':    'Víctimas',
+                'Prioritario': 'Prioritario',
+                'General':     'General',
+                'Empresario':  'Empresario',
             };
-            const info = tipoMap[turno.tur_tipo] || { label: turno.tur_tipo, color: 'bg-gray-50 text-gray-500' };
+            const label = tipoMap[turno.tur_tipo] || turno.tur_tipo;
 
-            const tipoEl = document.getElementById('nuevo-turno-tipo');
-            tipoEl.textContent = info.label;
-            tipoEl.className = `px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest ${info.color}`;
-
-            // Mostrar modal
-            modal.classList.remove('opacity-0', 'pointer-events-none');
-            modal.classList.add('opacity-100');
-
-            // Sonido inmediato — activar audio si es necesario
+            // Solo sonido + voz, sin modal
             if (!audioCtx) {
                 try { audioCtx = new AudioContext(); audioEnabled = true; } catch(e) {}
             }
@@ -523,24 +499,16 @@
                 audioCtx.resume().then(() => {
                     audioEnabled = true;
                     playBell();
+                    if (window.speechSynthesis) {
+                        window.speechSynthesis.cancel();
+                        const msg = new SpeechSynthesisUtterance(
+                            `Turno ${turno.tur_numero.replace('-', ' ')}. Tipo ${label}. Por favor espere su llamado.`
+                        );
+                        msg.lang = 'es-ES'; msg.rate = 0.9;
+                        window.speechSynthesis.speak(msg);
+                    }
                 });
             }
-
-            // Voz
-            if (window.speechSynthesis) {
-                window.speechSynthesis.cancel();
-                const msg = new SpeechSynthesisUtterance(
-                    `Turno ${turno.tur_numero.replace('-', ' ')}. Tipo ${info.label}. Por favor espere su llamado.`
-                );
-                msg.lang = 'es-ES'; msg.rate = 0.9;
-                window.speechSynthesis.speak(msg);
-            }
-
-            // Cerrar tras 5 segundos
-            setTimeout(() => {
-                modal.classList.add('opacity-0', 'pointer-events-none');
-                modal.classList.remove('opacity-100');
-            }, 5000);
         }
 
         function mostrarModalLlamado(turno) {
