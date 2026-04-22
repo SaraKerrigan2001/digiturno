@@ -58,9 +58,10 @@ class ApiController extends Controller
         $turnosEnEspera = $this->turnoRepo->getWaitingForPublicScreen()
                                 ->map(function($t) {
                                     return [
-                                        'tur_id' => $t->tur_id,
-                                        'tur_numero' => $t->tur_numero,
-                                        'tur_tipo' => $t->tur_tipo
+                                        'tur_id'        => $t->tur_id,
+                                        'tur_numero'    => $t->tur_numero,
+                                        'tur_tipo'      => $t->tur_tipo,
+                                        'tur_hora_fecha'=> $t->tur_hora_fecha,
                                     ];
                                 });
 

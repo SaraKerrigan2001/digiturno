@@ -503,22 +503,24 @@
             };
             const info = tipoMap[turno.tur_tipo] || { label: turno.tur_tipo, color: 'bg-gray-50 text-gray-500' };
 
-            // Actualizar modal
+            // Actualizar modal — SIEMPRE mostrar sin importar el audio
+            const modal = document.getElementById('nuevo-turno-modal');
+            if (!modal) return;
+
             document.getElementById('nuevo-turno-numero').textContent = turno.tur_numero;
             const tipoEl = document.getElementById('nuevo-turno-tipo');
             tipoEl.textContent = info.label;
             tipoEl.className = `px-5 py-1.5 rounded-full text-sm font-black uppercase tracking-widest ${info.color}`;
 
             // Mostrar con fondo oscuro
-            const modal = document.getElementById('nuevo-turno-modal');
+            modal.style.opacity = '1';
+            modal.style.pointerEvents = 'auto';
             modal.classList.remove('opacity-0', 'pointer-events-none');
             modal.classList.add('opacity-100');
 
-            // Sonido + voz
-            if (!audioCtx) {
-                try { audioCtx = new AudioContext(); audioEnabled = true; } catch(e) {}
-            }
-            if (audioCtx) {
+            // Intentar sonido + voz (no bloquea si falla)
+            try {
+                if (!audioCtx) audioCtx = new AudioContext();
                 audioCtx.resume().then(() => {
                     audioEnabled = true;
                     playBell();
@@ -530,11 +532,13 @@
                         msg.lang = 'es-ES'; msg.rate = 0.9;
                         window.speechSynthesis.speak(msg);
                     }
-                });
-            }
+                }).catch(() => {});
+            } catch(e) {}
 
             // Cerrar tras 6 segundos
             setTimeout(() => {
+                modal.style.opacity = '0';
+                modal.style.pointerEvents = 'none';
                 modal.classList.add('opacity-0', 'pointer-events-none');
                 modal.classList.remove('opacity-100');
             }, 6000);
