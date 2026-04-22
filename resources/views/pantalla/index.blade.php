@@ -325,7 +325,11 @@
         let audioEnabled = false;
         let lastTurnIds = @json($turnosEnEspera->pluck('tur_id'));
         let lastCurrentAtncId = @json($turnoActual->atnc_id ?? null);
-        const pollingInterval = 3000; // 3 segundos para mayor respuesta
+        const pollingInterval = 3000;
+
+        // Re-anuncio cada 20 minutos para turnos en espera
+        const REANUNCIO_INTERVAL = 20 * 60 * 1000; // 20 minutos en ms
+        let lastReanuncioTime = {}; // { tur_id: timestamp }
 
         // --- SISTEMA DE AUDIO ROBUSTO (WEB AUDIO API) ---
         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -451,6 +455,21 @@
                     lastCurrentAtncId = null;
                     updateCurrentTurnBox(null);
                 }
+
+                // 3. Re-anunciar turnos en espera cada 20 minutos
+                const ahora = Date.now();
+                data.turnosEnEspera.forEach(t => {
+                    const ultimoAnuncio = lastReanuncioTime[t.tur_id] || 0;
+                    if (ahora - ultimoAnuncio >= REANUNCIO_INTERVAL) {
+                        lastReanuncioTime[t.tur_id] = ahora;
+                        // Solo re-anunciar si ya pasaron al menos 20 min desde que llegó
+                        const llegada = new Date(t.tur_hora_fecha).getTime();
+                        const minutosEspera = (ahora - llegada) / 60000;
+                        if (minutosEspera >= 20) {
+                            setTimeout(() => mostrarNuevoTurno(t), 1000);
+                        }
+                    }
+                });
 
             } catch (error) {
                 console.error("Error al obtener actualizaciones:", error);
