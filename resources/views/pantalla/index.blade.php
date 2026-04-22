@@ -194,6 +194,19 @@
         </div>
     </main>
 
+    <!-- Modal Nuevo Turno — centrado con fondo oscuro -->
+    <div id="nuevo-turno-modal" class="fixed inset-0 z-40 flex items-center justify-center bg-black/60 transition-all duration-300 opacity-0 pointer-events-none">
+        <div class="bg-white rounded-3xl px-12 py-10 shadow-2xl flex flex-col items-center text-center space-y-4 border-2 border-sena-500/20 min-w-[300px]">
+            <div class="w-14 h-14 bg-sena-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
+                <i class="fa-solid fa-ticket"></i>
+            </div>
+            <p class="text-xs font-black text-sena-500 uppercase tracking-[0.3em]">Nuevo Turno Registrado</p>
+            <h3 id="nuevo-turno-numero" class="text-7xl font-poppins font-black text-[#1e293b] tracking-tighter leading-none whitespace-nowrap">---</h3>
+            <span id="nuevo-turno-tipo" class="px-5 py-1.5 rounded-full bg-sena-50 text-sena-500 text-sm font-black uppercase tracking-widest"></span>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Por favor espere su llamado</p>
+        </div>
+    </div>
+
     <!-- Modal de Llamado (Turno que va a ser atendido) -->
     <div id="llamado-modal" class="fixed inset-0 z-50 flex items-center justify-center p-10 bg-[#10069FB3] backdrop-blur-md transition-all duration-500 opacity-0 pointer-events-none scale-110">
         <div class="bg-white w-full max-w-5xl rounded-[4rem] p-16 shadow-2xl flex flex-col items-center text-center space-y-12 border-8 border-sena-orange/20 relative overflow-hidden">
@@ -484,14 +497,25 @@
 
         function mostrarNuevoTurno(turno) {
             const tipoMap = {
-                'Victimas':    'Víctimas',
-                'Prioritario': 'Prioritario',
-                'General':     'General',
-                'Empresario':  'Empresario',
+                'Victimas':    { label: 'Víctimas',    color: 'bg-rose-50 text-rose-500' },
+                'Prioritario': { label: 'Prioritario', color: 'bg-orange-50 text-orange-500' },
+                'General':     { label: 'General',     color: 'bg-sena-50 text-sena-500' },
+                'Empresario':  { label: 'Empresario',  color: 'bg-blue-50 text-blue-500' },
             };
-            const label = tipoMap[turno.tur_tipo] || turno.tur_tipo;
+            const info = tipoMap[turno.tur_tipo] || { label: turno.tur_tipo, color: 'bg-gray-50 text-gray-500' };
 
-            // Solo sonido + voz, sin modal
+            // Actualizar modal
+            document.getElementById('nuevo-turno-numero').textContent = turno.tur_numero;
+            const tipoEl = document.getElementById('nuevo-turno-tipo');
+            tipoEl.textContent = info.label;
+            tipoEl.className = `px-5 py-1.5 rounded-full text-sm font-black uppercase tracking-widest ${info.color}`;
+
+            // Mostrar con fondo oscuro
+            const modal = document.getElementById('nuevo-turno-modal');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.classList.add('opacity-100');
+
+            // Sonido + voz
             if (!audioCtx) {
                 try { audioCtx = new AudioContext(); audioEnabled = true; } catch(e) {}
             }
@@ -502,13 +526,19 @@
                     if (window.speechSynthesis) {
                         window.speechSynthesis.cancel();
                         const msg = new SpeechSynthesisUtterance(
-                            `Turno ${turno.tur_numero.replace('-', ' ')}. Tipo ${label}. Por favor espere su llamado.`
+                            `Turno ${turno.tur_numero.replace('-', ' ')}. Tipo ${info.label}. Por favor espere su llamado.`
                         );
                         msg.lang = 'es-ES'; msg.rate = 0.9;
                         window.speechSynthesis.speak(msg);
                     }
                 });
             }
+
+            // Cerrar tras 6 segundos
+            setTimeout(() => {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                modal.classList.remove('opacity-100');
+            }, 6000);
         }
 
         function mostrarModalLlamado(turno) {
