@@ -335,6 +335,23 @@
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioCtx = null;
 
+        // Intentar activar audio automáticamente al cargar
+        try {
+            audioCtx = new AudioContext();
+            if (audioCtx.state !== 'suspended') audioEnabled = true;
+        } catch(e) {}
+
+        // Activar al primer clic/toque en cualquier parte
+        function tryActivateAudio() {
+            if (audioEnabled) return;
+            try {
+                if (!audioCtx) audioCtx = new AudioContext();
+                audioCtx.resume().then(() => { audioEnabled = true; });
+            } catch(e) {}
+        }
+        document.addEventListener('click', tryActivateAudio, { once: false });
+        document.addEventListener('touchstart', tryActivateAudio, { once: false });
+
         function playDing() {
             if (!audioCtx) return;
             const osc = audioCtx.createOscillator();
@@ -395,18 +412,20 @@
         setInterval(checkUpdates, pollingInterval);
 
         function anunciarTurno(numero, modulo) {
-            if (!audioEnabled || !audioCtx) return;
-            
-            // Sonido de alerta generado por el navegador
-            playDing();
-            
-            setTimeout(() => {
-                const mensaje = new SpeechSynthesisUtterance(`Turno ${numero.replace('-', ' ')}, por favor dirigirse al módulo ${modulo}`);
-                mensaje.lang = 'es-ES';
-                mensaje.rate = 0.9;
-                mensaje.pitch = 1;
-                window.speechSynthesis.speak(mensaje);
-            }, 500);
+            if (!audioCtx) {
+                try { audioCtx = new AudioContext(); audioEnabled = true; } catch(e) { return; }
+            }
+            audioCtx.resume().then(() => {
+                audioEnabled = true;
+                playDing();
+                setTimeout(() => {
+                    const mensaje = new SpeechSynthesisUtterance(`Turno ${numero.replace('-', ' ')}, por favor dirigirse al módulo ${modulo}`);
+                    mensaje.lang = 'es-ES';
+                    mensaje.rate = 0.9;
+                    mensaje.pitch = 1;
+                    window.speechSynthesis.speak(mensaje);
+                }, 500);
+            });
         }
 
         // --- POLLING Y ACTUALIZACIÓN ---
@@ -496,12 +515,16 @@
             modal.classList.remove('opacity-0', 'pointer-events-none');
             modal.classList.add('opacity-100');
 
-            // Sonido inmediato
+            // Sonido inmediato — activar audio si es necesario
             if (!audioCtx) {
                 try { audioCtx = new AudioContext(); audioEnabled = true; } catch(e) {}
             }
-            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-            playBell();
+            if (audioCtx) {
+                audioCtx.resume().then(() => {
+                    audioEnabled = true;
+                    playBell();
+                });
+            }
 
             // Voz
             if (window.speechSynthesis) {
