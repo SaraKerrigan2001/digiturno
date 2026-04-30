@@ -41,13 +41,19 @@ class AsesorController extends Controller
 
         $isValid = false;
         if ($asesor) {
-            if ($pass === $asesor->ase_password) {
-                $isValid = true;
+            $currentStored = $asesor->ase_password;
+            // Si empieza con $2y$, es un hash de Bcrypt válido en Laravel
+            if (str_starts_with($currentStored, '$2y$')) {
+                if (\Illuminate\Support\Facades\Hash::check($pass, $currentStored)) {
+                    $isValid = true;
+                }
             } else {
-                try {
-                    $isValid = \Illuminate\Support\Facades\Hash::check($pass, $asesor->ase_password);
-                } catch (\Exception $e) {
-                    $isValid = false;
+                // Es texto plano (registro antiguo): comparar directamente
+                if ($pass === $currentStored) {
+                    $isValid = true;
+                    // Migrar automáticamente a hash para la próxima vez
+                    $asesor->ase_password = \Illuminate\Support\Facades\Hash::make($pass);
+                    $asesor->save();
                 }
             }
         }
@@ -75,31 +81,14 @@ class AsesorController extends Controller
 
     private function checkAuth()
     {
-        if (!session()->has('ase_id')) {
-            return false;
-        }
-        return true;
+        // Mantenido por compatibilidad; la protección real la ejerce el middleware auth.asesor
+        return session()->has('ase_id');
     }
 
     public function index()
     {
-        if (!$this->checkAuth())
-            return redirect()->route('asesor.login');
         $ase_id = session('ase_id');
-        $asesor = Asesor::with('persona')->find($ase_id);
-
-        // Demo Fallback: if no asesor in DB, create a mock one to avoid 500 errors
-        if (!$asesor) {
-            $asesor = new Asesor();
-            $asesor->ase_id = $ase_id;
-            $asesor->modulo = '04';
-            $asesor->persona = (object) [
-                'pers_nombres' => 'Asesor',
-                'pers_apellidos' => 'Pruebas',
-                'pers_tipodoc' => 'CC',
-                'pers_doc' => '123456'
-            ];
-        }
+        $asesor = Asesor::with('persona')->findOrFail($ase_id);
 
         // Atención en curso para este asesor
         $atencion = $this->turnoRepo->getActiveAttentionForAsesor($ase_id);
@@ -115,16 +104,8 @@ class AsesorController extends Controller
 
     public function actividad(Request $request)
     {
-        if (!$this->checkAuth())
-            return redirect()->route('asesor.login');
         $ase_id = session('ase_id');
-        $asesor = Asesor::with('persona')->find($ase_id);
-
-        if (!$asesor) {
-            $asesor = new Asesor();
-            $asesor->ase_id = $ase_id;
-            $asesor->modulo = '04';
-        }
+        $asesor = Asesor::with('persona')->findOrFail($ase_id);
 
         $query = Atencion::where('ASESOR_ase_id', $ase_id)
             ->with('turno.solicitante.persona');
@@ -132,9 +113,13 @@ class AsesorController extends Controller
         // Lógica de Filtro
         if ($request->has('estado') && $request->estado != '') {
             if ($request->estado == 'completado') {
-                $query->whereNotNull('atnc_hora_fin');
+                $query->whereNotNull('atnc_hora_fin')
+                      ->whereHas('turno', fn($q) => $q->where('tur_estado', 'Finalizado'));
             } elseif ($request->estado == 'proceso') {
                 $query->whereNull('atnc_hora_fin');
+            } elseif ($request->estado == 'ausente') {
+                $query->whereNotNull('atnc_hora_fin')
+                      ->whereHas('turno', fn($q) => $q->where('tur_estado', 'Ausente'));
             }
         }
 
@@ -154,40 +139,7 @@ class AsesorController extends Controller
         // Paginación en lugar de límite estático
         $atenciones = $query->orderBy('atnc_hora_inicio', 'desc')->paginate(5);
 
-        // Demo Fallback si la colección está vacía
-        if ($atenciones->isEmpty() && !$request->has('search') && !$request->has('estado')) {
-            // Creamos un paginator fake
-            $items = collect([
-                (object) [
-                    'atnc_id' => 1,
-                    'atnc_hora_inicio' => '2026-03-20 08:20:00',
-                    'atnc_hora_fin' => '2026-03-20 08:32:00',
-                    'turno' => (object) [
-                        'tur_numero' => 'G-001',
-                        'solicitante' => (object) ['persona' => (object) ['pers_nombres' => 'María', 'pers_apellidos' => 'Rodríguez', 'pers_doc' => '10203040']]
-                    ]
-                ],
-                (object) [
-                    'atnc_id' => 2,
-                    'atnc_hora_inicio' => '2026-03-20 09:15:00',
-                    'atnc_hora_fin' => '2026-03-20 09:23:00',
-                    'turno' => (object) [
-                        'tur_numero' => 'P-042',
-                        'solicitante' => (object) ['persona' => (object) ['pers_nombres' => 'Juan', 'pers_apellidos' => 'Pérez', 'pers_doc' => '50607080']]
-                    ]
-                ],
-                (object) [
-                    'atnc_id' => 3,
-                    'atnc_hora_inicio' => now(),
-                    'atnc_hora_fin' => null,
-                    'turno' => (object) [
-                        'tur_numero' => 'V-012',
-                        'solicitante' => (object) ['persona' => (object) ['pers_nombres' => 'Elena', 'pers_apellidos' => 'Gómez', 'pers_doc' => '90102030']]
-                    ]
-                ]
-            ]);
-            $atenciones = new \Illuminate\Pagination\LengthAwarePaginator($items, $items->count(), 5, 1, ['path' => $request->url(), 'query' => $request->query()]);
-        }
+        // Sin datos: la vista mostrará el estado vacío real
 
         // Lógica de Descarga Excel Premium
         if ($request->has('export') && $request->export == 'excel') {
@@ -304,25 +256,15 @@ class AsesorController extends Controller
 
     public function tramites()
     {
-        if (!$this->checkAuth())
-            return redirect()->route('asesor.login');
         $ase_id = session('ase_id');
-        $asesor = Asesor::with('persona')->find($ase_id);
+        $asesor = Asesor::with('persona')->findOrFail($ase_id);
         return view('asesor.tramites', compact('asesor'));
     }
 
     public function reportes()
     {
-        if (!$this->checkAuth())
-            return redirect()->route('asesor.login');
         $ase_id = session('ase_id');
-        $asesor = Asesor::with('persona')->find($ase_id);
-
-        if (!$asesor) {
-            $asesor = new Asesor();
-            $asesor->ase_id = $ase_id;
-            $asesor->modulo = '04';
-        }
+        $asesor = Asesor::with('persona')->findOrFail($ase_id);
 
         $hoy = now()->today();
 
@@ -345,26 +287,22 @@ class AsesorController extends Controller
         $tiempoPromedio = $atencionesCompletadas->count() > 0 ? round($tiempoTotal / $atencionesCompletadas->count(), 1) : 0;
 
         $metas = [
-            'atencion_meta' => 12,
+            'atencion_meta'  => 12,
             'atencion_actual' => $tiempoPromedio,
-            'diaria_meta' => 50,
-            'diaria_actual' => $atencionesHoy->count(),
-            'calificacion' => rand(45, 50) / 10
+            'diaria_meta'    => 50,
+            'diaria_actual'  => $atencionesHoy->count(),
+            // Calificación: dato real pendiente de módulo de encuestas; se muestra N/A por ahora
+            'calificacion'   => null,
         ];
 
+        // Top trámites: conteo real por tipo de atención del asesor hoy
         $topTramites = [
-            ['nombre' => 'Validación de HV', 'count' => rand(5, 20), 'color' => 'bg-emerald-500'],
-            ['nombre' => 'Inscripción SENA', 'count' => rand(5, 15), 'color' => 'bg-blue-500'],
-            ['nombre' => 'Certificación Laboral', 'count' => rand(2, 10), 'color' => 'bg-amber-500'],
-            ['nombre' => 'Orientación Ocupacional', 'count' => rand(1, 8), 'color' => 'bg-purple-500'],
-            ['nombre' => 'Asesoría Empresarial', 'count' => rand(0, 5), 'color' => 'bg-rose-500']
+            ['nombre' => 'Orientación Laboral',    'count' => Atencion::where('ASESOR_ase_id', $ase_id)->whereDate('atnc_hora_inicio', $hoy)->whereHas('turno', fn($q) => $q->where('tur_servicio', 'Orientacion'))->count(),    'color' => 'bg-emerald-500'],
+            ['nombre' => 'Formación Profesional',  'count' => Atencion::where('ASESOR_ase_id', $ase_id)->whereDate('atnc_hora_inicio', $hoy)->whereHas('turno', fn($q) => $q->where('tur_servicio', 'Formacion'))->count(),      'color' => 'bg-blue-500'],
+            ['nombre' => 'Emprendimiento',         'count' => Atencion::where('ASESOR_ase_id', $ase_id)->whereDate('atnc_hora_inicio', $hoy)->whereHas('turno', fn($q) => $q->where('tur_servicio', 'Emprendimiento'))->count(), 'color' => 'bg-amber-500'],
         ];
 
-        $feedback = [
-            ['user' => 'María R.', 'stars' => 5, 'comentario' => 'Muy amable y resolvió todas mis dudas.', 'time' => '10 min ago'],
-            ['user' => 'Juan P.', 'stars' => 5, 'comentario' => 'Atención rápida y eficiente.', 'time' => '1h ago'],
-            ['user' => 'Elena G.', 'stars' => 4, 'comentario' => 'Información completa del proceso.', 'time' => '3h ago']
-        ];
+        $feedback = [];
 
         $turnos = Atencion::where('ASESOR_ase_id', $ase_id)
             ->with('turno.solicitante.persona')
@@ -383,25 +321,8 @@ class AsesorController extends Controller
 
     public function configuracion()
     {
-        if (!$this->checkAuth())
-            return redirect()->route('asesor.login');
         $ase_id = session('ase_id');
-        $asesor = Asesor::with('persona')->find($ase_id);
-
-        if (!$asesor) {
-            $asesor = new Asesor();
-            $asesor->ase_id = $ase_id;
-            $asesor->modulo = '04';
-        }
-
-        if (!$asesor->persona) {
-            $asesor->persona = (object) [
-                'pers_nombres' => 'Carlos',
-                'pers_apellidos' => 'Ruiz',
-                'pers_doc' => '12345678'
-            ];
-        }
-
+        $asesor = Asesor::with('persona')->findOrFail($ase_id);
         return view('asesor.configuracion', compact('asesor'));
     }
 
@@ -426,47 +347,41 @@ class AsesorController extends Controller
 
     public function finalizar($atnc_id)
     {
-        if (!$this->checkAuth())
-            return redirect()->route('asesor.login');
-        $atencion = Atencion::findOrFail($atnc_id);
+        $atencion = Atencion::with('turno')->findOrFail($atnc_id);
         $atencion->update([
             'atnc_hora_fin' => now()
         ]);
+        
+        if ($atencion->turno) {
+            $atencion->turno->update(['tur_estado' => 'Finalizado']);
+        }
 
         return redirect()->route('asesor.index')->with('success', 'Atención finalizada con éxito.');
     }
 
     public function ausente($atnc_id)
     {
-        if (!$this->checkAuth())
-            return redirect()->route('asesor.login');
-        $atencion = Atencion::findOrFail($atnc_id);
+        $atencion = Atencion::with('turno')->findOrFail($atnc_id);
         $atencion->update([
             'atnc_hora_fin' => now()
-            // No cambiamos el tipo aquí ya que el enum es restrictivo (General/Prioritaria/Victimas)
         ]);
+
+        if ($atencion->turno) {
+            $atencion->turno->update(['tur_estado' => 'Ausente']);
+        }
 
         return redirect()->route('asesor.index')->with('warning', 'Ciudadano marcado como ausente.');
     }
 
     public function manualAsesor()
     {
-        if (!$this->checkAuth())
-            return redirect()->route('asesor.login');
         $ase_id = session('ase_id');
-        $asesor = Asesor::with('persona')->find($ase_id);
-        if (!$asesor) {
-            $asesor = new Asesor();
-            $asesor->ase_id = $ase_id;
-            $asesor->modulo = '04';
-        }
+        $asesor = Asesor::with('persona')->findOrFail($ase_id);
         return view('asesor.manual', compact('asesor'));
     }
 
     public function updatePersona(Request $request, $pers_doc)
     {
-        if (!$this->checkAuth())
-            return redirect()->route('asesor.login');
 
         $request->validate([
             'pers_nombres' => 'required|string|max:100',
@@ -487,15 +402,8 @@ class AsesorController extends Controller
      */
     public function registrarReceso()
     {
-        if (!$this->checkAuth())
-            return redirect()->route('asesor.login');
-
         $ase_id = session('ase_id');
-        $asesor = Asesor::find($ase_id);
-
-        if (!$asesor) {
-            return back()->with('error', 'Sesión no válida.');
-        }
+        $asesor = Asesor::findOrFail($ase_id);
 
         $resultado = $this->turnoRepo->iniciarReceso($asesor);
 
@@ -516,15 +424,8 @@ class AsesorController extends Controller
      */
     public function finalizarReceso()
     {
-        if (!$this->checkAuth())
-            return redirect()->route('asesor.login');
-
         $ase_id = session('ase_id');
-        $asesor = Asesor::find($ase_id);
-
-        if (!$asesor) {
-            return back()->with('error', 'Sesión no válida.');
-        }
+        $asesor = Asesor::findOrFail($ase_id);
 
         $resultado = $this->turnoRepo->finalizarReceso($asesor);
 

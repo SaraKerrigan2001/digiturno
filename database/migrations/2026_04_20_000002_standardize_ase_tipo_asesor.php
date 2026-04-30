@@ -16,6 +16,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
         // 1. Normalizar valores existentes antes de cambiar el tipo de columna
         DB::statement("UPDATE asesor SET ase_tipo_asesor = 'OV' WHERE ase_tipo_asesor IN ('Especializado', 'Victimas', 'OV')");
         DB::statement("UPDATE asesor SET ase_tipo_asesor = 'OT' WHERE ase_tipo_asesor IS NULL OR ase_tipo_asesor NOT IN ('OT', 'OV')");
@@ -26,6 +30,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
         DB::statement("ALTER TABLE asesor MODIFY ase_tipo_asesor VARCHAR(45) DEFAULT NULL");
     }
 };

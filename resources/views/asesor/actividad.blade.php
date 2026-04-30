@@ -26,6 +26,7 @@
                 <option value="">Todos los Estados</option>
                 <option value="completado" {{ request('estado') == 'completado' ? 'selected' : '' }}>Atendido</option>
                 <option value="proceso" {{ request('estado') == 'proceso' ? 'selected' : '' }}>En Proceso</option>
+                <option value="ausente" {{ request('estado') == 'ausente' ? 'selected' : '' }}>Ausente</option>
             </select>
             <button type="submit" class="h-10 px-4 flex items-center justify-center bg-sena-50 text-sena-600 font-bold border border-sena-100 rounded-xl hover:bg-sena-500 hover:text-white transition-all shadow-sm">
                 <i class="fa-solid fa-filter text-xs mr-2"></i>
@@ -96,11 +97,22 @@
                         </div>
                     </td>
                     <td class="px-10 py-8 text-center">
+                        @php
+                            $turEstado = $atn->turno->tur_estado ?? null;
+                            $esAusente = $turEstado === 'Ausente';
+                        @endphp
                         @if($atn->atnc_hora_fin)
-                            <div class="inline-flex items-center space-x-2 bg-emerald-50 text-emerald-600 text-[10px] font-black px-5 py-2 rounded-xl border border-emerald-100 uppercase tracking-widest">
-                                <i class="fa-solid fa-check-double"></i>
-                                <span>Atendido</span>
-                            </div>
+                            @if($esAusente)
+                                <div class="inline-flex items-center space-x-2 bg-amber-50 text-amber-600 text-[10px] font-black px-5 py-2 rounded-xl border border-amber-100 uppercase tracking-widest">
+                                    <i class="fa-solid fa-user-slash"></i>
+                                    <span>Ausente</span>
+                                </div>
+                            @else
+                                <div class="inline-flex items-center space-x-2 bg-emerald-50 text-emerald-600 text-[10px] font-black px-5 py-2 rounded-xl border border-emerald-100 uppercase tracking-widest">
+                                    <i class="fa-solid fa-check-double"></i>
+                                    <span>Atendido</span>
+                                </div>
+                            @endif
                         @else
                             <div class="inline-flex items-center space-x-2 bg-blue-50 text-blue-600 text-[10px] font-black px-5 py-2 rounded-xl border border-blue-100 uppercase tracking-widest animate-pulse">
                                 <i class="fa-solid fa-spinner fa-spin"></i>

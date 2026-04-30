@@ -8,6 +8,7 @@ use App\Models\Atencion;
 use App\Models\Asesor;
 use App\Models\Turno;
 use App\Models\PausaAsesor;
+use App\Models\ConfiguracionSistema;
 use App\Repositories\TurnoRepository;
 use Carbon\Carbon;
 
@@ -28,22 +29,29 @@ class CoordinadorController extends Controller
             'password' => 'required'
         ]);
 
-        // Validate against the coordinador table
         $coordinador = DB::table('coordinador')
             ->join('persona', 'coordinador.PERSONA_pers_doc', '=', 'persona.pers_doc')
             ->where('coordinador.coor_correo', trim($request->email))
-            ->select('coordinador.*', 'persona.pers_nombres', 'persona.pers_apellidos')
+            ->select('coordinador.coor_id', 'coordinador.coor_password', 'coordinador.coor_correo',
+                     'persona.pers_nombres', 'persona.pers_apellidos')
             ->first();
 
         $isValid = false;
         if ($coordinador) {
-            if ($request->password === $coordinador->coor_password) {
-                $isValid = true;
+            $currentStored = $coordinador->coor_password;
+            // Si empieza con $2y$, es un hash de Bcrypt
+            if (str_starts_with($currentStored, '$2y$')) {
+                if (\Illuminate\Support\Facades\Hash::check($request->password, $currentStored)) {
+                    $isValid = true;
+                }
             } else {
-                try {
-                    $isValid = \Illuminate\Support\Facades\Hash::check($request->password, $coordinador->coor_password);
-                } catch (\Exception $e) {
-                    $isValid = false;
+                // Es texto plano: comparar directamente
+                if ($request->password === $currentStored) {
+                    $isValid = true;
+                    // Migrar a hash
+                    DB::table('coordinador')
+                        ->where('coor_id', $coordinador->coor_id)
+                        ->update(['coor_password' => \Illuminate\Support\Facades\Hash::make($request->password)]);
                 }
             }
         }
@@ -81,9 +89,12 @@ class CoordinadorController extends Controller
         if (!$this->checkAuth()) return redirect()->route('coordinador.login');
         $hoy = now()->today();
 
-        // KPIs
+        // KPIs con tur_estado
         $usuariosHoy = Turno::whereDate('tur_hora_fecha', $hoy)->count();
-        $enAtencion = Atencion::whereNull('atnc_hora_fin')->count();
+        $enEspera = Turno::whereDate('tur_hora_fecha', $hoy)->where('tur_estado', 'Espera')->count();
+        $enAtencion = Turno::whereDate('tur_hora_fecha', $hoy)->where('tur_estado', 'Atendiendo')->count();
+        $finalizados = Turno::whereDate('tur_hora_fecha', $hoy)->where('tur_estado', 'Finalizado')->count();
+        $ausentes = Turno::whereDate('tur_hora_fecha', $hoy)->where('tur_estado', 'Ausente')->count();
         $satisfaccion = "4.8/5";
         
         // Tiempo Medio de Espera (Minutos)
@@ -117,33 +128,36 @@ class CoordinadorController extends Controller
             ->pluck('count', 'pers_tipodoc')
             ->toArray();
 
-        // Advisor Status Real (Checking table atencion)
+        // Estado real de asesores basado en tabla atencion y pausas_asesor
         $asesoresStatus = Asesor::with('persona')->get()->map(function($ase) {
             $atencionActiva = Atencion::where('ASESOR_ase_id', $ase->ase_id)
                                     ->whereNull('atnc_hora_fin')
                                     ->with('turno.persona')
                                     ->first();
-            
+
+            $pausaActiva = \App\Models\PausaAsesor::where('ASESOR_ase_id', $ase->ase_id)
+                                    ->whereNull('hora_fin')
+                                    ->exists();
+
             $estado = 'Libre';
+            if ($pausaActiva)    $estado = 'Descanso';
             if ($atencionActiva) $estado = 'Atendiendo';
-            // MOCK: Si no tiene atención y su ase_id es par, simular descanso para demo visual
-            else if ($ase->ase_id % 2 == 0) $estado = 'Descanso';
 
             return [
-                'nombre' => $ase->persona->pers_nombres . ' ' . $ase->persona->pers_apellidos,
-                'modulo' => $ase->ase_id,
-                'estado' => $estado,
-                'atencion' => $atencionActiva,
-                'inicio_sesion' => $atencionActiva ? $atencionActiva->atnc_hora_inicio->format('H:i') : '--:--',
-                'ase_foto' => $ase->ase_foto ?? 'images/foto de perfil.jpg'
+                'nombre'       => $ase->persona->pers_nombres . ' ' . $ase->persona->pers_apellidos,
+                'modulo'       => $ase->ase_id,
+                'estado'       => $estado,
+                'atencion'     => $atencionActiva,
+                'inicio_sesion'=> $atencionActiva ? $atencionActiva->atnc_hora_inicio->format('H:i') : '--:--',
+                'ase_foto'     => $ase->ase_foto ?? 'images/foto de perfil.jpg',
             ];
         });
 
         $alertas = [];
 
-        // 1. Turnos en espera > 15 min
+        // 1. Turnos en espera > 15 min usando tur_estado
         $turnosRetrasados = Turno::whereDate('tur_hora_fecha', $hoy)
-            ->doesntHave('atencion')
+            ->where('tur_estado', 'Espera')
             ->where('tur_hora_fecha', '<', now()->subMinutes(15))
             ->count();
             
@@ -155,8 +169,8 @@ class CoordinadorController extends Controller
             ];
         }
 
-        // 2. Módulos Inactivos con cola
-        $turnosEnEspera = Turno::whereDate('tur_hora_fecha', $hoy)->doesntHave('atencion')->count();
+        // 2. Módulos Inactivos con cola usando tur_estado
+        $turnosEnEspera = Turno::whereDate('tur_hora_fecha', $hoy)->where('tur_estado', 'Espera')->count();
         if ($turnosEnEspera > 0 && $enAtencion == 0) {
             $alertas[] = [
                 'msg' => 'Hay cola pero 0 Asesores Atendiendo',
@@ -191,7 +205,7 @@ class CoordinadorController extends Controller
         ];
 
         return view('coordinador.dashboard', compact(
-            'usuariosHoy', 'enAtencion', 'satisfaccion', 'tiempoMedio', 
+            'usuariosHoy', 'enAtencion', 'enEspera', 'finalizados', 'ausentes', 'satisfaccion', 'tiempoMedio', 
             'flowLabels', 'flowValues', 'docData', 'asesoresStatus', 'alertas'
         ));
     }
@@ -226,8 +240,14 @@ class CoordinadorController extends Controller
             $doc = $t->solicitante && $t->solicitante->persona ? $t->solicitante->persona->pers_doc : '-';
             $asesor = $t->atencion && $t->atencion->asesor && $t->atencion->asesor->persona ? explode(' ', $t->atencion->asesor->persona->pers_nombres)[0] : 'En Cola';
             
-            $estado = $t->atencion ? 'ATENDIDO' : 'EN ESPERA';
-            $estadoColor = $t->atencion ? '#10b981' : '#f59e0b';
+            $estado = $t->tur_estado;
+            $estadoColor = match($estado) {
+                'Espera' => '#f59e0b',
+                'Atendiendo' => '#3b82f6',
+                'Finalizado' => '#10b981',
+                'Ausente' => '#ef4444',
+                default => '#64748b'
+            };
             
             $tipoColor = $t->tur_tipo == 'General' ? '#10b981' : (in_array($t->tur_tipo, ['Prioritario', 'Prioritaria']) ? '#f59e0b' : '#3b82f6');
             
@@ -269,7 +289,15 @@ class CoordinadorController extends Controller
         $distribucionTipos = [
             'General' => Turno::whereDate('tur_hora_fecha', $hoy)->where('tur_tipo', 'General')->count(),
             'Prioritario' => Turno::whereDate('tur_hora_fecha', $hoy)->whereIn('tur_tipo', ['Prioritario', 'Prioritaria'])->count(),
-            'Víctimas' => Turno::whereDate('tur_hora_fecha', $hoy)->where('tur_tipo', 'Victimas')->count()
+            'Víctimas' => Turno::whereDate('tur_hora_fecha', $hoy)->where('tur_tipo', 'Victimas')->count(),
+            'Empresarios' => Turno::whereDate('tur_hora_fecha', $hoy)->where('tur_perfil', 'Empresario')->count()
+        ];
+
+        $distribucionEstados = [
+            'Espera' => Turno::whereDate('tur_hora_fecha', $hoy)->where('tur_estado', 'Espera')->count(),
+            'Atendiendo' => Turno::whereDate('tur_hora_fecha', $hoy)->where('tur_estado', 'Atendiendo')->count(),
+            'Finalizado' => Turno::whereDate('tur_hora_fecha', $hoy)->where('tur_estado', 'Finalizado')->count(),
+            'Ausente' => Turno::whereDate('tur_hora_fecha', $hoy)->where('tur_estado', 'Ausente')->count()
         ];
         
         $tiempoTotal = 0;
@@ -280,30 +308,26 @@ class CoordinadorController extends Controller
         $tiempoPromedio = $atencionesCompletadas->count() > 0 ? round($tiempoTotal / $atencionesCompletadas->count(), 1) : 0;
         
         $metas = [
-            'atencion_meta' => 12,
+            'atencion_meta'  => 12,
             'atencion_actual' => $tiempoPromedio,
-            'diaria_meta' => 200,
-            'diaria_actual' => $atencionesHoy->count(),
-            'calificacion' => rand(45, 50) / 10
+            'diaria_meta'    => 200,
+            'diaria_actual'  => $atencionesHoy->count(),
+            // Calificación: dato real pendiente de módulo de encuestas; se muestra N/A por ahora
+            'calificacion'   => null,
         ];
-        
+
+        // Top trámites: conteo real por servicio hoy
         $topTramites = [
-            ['nombre' => 'Validación de HV', 'count' => rand(10, 50), 'color' => 'bg-emerald-500'],
-            ['nombre' => 'Inscripción SENA', 'count' => rand(10, 50), 'color' => 'bg-blue-500'],
-            ['nombre' => 'Certificación Laboral', 'count' => rand(5, 30), 'color' => 'bg-amber-500'],
-            ['nombre' => 'Orientación Ocupacional', 'count' => rand(5, 20), 'color' => 'bg-purple-500'],
-            ['nombre' => 'Asesoría Empresarial', 'count' => rand(1, 15), 'color' => 'bg-rose-500']
+            ['nombre' => 'Orientación Laboral',   'count' => Turno::whereDate('tur_hora_fecha', $hoy)->where('tur_servicio', 'Orientacion')->count(),    'color' => 'bg-emerald-500'],
+            ['nombre' => 'Formación Profesional', 'count' => Turno::whereDate('tur_hora_fecha', $hoy)->where('tur_servicio', 'Formacion')->count(),      'color' => 'bg-blue-500'],
+            ['nombre' => 'Emprendimiento',        'count' => Turno::whereDate('tur_hora_fecha', $hoy)->where('tur_servicio', 'Emprendimiento')->count(), 'color' => 'bg-amber-500'],
         ];
-        
-        $feedback = [
-            ['user' => 'María R.', 'stars' => 5, 'comentario' => 'Servicio excelente en toda la sede.', 'time' => '10 min ago'],
-            ['user' => 'Juan P.', 'stars' => 5, 'comentario' => 'Tiempos de espera muy cortos hoy.', 'time' => '1h ago'],
-            ['user' => 'Elena G.', 'stars' => 4, 'comentario' => 'Información completa del proceso.', 'time' => '3h ago']
-        ];
+
+        $feedback = [];
 
         $turnos = Turno::with(['solicitante.persona', 'atencion.asesor.persona'])->orderBy('tur_hora_fecha', 'desc')->paginate(15);
 
-        return view('coordinador.reportes', compact('distribucionTipos', 'metas', 'topTramites', 'feedback', 'turnos'));
+        return view('coordinador.reportes', compact('distribucionTipos', 'distribucionEstados', 'metas', 'topTramites', 'feedback', 'turnos'));
     }
 
     public function modulos()
@@ -317,6 +341,26 @@ class CoordinadorController extends Controller
     {
         if (!$this->checkAuth()) return redirect()->route('coordinador.login');
         return view('coordinador.configuracion');
+    }
+
+    /**
+     * Actualiza el ciclo de reinicio de turnos (dia | semana | mes).
+     * Accesible solo para coordinadores autenticados.
+     */
+    public function actualizarCicloTurno(Request $request)
+    {
+        if (!$this->checkAuth()) return redirect()->route('coordinador.login');
+
+        $request->validate([
+            'ciclo_turno' => 'required|in:dia,semana,mes',
+        ]);
+
+        \App\Models\ConfiguracionSistema::set('ciclo_turno', $request->ciclo_turno);
+
+        $etiquetas = ['dia' => 'Diario', 'semana' => 'Semanal', 'mes' => 'Mensual'];
+        $etiqueta  = $etiquetas[$request->ciclo_turno] ?? $request->ciclo_turno;
+
+        return back()->with('success', "Ciclo de turnos actualizado a: {$etiqueta}. La validación de duplicados y la numeración correlativa ahora aplican por {$etiqueta}.");
     }
 
     public function storeAsesor(Request $request)
@@ -415,7 +459,7 @@ class CoordinadorController extends Controller
         
         // Contar turnos en espera (donde no existe registro en la tabla atencion)
         $stats = Turno::whereDate('tur_hora_fecha', $hoy)
-            ->whereDoesntHave('atencion')
+            ->where('tur_estado', 'Espera')
             ->selectRaw('tur_tipo, count(*) as count')
             ->groupBy('tur_tipo')
             ->pluck('count', 'tur_tipo')
@@ -507,7 +551,7 @@ class CoordinadorController extends Controller
         // ── Turnos en espera con tiempo > 20 minutos (alerta visual) ─────────
         $turnosEspera20 = Turno::whereDate('tur_hora_fecha', $hoy)
             ->whereDoesntHave('atencion')
-            ->where('tur_hora_fecha', '<', now()->subMinutes(20))
+            ->where('tur_hora_fecha', '<', now()->subSeconds(40))
             ->with('solicitante.persona')
             ->orderBy('tur_hora_fecha', 'asc')
             ->get()

@@ -12,14 +12,19 @@ class PantallaController extends Controller
     {
         // Turno que está siendo atendido actualmente (con hora_fin null)
         $atencionActual = Atencion::whereNull('atnc_hora_fin')
-                                  ->with(['turno', 'asesor'])
+                                  ->with(['turno.persona', 'asesor'])
                                   ->latest('atnc_hora_inicio')
                                   ->first();
 
+        $persona = $atencionActual && $atencionActual->turno->persona ? $atencionActual->turno->persona : null;
+        $nombreCompleto = $persona ? "{$persona->pers_nombres} {$persona->pers_apellidos}" : 'Ciudadano';
+
         $turnoActual = $atencionActual ? (object)[
             'tur_numero' => $atencionActual->turno->tur_numero,
-            'modulo' => $atencionActual->ASESOR_ase_id,
-            'ase_foto' => $atencionActual->asesor->ase_foto ?? 'images/foto de perfil.jpg'
+            'ciudadano'  => $nombreCompleto,
+            'modulo'     => $atencionActual->ASESOR_ase_id,
+            'ase_foto'   => $atencionActual->asesor->ase_foto ?? 'images/foto de perfil.jpg',
+            'atnc_id'    => $atencionActual->atnc_id,
         ] : null;
 
         // Turnos en espera (Ordenados por prioridad SENA: Víctima > Prioritario > General)
@@ -39,13 +44,17 @@ class PantallaController extends Controller
     {
         // Turno que está siendo atendido actualmente
         $atencionActual = Atencion::whereNull('atnc_hora_fin')
-                                  ->with(['turno', 'asesor'])
+                                  ->with(['turno.persona', 'asesor'])
                                   ->latest('atnc_hora_inicio')
                                   ->first();
+
+        $persona = $atencionActual && $atencionActual->turno->persona ? $atencionActual->turno->persona : null;
+        $nombreCompleto = $persona ? "{$persona->pers_nombres} {$persona->pers_apellidos}" : 'Ciudadano';
 
         $turnoActual = $atencionActual ? [
             'tur_id' => $atencionActual->turno->tur_id,
             'tur_numero' => $atencionActual->turno->tur_numero,
+            'ciudadano' => $nombreCompleto,
             'modulo' => $atencionActual->ASESOR_ase_id,
             'ase_foto' => $atencionActual->asesor->ase_foto ? asset($atencionActual->asesor->ase_foto) : asset('images/foto de perfil.jpg'),
             'atnc_id' => $atencionActual->atnc_id

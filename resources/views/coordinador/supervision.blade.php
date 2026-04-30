@@ -31,8 +31,8 @@
             <h3 class="text-2xl font-black text-gray-800 leading-none">
                 {{ $tiemposMedios['tiempo_espera_medio'] > 0 ? $tiemposMedios['tiempo_espera_medio'] . ' min' : '—' }}
             </h3>
-            <p class="text-[10px] font-bold mt-1 {{ $tiemposMedios['tiempo_espera_medio'] > 20 ? 'text-red-500' : 'text-green-500' }}">
-                {{ $tiemposMedios['tiempo_espera_medio'] > 20 ? '⚠ Supera límite (20 min)' : '✓ Dentro del límite' }}
+            <p class="text-[10px] font-bold mt-1 {{ $tiemposMedios['tiempo_espera_medio'] > 1 ? 'text-red-500' : 'text-green-500' }}">
+                {{ $tiemposMedios['tiempo_espera_medio'] > 1 ? '⚠ Supera límite (1 min)' : '✓ Dentro del límite' }}
             </p>
         </div>
     </div>
@@ -174,7 +174,7 @@
     <div class="bg-white p-6 rounded-2xl shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)] border border-gray-100 {{ $turnosEspera20->count() > 0 ? 'border-l-4 border-l-red-500' : '' }}">
         <div class="flex items-center justify-between mb-6">
             <div>
-                <h3 class="text-[10px] font-black {{ $turnosEspera20->count() > 0 ? 'text-red-500' : 'text-gray-400' }} uppercase tracking-widest">Alertas de Espera &gt; 20 min</h3>
+                <h3 class="text-[10px] font-black {{ $turnosEspera20->count() > 0 ? 'text-red-500' : 'text-gray-400' }} uppercase tracking-widest">Alertas de Espera &gt; 1 min</h3>
                 <p class="text-xs font-bold text-gray-600 mt-1">{{ $turnosEspera20->count() }} turno(s) con espera crítica</p>
             </div>
             <div class="w-10 h-10 {{ $turnosEspera20->count() > 0 ? 'bg-red-50 text-red-500 animate-bounce' : 'bg-green-50 text-green-500' }} rounded-xl flex items-center justify-center">
@@ -201,7 +201,7 @@
                     <i class="fa-solid fa-check text-green-500 text-xl"></i>
                 </div>
                 <p class="text-xs font-black text-gray-900 uppercase tracking-wide">Todo en orden</p>
-                <p class="text-[10px] text-gray-400 mt-1">Todos los turnos en espera son &lt; 20 minutos</p>
+                <p class="text-[10px] text-gray-400 mt-1">Todos los turnos en espera son &lt; 1 minuto</p>
             </div>
             @endforelse
         </div>
@@ -268,7 +268,7 @@
     Actualización automática cada 60 seg &nbsp;·&nbsp; <a href="{{ route('coordinador.supervision') }}" class="text-sena-blue font-bold hover:underline">Actualizar ahora</a>
 </p>
 
-<!-- MODAL DE ALERTA CRÍTICA (ESPERA > 20 MIN) -->
+<!-- MODAL DE ALERTA CRÍTICA — TURNO LLAMADO SIN ATENDER -->
 <div id="criticoModal" class="fixed inset-0 z-[200] hidden items-center justify-center p-6 bg-red-900/40 backdrop-blur-sm transition-all duration-500">
     <div class="bg-white w-full max-w-xl rounded-[2.5rem] shadow-[0_35px_60px_-15px_rgba(220,38,38,0.3)] border-4 border-red-500 overflow-hidden animate-in zoom-in duration-300">
         <div class="bg-red-500 p-8 flex flex-col items-center text-center text-white relative">
@@ -278,32 +278,19 @@
             <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-4 animate-bounce">
                 <i class="fa-solid fa-bell text-4xl"></i>
             </div>
-            <h3 class="text-2xl font-black uppercase tracking-tighter italic">Alerta de Espera Crítica</h3>
-            <p class="text-[10px] font-bold uppercase tracking-[0.3em] opacity-80 mt-1">Supervisión en tiempo real — CU-04</p>
+            <h3 class="text-2xl font-black uppercase tracking-tighter italic">Tiempo de Atención Vencido</h3>
+            <p class="text-[10px] font-bold uppercase tracking-[0.3em] opacity-80 mt-1">Turno llamado sin respuesta del ciudadano</p>
         </div>
         <div class="p-8 space-y-6">
             <div class="space-y-3">
-                <p class="text-center text-xs font-bold text-gray-400 uppercase tracking-widest">Turnos sin llamar por > 20 minutos:</p>
-                <div class="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-                    @foreach($turnosEspera20 as $t)
-                    <div class="flex items-center justify-between p-4 bg-red-50 border border-red-100 rounded-2xl">
-                        <div class="flex items-center space-x-3">
-                            <span class="w-10 h-10 bg-red-500 text-white rounded-xl flex items-center justify-center font-black text-xs shadow-sm">{{ $t->tur_numero }}</span>
-                            <div>
-                                <p class="text-sm font-black text-gray-800">{{ $t->solicitante->persona->pers_nombres ?? 'Ciudadano' }}</p>
-                                <p class="text-[9px] font-bold text-red-500 uppercase tracking-widest">{{ $t->tur_perfil }} · {{ $t->tur_servicio }}</p>
-                            </div>
-                        </div>
-                        <span class="text-xs font-black text-red-600 bg-white border border-red-100 px-3 py-1 rounded-full">{{ $t->minutos_espera }}m</span>
-                    </div>
-                    @endforeach
-                </div>
+                <p class="text-center text-xs font-bold text-gray-400 uppercase tracking-widest">Turnos llamados hace más de 40 segundos:</p>
+                <div id="lista-vencidos" class="space-y-2 max-h-48 overflow-y-auto pr-2"></div>
             </div>
             <div class="flex flex-col space-y-3">
-                <button onclick="cerrarAlertModal()" class="w-full py-5 bg-gray-900 text-white font-black rounded-2xl shadow-xl hover:bg-black transition-all active:scale-95 uppercase tracking-widest text-xs">Entendido, atender ahora</button>
+                <button onclick="cerrarAlertModal()" class="w-full py-5 bg-gray-900 text-white font-black rounded-2xl shadow-xl hover:bg-black transition-all active:scale-95 uppercase tracking-widest text-xs">Entendido</button>
                 <div class="flex items-center justify-center space-x-2 text-[9px] font-bold text-gray-300 uppercase tracking-widest">
                     <i class="fa-solid fa-clock"></i>
-                    <span>Siguiente verificación en 60 segundos</span>
+                    <span>Verificación automática cada 15 segundos</span>
                 </div>
             </div>
         </div>
@@ -315,33 +302,33 @@
 @section('scripts')
 <script>
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
+    let modalAbierto = false;
+
     function playAlertSound() {
-        const now = audioCtx.currentTime;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(440, now);
-        osc.frequency.exponentialRampToValueAtTime(880, now + 0.1);
-        osc.frequency.exponentialRampToValueAtTime(440, now + 0.2);
-        
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
-        
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        
-        osc.start(now);
-        osc.stop(now + 0.8);
+        try {
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(440, now);
+            osc.frequency.exponentialRampToValueAtTime(880, now + 0.1);
+            osc.frequency.exponentialRampToValueAtTime(440, now + 0.2);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.8);
+        } catch(e) {}
     }
 
     function toggleAlertModal(show) {
         const modal = document.getElementById('criticoModal');
+        modalAbierto = show;
         if (show) {
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            try { playAlertSound(); } catch(e) { console.log("Audio interaction required"); }
+            playAlertSound();
         } else {
             modal.classList.add('hidden');
             modal.classList.remove('flex');
@@ -358,16 +345,59 @@
             ahora.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     }
 
+    function verificarTurnosVencidos() {
+        fetch('{{ route("coordinador.api.vencidos") }}')
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success) return;
+
+                if (data.total > 0) {
+                    // Renderizar lista en el modal
+                    const lista = document.getElementById('lista-vencidos');
+                    lista.innerHTML = data.vencidos.map(t => {
+                        const mins = Math.floor(t.segundos / 60);
+                        const segs = t.segundos % 60;
+                        // Mostrar máximo "1m 00s" como límite visual
+                        const tiempoLabel = mins > 0 ? `${mins}m ${segs}s` : `${segs}s`;
+                        const tiempoColor = mins >= 1 ? 'text-red-600' : 'text-orange-500';
+                        return `
+                        <div class="flex items-center justify-between p-4 bg-red-50 border border-red-100 rounded-2xl">
+                            <div class="flex items-center space-x-3">
+                                <span class="w-10 h-10 bg-red-500 text-white rounded-xl flex items-center justify-center font-black text-xs shadow-sm">${t.tur_numero}</span>
+                                <div>
+                                    <p class="text-sm font-black text-gray-800">${t.ciudadano}</p>
+                                    <p class="text-[9px] font-bold text-red-500 uppercase tracking-widest">${t.tur_perfil} · ${t.tur_servicio} · Módulo ${t.modulo}</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-black ${tiempoColor} bg-white border border-red-100 px-3 py-1 rounded-full flex items-center gap-1">
+                                <i class="fa-solid fa-stopwatch text-[10px]"></i> ${tiempoLabel}
+                            </span>
+                        </div>
+                    `}).join('');
+
+                    // Solo abrir si no está ya abierto
+                    if (!modalAbierto) {
+                        toggleAlertModal(true);
+                    }
+                } else {
+                    // Si ya no hay vencidos y el modal estaba abierto, cerrarlo
+                    if (modalAbierto) {
+                        toggleAlertModal(false);
+                    }
+                }
+            })
+            .catch(() => {});
+    }
+
     window.onload = () => {
         actualizarReloj();
         setInterval(actualizarReloj, 1000);
-        
-        // Disparar alerta si hay turnos críticos (>0)
-        @if($turnosEspera20->count() > 0)
-            setTimeout(() => toggleAlertModal(true), 500);
-        @endif
 
-        // Auto-refresh cada 60s
+        // Verificar turnos vencidos cada 15 segundos
+        verificarTurnosVencidos();
+        setInterval(verificarTurnosVencidos, 15000);
+
+        // Auto-refresh de la página cada 60s
         setTimeout(() => location.reload(), 60000);
     };
 </script>
