@@ -291,7 +291,7 @@
                 <button type="button" onclick="pressPhone('0'); playKey();" class="h-12 bg-white hover:bg-slate-50 border-2 border-transparent hover:border-sena-100 rounded-2xl flex items-center justify-center text-xl font-black text-slate-700 shadow-sm hover:shadow-md transition-all active:scale-95">0</button>
                 <button type="button" onclick="backspacePhone(); playKey();" class="h-12 bg-white rounded-2xl flex items-center justify-center text-lg text-slate-300 shadow-sm hover:text-amber-500 transition-colors"><i class="fa-solid fa-delete-left"></i></button>
             </div>
-            <button type="button" onclick="nextStep(6); playKey();" class="w-full max-w-2xl py-4 bg-sena-orange text-white font-black text-base rounded-[2rem] shadow-xl hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-3 uppercase tracking-widest">
+            <button type="button" onclick="validatePhone(); playKey();" class="w-full max-w-2xl py-4 bg-sena-orange text-white font-black text-base rounded-[2rem] shadow-xl hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-3 uppercase tracking-widest">
                 <span>CONTINUAR</span><i class="fa-solid fa-chevron-right"></i>
             </button>
         </div>
@@ -605,6 +605,13 @@ function updatePhoneDisplay() {
     d.innerText = phoneNumber.replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3") || "300 000 0000";
     d.style.color = phoneNumber ? "#1e293b" : "#cbd5e1";
     document.getElementById('hidden_pers_telefono').value = phoneNumber;
+}
+function validatePhone() {
+    if (phoneNumber.length === 10) {
+        nextStep(6);
+    } else {
+        alert("Por favor, ingrese un número de teléfono válido de 10 dígitos.");
+    }
 }
 function selectChannel(method, btn) {
     document.getElementById('hidden_receive_method').value = method;
