@@ -106,11 +106,11 @@
     </header>
 
     <!-- Content Area (Scrollable) -->
-    <form id="kioskForm" action="{{ route('turnos.store') }}" method="POST" onsubmit="return validateForm();" class="flex-1 w-full overflow-y-auto overflow-x-hidden pt-4 pb-10 custom-scrollbar">
+    <form id="kioskForm" action="{{ route('turnos.store') }}" method="POST" onsubmit="return validateForm();" class="flex-1 w-full flex flex-col overflow-y-auto overflow-x-hidden pt-4 pb-10 custom-scrollbar">
         @csrf
 
         <!-- STEP 1: BIENVENIDA -->
-        <div id="step1" class="step-content active w-full flex-col items-center justify-center text-center px-6 md:px-10 py-3 md:py-5 space-y-4 md:space-y-6">
+        <div id="step1" class="step-content active flex-1 w-full flex-col items-center justify-center text-center px-6 md:px-10 py-3 md:py-5 space-y-4 md:space-y-8">
             <div class="space-y-3 max-w-3xl">
                 <h1 id="welcomeTitle" class="text-2xl md:text-4xl lg:text-5xl font-black text-sena-navy tracking-tight leading-tight uppercase">Bienvenido al <br>Centro de Atención</h1>
                 <p id="welcomeDescription" class="text-sm md:text-base font-medium text-slate-500 max-w-2xl mx-auto">Por favor toca el botón para iniciar tu proceso de asignación de turno.</p>
@@ -143,7 +143,7 @@
         </div>
 
         <!-- STEP 2: TRATAMIENTO DE DATOS -->
-        <div id="step2" class="step-content w-full flex-col items-center justify-start p-4 md:p-6 space-y-4">
+        <div id="step2" class="step-content flex-1 w-full flex-col items-center justify-center p-4 md:p-6 space-y-4">
             <div class="text-center space-y-2">
                 <h3 class="text-3xl font-poppins font-black text-[#1e293b] tracking-tighter leading-none">Tratamiento de Datos</h3>
                 <p class="text-sm text-slate-500 font-medium">Para brindarte un servicio personalizado, requerimos procesar tu información institucional.</p>
@@ -184,7 +184,7 @@
         </div>
 
         <!-- STEP 3: PERFIL DE ATENCIÓN -->
-        <div id="step3" class="step-content w-full flex-col items-center justify-start p-4 md:p-6 space-y-4">
+        <div id="step3" class="step-content flex-1 w-full flex-col items-center justify-center p-4 md:p-6 space-y-4">
             <div class="text-center space-y-1.5">
                 <h2 class="text-2xl font-poppins font-black text-[#1e293b] tracking-tight leading-tight">¿Cuál es su <span class="text-sena-500">categoría</span> de usuario?</h2>
                 <p class="text-sm font-medium text-slate-500">Seleccione la opción que mejor describa su condición.</p>
@@ -211,7 +211,7 @@
         </div>
 
         <!-- STEP 3.5: SERVICIO Y TIPO DE ATENCIÓN -->
-        <div id="step3_5" class="step-content w-full flex-col items-center justify-start p-4 md:p-6 space-y-5">
+        <div id="step3_5" class="step-content flex-1 w-full flex-col items-center justify-center p-4 md:p-6 space-y-5">
             <div class="text-center space-y-2 max-w-4xl mx-auto">
                 <h2 class="text-3xl font-poppins font-black text-[#1e293b] tracking-tighter leading-none">DETALLES DE LA <span class="text-sena-500">VISITA</span></h2>
             </div>
@@ -245,7 +245,7 @@
         </div>
 
         <!-- STEP 4: IDENTIDAD -->
-        <div id="step4" class="step-content w-full flex-col items-center justify-start p-3 md:p-5 space-y-2">
+        <div id="step4" class="step-content flex-1 w-full flex-col items-center justify-center p-3 md:p-5 space-y-2">
             <div class="text-center space-y-0.5">
                 <h3 class="text-2xl font-poppins font-black text-[#1e293b] tracking-tighter leading-none">Ingrese su <span class="text-sena-500">Documento</span></h3>
                 <p class="text-xs text-slate-500 font-medium">Seleccione el tipo e ingrese su número de identificación.</p>
@@ -273,7 +273,7 @@
         </div>
 
         <!-- STEP 5: CONTACTO -->
-        <div id="step5" class="step-content w-full flex-col items-center justify-start p-4 md:p-6 space-y-3">
+        <div id="step5" class="step-content flex-1 w-full flex-col items-center justify-center p-4 md:p-6 space-y-3">
             <div class="text-center space-y-1">
                 <h3 class="text-2xl font-poppins font-black text-[#1e293b] tracking-tight">Datos de <span class="text-sena-500">Contacto</span></h3>
                 <p class="text-sm text-slate-500 font-medium uppercase tracking-wider">Ingrese su número celular para el turno</p>
@@ -297,7 +297,7 @@
         </div>
 
         <!-- STEP 6: CANAL DE ENTREGA -->
-        <div id="step6" class="step-content w-full flex-col items-center justify-start p-4 md:p-6 space-y-4">
+        <div id="step6" class="step-content flex-1 w-full flex-col items-center justify-center p-4 md:p-6 space-y-4">
             <div class="text-center space-y-1.5">
                 <h3 class="text-2xl font-poppins font-black text-[#1e293b] tracking-tight">Canal de <span class="text-sena-500">Entrega</span></h3>
                 <p class="text-sm font-medium text-slate-500 uppercase tracking-widest">¿Por qué medio desea recibir su turno?</p>

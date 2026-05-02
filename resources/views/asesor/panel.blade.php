@@ -72,10 +72,10 @@
                     <h3 class="text-2xl font-black text-gray-900 italic">Esperando Ciudadano...</h3>
                     <p class="text-sm font-medium text-gray-400 mt-2">Actualmente no tienes ninguna atención activa.</p>
                 </div>
-                <form action="{{ route('asesor.llamar') }}" method="POST" class="w-full max-w-xs">
+                <form id="autoCallForm" action="{{ route('asesor.llamar') }}" method="POST" class="w-full max-w-xs">
                     @csrf
                     <input type="hidden" name="ase_id" value="{{ $asesor->ase_id }}">
-                    <button type="submit" class="w-full bg-sena-blue text-white font-black py-6 rounded-[2rem] shadow-xl hover:bg-sena-blue/90 hover:-translate-y-1 transition-all active:scale-95 uppercase tracking-widest text-xs">
+                    <button type="submit" id="autoCallBtn" class="w-full bg-sena-blue text-white font-black py-6 rounded-[2rem] shadow-xl hover:bg-sena-blue/90 hover:-translate-y-1 transition-all active:scale-95 uppercase tracking-widest text-xs">
                         Llamar Siguiente Turno
                     </button>
                 </form>
@@ -145,7 +145,12 @@
 
                     <div class="space-y-4 bg-gray-50 p-6 rounded-3xl border border-gray-100/50">
                         <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Hora de llegada</p>
-                        <h5 class="text-lg font-black text-gray-800">{{ \Carbon\Carbon::parse($atencion->turno->tur_hora_fecha ?? now())->format('h:i A') }}</h5>
+                        <h5 class="text-lg font-black text-gray-800 flex items-center space-x-3">
+                            <span>{{ \Carbon\Carbon::parse($atencion->turno->tur_hora_fecha ?? now())->format('h:i A') }}</span>
+                            <span id="arrival-relative-time" class="text-[9px] font-black bg-sena-blue/10 text-sena-blue px-3 py-1 rounded-full uppercase tracking-tighter" data-arrival="{{ \Carbon\Carbon::parse($atencion->turno->tur_hora_fecha ?? now())->timestamp }}">
+                                Calculando...
+                            </span>
+                        </h5>
                     </div>
 
                     @if($atencion)
@@ -401,12 +406,35 @@
             sEl.textContent = s;
         }, 1000);
 
-        const btnResume = document.getElementById('btn-resume-work');
-        if(btnResume) {
-            btnResume.addEventListener('click', () => {
-                localStorage.removeItem('ape_pause_start');
-            });
+    // Actualización de tiempo relativo de llegada
+    const arrivalElement = document.getElementById('arrival-relative-time');
+    if (arrivalElement) {
+        const arrivalTimestamp = parseInt(arrivalElement.dataset.arrival);
+        
+        function updateArrivalRelativeTime() {
+            const now = Math.floor(Date.now() / 1000);
+            const diffInSeconds = now - arrivalTimestamp;
+            const diffInMinutes = Math.floor(diffInSeconds / 60);
+            
+            if (diffInMinutes < 1) {
+                arrivalElement.textContent = 'Hace un momento';
+            } else if (diffInMinutes < 60) {
+                arrivalElement.textContent = `Hace ${diffInMinutes} min`;
+            } else {
+                const hours = Math.floor(diffInMinutes / 60);
+                arrivalElement.textContent = `Hace ${hours}h ${diffInMinutes % 60}min`;
+            }
         }
+        
+        updateArrivalRelativeTime();
+        setInterval(updateArrivalRelativeTime, 60000); // Actualizar cada minuto
+    }
+
+    const btnResume = document.getElementById('btn-resume-work');
+    if(btnResume) {
+        btnResume.addEventListener('click', () => {
+            localStorage.removeItem('ape_pause_start');
+        });
     }
 
     function toggleEditModal(show) {
@@ -463,5 +491,23 @@
             window.location.reload();
         }
     }, 20000); // 20 segundos
+
+    // AUTO-LLAMADO AUTOMÁTICO (Nueva Función Solicitada)
+    // Si no hay atención activa Y hay turnos en espera Y no estamos en pausa
+    @if(!$atencion && count($turnosEnEspera) > 0 && !$isPause)
+        const autoForm = document.getElementById('autoCallForm');
+        const autoBtn = document.getElementById('autoCallBtn');
+        if (autoForm && autoBtn) {
+            let timer = 3;
+            const autoInterval = setInterval(() => {
+                autoBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> LLAMANDO EN ${timer}...`;
+                timer--;
+                if (timer < 0) {
+                    clearInterval(autoInterval);
+                    autoForm.submit();
+                }
+            }, 1000);
+        }
+    @endif
 </script>
 @endsection

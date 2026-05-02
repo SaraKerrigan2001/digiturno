@@ -155,12 +155,13 @@ class AsesorController extends Controller
             $fileName = 'Registro_Actividad_Asesor_' . date('Y-m-d_H-i-s') . '.xls';
 
             // Calcular estadísticas para el resumen inferior
-            $totalAtendidos = $queryExport->whereNotNull('atnc_hora_fin')->count();
+            $totalAtendidos = $queryExport->whereNotNull('atnc_hora_fin')->filter(function($q) { return !$q->turno || $q->turno->tur_estado !== 'Ausente'; })->count();
+            $totalAusentes = $queryExport->whereNotNull('atnc_hora_fin')->filter(function($q) { return $q->turno && $q->turno->tur_estado === 'Ausente'; })->count();
             $totalEnProceso = $queryExport->whereNull('atnc_hora_fin')->count();
             $tiempoTotal = 0;
             $countConDuracion = 0;
             foreach ($queryExport as $at) {
-                if ($at->atnc_hora_fin) {
+                if ($at->atnc_hora_fin && (!$at->turno || $at->turno->tur_estado !== 'Ausente')) {
                     $ini = is_string($at->atnc_hora_inicio) ? \Carbon\Carbon::parse($at->atnc_hora_inicio) : $at->atnc_hora_inicio;
                     $fin = is_string($at->atnc_hora_fin) ? \Carbon\Carbon::parse($at->atnc_hora_fin) : $at->atnc_hora_fin;
                     $tiempoTotal += $ini->diffInMinutes($fin);
@@ -211,9 +212,20 @@ class AsesorController extends Controller
                 $horaInicio = $ini->format('d/m/Y h:i A');
                 $horaFin = $finCarbon ? $finCarbon->format('d/m/Y h:i A') : '—';
                 $duracion = $finCarbon ? $ini->diffInMinutes($finCarbon) . ' min' : '—';
-                $estado = $finCarbon ? 'ATENDIDO' : 'EN PROCESO';
-                $estadoColor = $finCarbon ? '#166534' : '#1e40af';
-                $estadoBg = $finCarbon ? '#dcfce7' : '#dbeafe';
+                $esAusente = $finCarbon && $atn->turno && $atn->turno->tur_estado === 'Ausente';
+                if ($esAusente) {
+                    $estado = 'AUSENTE';
+                    $estadoColor = '#e11d48'; // rose-600
+                    $estadoBg = '#fff1f2'; // rose-50
+                } elseif ($finCarbon) {
+                    $estado = 'ATENDIDO';
+                    $estadoColor = '#166534';
+                    $estadoBg = '#dcfce7';
+                } else {
+                    $estado = 'EN PROCESO';
+                    $estadoColor = '#1e40af';
+                    $estadoBg = '#dbeafe';
+                }
                 $bgRow = ($row % 2 == 0) ? '#f9fafb' : '#ffffff';
 
                 $html .= '<tr style="height:34px; background-color:' . $bgRow . ';">';
@@ -237,6 +249,7 @@ class AsesorController extends Controller
             $html .= '<td style="border:2px solid #86efac; font-weight:bold; font-size:11px; color:#166534; text-align:center;">—</td>';
             $html .= '<td style="border:2px solid #86efac; font-weight:bold; font-size:11px; color:#166534; text-align:center;">Promedio: ' . $promedioDuracion . ' min</td>';
             $html .= '<td style="border:2px solid #86efac; font-weight:bold; font-size:11px; color:#166534; text-align:center;">Atendidos: ' . $totalAtendidos . '</td>';
+            $html .= '<td style="border:2px solid #86efac; font-weight:bold; font-size:11px; color:#e11d48; text-align:center;">Ausentes: ' . $totalAusentes . '</td>';
             $html .= '<td style="border:2px solid #86efac; font-weight:bold; font-size:11px; color:#1e40af; text-align:center;">En Proceso: ' . $totalEnProceso . '</td>';
             $html .= '</tr>';
 
