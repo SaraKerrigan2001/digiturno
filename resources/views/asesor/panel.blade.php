@@ -9,73 +9,73 @@
 
 @if(!$isPause)
     <!-- Attendance Dashboard (Active) -->
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-10">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
         
         <!-- Main Attendance Card -->
-        <div class="xl:col-span-2 space-y-10">
+        <div class="xl:col-span-2 space-y-6">
             @if($atencion)
-            <div class="bg-sena-blue rounded-[3rem] p-10 shadow-2xl shadow-sena-blue/30 relative overflow-hidden group">
-                <i class="fa-solid fa-id-card absolute -bottom-10 -right-10 text-[200px] text-white/5 transform rotate-12 transition-transform group-hover:rotate-0 duration-700"></i>
+            <div class="bg-sena-blue rounded-[1.5rem] p-6 shadow-2xl shadow-sena-blue/30 relative overflow-hidden group">
+                <i class="fa-solid fa-id-card absolute -bottom-10 -right-10 text-[150px] text-white/5 transform rotate-12 transition-transform group-hover:rotate-0 duration-700"></i>
 
                 <div class="flex justify-between items-start relative z-10">
                     <div class="space-y-1">
-                        <p class="text-[10px] font-black text-white/80 uppercase tracking-[0.3em]">Atendiendo Ahora</p>
-                        <h2 class="text-7xl font-black text-white tracking-tighter">{{ $atencion->turno->tur_numero }}</h2>
+                        <p class="text-[9px] font-black text-white/80 uppercase tracking-[0.3em]">Atendiendo Ahora</p>
+                        <h2 class="text-5xl font-black text-white tracking-tighter">{{ $atencion->turno->tur_numero }}</h2>
                     </div>
-                    <div class="bg-white/20 backdrop-blur-md px-5 py-2 rounded-full border border-white/30">
-                        <p class="text-xs font-black text-white tracking-widest" id="atencion-timer" data-start="{{ \Carbon\Carbon::parse($atencion->atnc_hora_inicio)->timestamp }}">00:00:00</p>
+                    <div class="bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/30">
+                        <p class="text-[11px] font-black text-white tracking-widest" id="atencion-timer" data-start="{{ \Carbon\Carbon::parse($atencion->atnc_hora_inicio)->timestamp }}">00:00:00</p>
                     </div>
                 </div>
 
-                <div class="mt-16 relative z-10 flex justify-between items-end">
+                <div class="mt-8 relative z-10 flex justify-between items-end">
                     <div>
-                        <p class="text-[10px] font-black text-white/80 uppercase tracking-[0.2em] mb-2">Ciudadano</p>
-                        <h3 class="text-3xl font-black text-white leading-tight">
+                        <p class="text-[9px] font-black text-white/80 uppercase tracking-[0.2em] mb-1">Ciudadano</p>
+                        <h3 class="text-2xl font-black text-white leading-tight">
                             {{ $atencion->turno->solicitante?->persona?->pers_nombres ?? 'Ciudadano' }} 
                             {{ $atencion->turno->solicitante?->persona?->pers_apellidos ?? 'No Registrado' }}
                         </h3>
-                        <p class="text-sm font-bold text-white/70 mt-1">
+                        <p class="text-xs font-bold text-white/70 mt-1">
                             {{ $atencion->turno->solicitante?->persona?->pers_tipodoc ?? 'DOC' }} 
                             {{ $atencion->turno->solicitante?->persona?->pers_doc ?? '—' }}
                         </p>
                     </div>
-                    <button onclick="toggleEditModal(true)" class="bg-white/10 hover:bg-white/20 p-4 rounded-2xl border border-white/20 transition-all group active:scale-95" title="Editar datos del ciudadano">
-                        <i class="fa-solid fa-user-pen text-white text-xl"></i>
+                    <button onclick="toggleEditModal(true)" class="bg-white/10 hover:bg-white/20 p-3 rounded-xl border border-white/20 transition-all group active:scale-95" title="Editar datos del ciudadano">
+                        <i class="fa-solid fa-user-pen text-white text-base"></i>
                     </button>
                 </div>
 
-                <div class="grid grid-cols-2 gap-6 mt-16 relative z-10">
+                <div class="grid grid-cols-2 gap-4 mt-8 relative z-10">
                     <form action="{{ route('asesor.llamar') }}" method="POST" class="inline">
                         @csrf
                         <input type="hidden" name="ase_id" value="{{ $asesor->ase_id }}">
-                        <button type="submit" class="w-full bg-white text-sena-blue font-extrabold py-5 rounded-3xl hover:bg-gray-50 transition-all flex items-center justify-center space-x-3 shadow-xl active:scale-95 group">
-                            <i class="fa-solid fa-arrow-right-long group-hover:translate-x-1 transition-transform"></i>
-                            <span class="uppercase tracking-widest text-xs">Llamar Siguiente</span>
+                        <button type="submit" class="w-full bg-white text-sena-blue font-extrabold py-3.5 rounded-2xl hover:bg-gray-50 transition-all flex items-center justify-center space-x-2 shadow-xl active:scale-95 group">
+                            <i class="fa-solid fa-arrow-right-long group-hover:translate-x-1 transition-transform text-xs"></i>
+                            <span class="uppercase tracking-widest text-[10px]">Llamar Siguiente</span>
                         </button>
                     </form>
                     <form action="{{ route('asesor.finalizar', $atencion->atnc_id) }}" method="POST" class="inline">
                         @csrf
-                        <button type="submit" class="w-full bg-[#FF4D4D] text-white font-extrabold py-5 rounded-3xl hover:bg-red-600 transition-all flex items-center justify-center space-x-3 shadow-xl active:scale-95">
-                            <i class="fa-solid fa-circle-xmark"></i>
-                            <span class="uppercase tracking-widest text-xs">Finalizar Atención</span>
+                        <button type="submit" class="w-full bg-[#FF4D4D] text-white font-extrabold py-3.5 rounded-2xl hover:bg-red-600 transition-all flex items-center justify-center space-x-2 shadow-xl active:scale-95">
+                            <i class="fa-solid fa-circle-xmark text-xs"></i>
+                            <span class="uppercase tracking-widest text-[10px]">Finalizar Atención</span>
                         </button>
                     </form>
                 </div>
             </div>
             @else
             <!-- Estado Inactivo / Esperando Turno -->
-            <div class="bg-white border-2 border-dashed border-gray-200 rounded-[3rem] p-16 flex flex-col items-center justify-center text-center space-y-8">
-                <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center">
-                    <i class="fa-solid fa-user-clock text-4xl text-gray-300"></i>
+            <div class="bg-white border-2 border-dashed border-gray-200 rounded-[2rem] p-10 flex flex-col items-center justify-center text-center space-y-6">
+                <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-user-clock text-2xl text-gray-300"></i>
                 </div>
                 <div>
-                    <h3 class="text-2xl font-black text-gray-900 italic">Esperando Ciudadano...</h3>
-                    <p class="text-sm font-medium text-gray-400 mt-2">Actualmente no tienes ninguna atención activa.</p>
+                    <h3 class="text-xl font-black text-gray-900 italic">Esperando Ciudadano...</h3>
+                    <p class="text-[11px] font-medium text-gray-400 mt-1">Actualmente no tienes ninguna atención activa.</p>
                 </div>
                 <form id="autoCallForm" action="{{ route('asesor.llamar') }}" method="POST" class="w-full max-w-xs">
                     @csrf
                     <input type="hidden" name="ase_id" value="{{ $asesor->ase_id }}">
-                    <button type="submit" id="autoCallBtn" class="w-full bg-sena-blue text-white font-black py-6 rounded-[2rem] shadow-xl hover:bg-sena-blue/90 hover:-translate-y-1 transition-all active:scale-95 uppercase tracking-widest text-xs">
+                    <button type="submit" id="autoCallBtn" class="w-full bg-sena-blue text-white font-black py-4 rounded-xl shadow-xl hover:bg-sena-blue/90 hover:-translate-y-1 transition-all active:scale-95 uppercase tracking-widest text-[10px]">
                         Llamar Siguiente Turno
                     </button>
                 </form>
@@ -83,72 +83,68 @@
             @endif
 
             <!-- Secondary Stats Row -->
-            <div class="grid grid-cols-3 gap-8 text-center px-4">
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-50 flex flex-col items-center group hover:shadow-xl transition-all duration-500">
-                    <div class="w-14 h-14 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+            <div class="grid grid-cols-3 gap-4 text-center px-2">
+                <div class="bg-white p-5 rounded-[1.5rem] shadow-sm border border-gray-50 flex flex-col items-center group hover:shadow-xl transition-all duration-500">
+                    <div class="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center text-base mb-3 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-user-group"></i>
                     </div>
-                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Atendidos hoy</p>
-                    <h4 class="text-4xl font-black text-gray-900">24</h4>
-                    <span class="text-[10px] font-black text-emerald-500 mt-2 tracking-widest">+12%</span>
+                    <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Atendidos hoy</p>
+                    <h4 class="text-2xl font-black text-gray-900">24</h4>
+                    <span class="text-[9px] font-black text-emerald-500 mt-1 tracking-widest">+12%</span>
                 </div>
 
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-50 flex flex-col items-center group hover:shadow-xl transition-all duration-500">
-                    <div class="w-14 h-14 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+                <div class="bg-white p-5 rounded-[1.5rem] shadow-sm border border-gray-50 flex flex-col items-center group hover:shadow-xl transition-all duration-500">
+                    <div class="w-10 h-10 bg-orange-50 text-orange-500 rounded-xl flex items-center justify-center text-base mb-3 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-stopwatch"></i>
                     </div>
-                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Tiempo atención</p>
-                    <h4 class="text-4xl font-black text-gray-900">14 <span class="text-sm">min</span></h4>
-                    <span class="text-[10px] font-black text-gray-400 mt-2 tracking-widest uppercase">Promedio</span>
+                    <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">T. atención</p>
+                    <h4 class="text-2xl font-black text-gray-900">14 <span class="text-[10px]">min</span></h4>
+                    <span class="text-[8px] font-black text-gray-400 mt-1 tracking-widest uppercase">Promedio</span>
                 </div>
 
-                <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-50 flex flex-col justify-between group hover:shadow-xl transition-all duration-500 relative overflow-hidden">
-                    <h5 class="text-[10px] font-black text-gray-400 uppercase tracking-widest text-left px-2">Estado del Puesto</h5>
-                    <div class="w-full mt-4 bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                <div class="bg-white p-4 rounded-[1.5rem] shadow-sm border border-gray-50 flex flex-col justify-between group hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+                    <h5 class="text-[8px] font-black text-gray-400 uppercase tracking-widest text-left px-1">Estado Puesto</h5>
+                    <div class="w-full mt-3 bg-gray-100 h-1.5 rounded-full overflow-hidden">
                         <div class="bg-sena-orange h-full rounded-full w-[75%] transition-all duration-1000 group-hover:w-[85%]"></div>
                     </div>
-                    <div class="flex justify-between items-end mt-4">
-                        <span class="text-[10px] font-black text-gray-600 uppercase tracking-widest">Capacidad</span>
-                        <span class="text-lg font-black text-gray-900">75%</span>
-                    </div>
-                    <div class="mt-4 bg-[#ECFDF5] text-emerald-600 px-4 py-2 rounded-xl text-center">
-                        <p class="text-[8px] font-black uppercase tracking-[0.2em] mb-0.5">Rendimiento</p>
-                        <p class="text-xs font-black uppercase">Excelente</p>
+                    <div class="flex justify-between items-end mt-2">
+                        <span class="text-[8px] font-black text-gray-600 uppercase tracking-widest">Capacidad</span>
+                        <span class="text-sm font-black text-gray-900">75%</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Right Column (Service Details) -->
-        <div class="space-y-10">
-            <div class="bg-white h-full rounded-[3rem] p-10 shadow-sm border border-gray-100">
-                <div class="flex items-center space-x-3 mb-10 pb-6 border-b border-gray-50">
-                    <i class="fa-solid fa-user-tag text-sena-blue text-lg"></i>
-                    <h4 class="text-sm font-black text-gray-900 tracking-wide uppercase">Detalles del Servicio</h4>
+        <div class="space-y-6">
+            <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100">
+                <div class="flex items-center space-x-3 mb-6 pb-4 border-b border-gray-50">
+                    <i class="fa-solid fa-user-tag text-sena-blue text-base"></i>
+                    <h4 class="text-xs font-black text-gray-900 tracking-wide uppercase">Detalles del Servicio</h4>
                 </div>
 
-                <div class="space-y-10">
-                    <div class="space-y-4 bg-gray-50 p-6 rounded-3xl border border-gray-100/50">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Trámite solicitado</p>
-                        <h5 class="text-sm font-black text-gray-800 leading-snug">
-                            {{ $atencion->turno->tramite ?? 'Consultoría de Empleo y Formalización' }}
+                <div class="space-y-6">
+                    <div class="space-y-2 bg-gray-50 p-4 rounded-2xl border border-gray-100/50">
+                        <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Trámite</p>
+                        <h5 class="text-xs font-black text-gray-800 leading-snug">
+                            {{ $atencion->turno->tramite ?? 'Consultoría de Empleo' }}
                         </h5>
                     </div>
 
-                    <div class="space-y-4 bg-gray-50 p-6 rounded-3xl border border-gray-100/50">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Prioridad</p>
+                    <div class="space-y-2 bg-gray-50 p-4 rounded-2xl border border-gray-100/50">
+                        <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Prioridad</p>
                         <div class="flex items-center space-x-2 {{ ($atencion && $atencion->turno->tur_tipo != 'General') ? 'text-sena-orange' : 'text-sena-blue' }}">
-                            <i class="fa-solid fa-circle-check"></i>
-                            <span class="text-xs font-black uppercase tracking-widest">{{ $atencion->turno->tur_tipo ?? 'Normal' }}</span>
+                            <i class="fa-solid fa-circle-check text-[10px]"></i>
+                            <span class="text-[10px] font-black uppercase tracking-widest">{{ $atencion->turno->tur_tipo ?? 'Normal' }}</span>
                         </div>
                     </div>
 
-                    <div class="space-y-4 bg-gray-50 p-6 rounded-3xl border border-gray-100/50">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Hora de llegada</p>
-                        <h5 class="text-lg font-black text-gray-800 flex items-center space-x-3">
+                    <div class="space-y-2 bg-gray-50 p-4 rounded-2xl border border-gray-100/50">
+                        <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Llegada</p>
+                        <h5 class="text-sm font-black text-gray-800 flex items-center justify-between">
                             <span>{{ \Carbon\Carbon::parse($atencion->turno->tur_hora_fecha ?? now())->format('h:i A') }}</span>
-                            <span id="arrival-relative-time" class="text-[9px] font-black bg-sena-blue/10 text-sena-blue px-3 py-1 rounded-full uppercase tracking-tighter" data-arrival="{{ \Carbon\Carbon::parse($atencion->turno->tur_hora_fecha ?? now())->timestamp }}">
-                                Calculando...
+                            <span id="arrival-relative-time" class="text-[8px] font-black bg-sena-blue/10 text-sena-blue px-2 py-0.5 rounded-full uppercase tracking-tighter" data-arrival="{{ \Carbon\Carbon::parse($atencion->turno->tur_hora_fecha ?? now())->timestamp }}">
+                                ...
                             </span>
                         </h5>
                     </div>
@@ -156,8 +152,8 @@
                     @if($atencion)
                     <form action="{{ route('asesor.ausente', $atencion->atnc_id) }}" method="POST">
                         @csrf
-                        <button type="submit" class="w-full mt-10 border-2 border-rose-500 text-rose-500 font-black py-5 rounded-3xl hover:bg-rose-50 transition-all text-xs uppercase tracking-[0.2em]">
-                            Marcar Ciudadano como Ausente
+                        <button type="submit" class="w-full mt-4 border border-rose-500 text-rose-500 font-black py-3 rounded-xl hover:bg-rose-50 transition-all text-[9px] uppercase tracking-[0.2em]">
+                            Ciudadano Ausente
                         </button>
                     </form>
                     @endif
@@ -167,25 +163,25 @@
 
         <!-- Bottom Lists -->
         <div class="xl:col-span-1">
-            <div class="bg-white rounded-[3rem] p-10 shadow-sm border border-gray-100 h-full">
-                <div class="flex justify-between items-center mb-10 pb-6 border-b border-gray-50">
+            <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 h-full">
+                <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-50">
                     <div class="flex items-center space-x-3">
-                        <i class="fa-solid fa-clock-rotate-left text-gray-400"></i>
-                        <h4 class="text-sm font-black text-gray-900 tracking-wide uppercase">Últimos Turnos</h4>
+                        <i class="fa-solid fa-clock-rotate-left text-gray-400 text-xs"></i>
+                        <h4 class="text-[10px] font-black text-gray-900 tracking-wide uppercase">Últimos Turnos</h4>
                     </div>
                 </div>
                 
-                <div class="space-y-6">
-                    @foreach([['num'=>'NIT-044', 'name'=>'Ana María Restrepo', 'time'=>'9:15 AM'],['num'=>'NIT-043', 'name'=>'Carlos Mario Úsuga', 'time'=>'8:58 AM'],['num'=>'NIT-042', 'name'=>'Elena Beltrán', 'time'=>'8:30 AM'],['num'=>'NIT-041', 'name'=>'Pedro Duarte', 'time'=>'8:12 AM']] as $t)
-                    <div class="flex items-center justify-between group cursor-pointer hover:bg-gray-50 p-2 -m-2 rounded-2xl transition-all">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-2 h-2 rounded-full bg-gray-200 group-hover:bg-sena-blue transition-colors"></div>
+                <div class="space-y-4">
+                    @foreach([['num'=>'NIT-044', 'name'=>'Ana María R.', 'time'=>'9:15'],['num'=>'NIT-043', 'name'=>'Carlos M. Úsuga', 'time'=>'8:58'],['num'=>'NIT-042', 'name'=>'Elena Beltrán', 'time'=>'8:30']] as $t)
+                    <div class="flex items-center justify-between group cursor-pointer hover:bg-gray-50 p-2 -m-2 rounded-xl transition-all">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-1.5 h-1.5 rounded-full bg-gray-200 group-hover:bg-sena-blue transition-colors"></div>
                             <div>
-                                <p class="text-xs font-black text-gray-900">{{ $t['num'] }}</p>
-                                <p class="text-[10px] font-bold text-gray-400 mt-0.5">{{ $t['name'] }}</p>
+                                <p class="text-[11px] font-black text-gray-900">{{ $t['num'] }}</p>
+                                <p class="text-[9px] font-bold text-gray-400 mt-0.5">{{ $t['name'] }}</p>
                             </div>
                         </div>
-                        <span class="text-[10px] font-bold text-gray-400 uppercase">{{ $t['time'] }}</span>
+                        <span class="text-[9px] font-bold text-gray-400 uppercase">{{ $t['time'] }}</span>
                     </div>
                     @endforeach
                 </div>
@@ -193,11 +189,11 @@
         </div>
 
         <div class="xl:col-span-2">
-            <div class="bg-white rounded-[3rem] p-10 shadow-sm border border-gray-100 h-full">
-                <div class="flex justify-between items-center mb-6">
-                    <h4 class="text-sm font-black text-gray-900 tracking-wide uppercase">Atendidos por Hora</h4>
+            <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 h-full">
+                <div class="flex justify-between items-center mb-4">
+                    <h4 class="text-[10px] font-black text-gray-900 tracking-wide uppercase">Atendidos por Hora</h4>
                 </div>
-                <div class="h-64">
+                <div class="h-48">
                     <canvas id="mainChart"></canvas>
                 </div>
             </div>

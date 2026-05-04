@@ -46,88 +46,87 @@
 <body class="h-screen overflow-hidden flex bg-[#F0F2F5]">
 
     <!-- Sidebar -->
-    <aside class="w-72 bg-white flex flex-col border-r border-gray-100 shrink-0 z-30">
-        <div class="px-8 py-10 flex flex-col space-y-4">
-            <div class="flex items-center space-x-3">
-                <img src="{{ asset('images/logo.jpeg') }}" class="h-12 w-auto object-contain" alt="SENA Logo">
-                <div class="h-8 w-px bg-gray-100 mx-2"></div>
+    <aside class="w-56 bg-white flex flex-col border-r border-gray-100 shrink-0 z-30">
+        <div class="px-5 py-4 flex flex-col space-y-3">
+            <div class="flex items-center space-x-2">
+                <img src="{{ asset('images/logo.jpeg') }}" class="h-8 w-auto object-contain" alt="SENA Logo">
+                <div class="h-5 w-px bg-gray-100 mx-0.5"></div>
                 <div>
-                    <h1 class="text-xl font-poppins font-black text-gray-900 tracking-tight leading-none uppercase">SENA APE</h1>
-                    <p class="text-[9px] font-bold text-sena-blue uppercase tracking-wider mt-1 leading-none">Sistema de Gestión de Turnos</p>
+                    <h1 class="text-base font-poppins font-black text-gray-900 tracking-tight leading-none uppercase">SENA APE</h1>
+                    <p class="text-[7px] font-bold text-sena-blue uppercase tracking-wider mt-0.5 leading-none">Gestión de Turnos</p>
                 </div>
             </div>
         </div>
 
-        <nav class="flex-1 px-6 space-y-2">
-            <a href="{{ route('asesor.index') }}" class="sidebar-item flex items-center space-x-4 px-5 py-4 rounded-2xl {{ Request::routeIs('asesor.index') && !$isPause ? 'bg-sena-50 text-sena-500 font-bold active-glow' : 'text-gray-400 hover:bg-gray-50' }}">
-                <i class="fa-solid fa-house-chimney text-lg"></i>
-                <span class="text-sm">Dashboard</span>
+        <nav class="flex-1 px-3 space-y-0.5">
+            <a href="{{ route('asesor.index') }}" class="sidebar-item flex items-center space-x-2.5 px-3 py-2 rounded-lg {{ Request::routeIs('asesor.index') && !$isPause ? 'bg-sena-50 text-sena-500 font-bold active-glow' : 'text-gray-400 hover:bg-gray-50' }}">
+                <i class="fa-solid fa-house-chimney text-sm"></i>
+                <span class="text-[11px]">Dashboard</span>
             </a>
-            <a href="{{ route('asesor.actividad') }}" class="sidebar-item flex items-center space-x-4 px-5 py-4 rounded-2xl {{ Request::routeIs('asesor.actividad') ? 'bg-sena-50 text-sena-500 font-bold active-glow' : 'text-gray-400 hover:bg-gray-50' }}">
-                <i class="fa-solid fa-clock-rotate-left text-lg"></i>
-                <span class="text-sm">Actividad Reciente</span>
+            <a href="{{ route('asesor.actividad') }}" class="sidebar-item flex items-center space-x-2.5 px-3 py-2 rounded-lg {{ Request::routeIs('asesor.actividad') ? 'bg-sena-50 text-sena-500 font-bold active-glow' : 'text-gray-400 hover:bg-gray-50' }}">
+                <i class="fa-solid fa-clock-rotate-left text-sm"></i>
+                <span class="text-[11px]">Actividad</span>
             </a>
-            <a href="{{ route('asesor.tramites') }}" class="sidebar-item flex items-center space-x-4 px-5 py-4 rounded-2xl {{ Request::routeIs('asesor.tramites') ? 'bg-sena-50 text-sena-500 font-bold active-glow' : 'text-gray-400 hover:bg-gray-50' }}">
-                <i class="fa-solid fa-file-invoice text-lg"></i>
-                <span class="text-sm">Trámites</span>
+            <a href="{{ route('asesor.tramites') }}" class="sidebar-item flex items-center space-x-2.5 px-3 py-2 rounded-lg {{ Request::routeIs('asesor.tramites') ? 'bg-sena-50 text-sena-500 font-bold active-glow' : 'text-gray-400 hover:bg-gray-50' }}">
+                <i class="fa-solid fa-file-invoice text-sm"></i>
+                <span class="text-[11px]">Trámites</span>
             </a>
-            <a href="{{ route('asesor.reportes') }}" class="sidebar-item flex items-center space-x-4 px-5 py-4 rounded-2xl {{ Request::routeIs('asesor.reportes') ? 'bg-sena-50 text-sena-500 font-bold active-glow' : 'text-gray-400 hover:bg-gray-50' }}">
-                <i class="fa-solid fa-chart-simple text-lg"></i>
-                <span class="text-sm">Reportes</span>
+            <a href="{{ route('asesor.reportes') }}" class="sidebar-item flex items-center space-x-2.5 px-3 py-2 rounded-lg {{ Request::routeIs('asesor.reportes') ? 'bg-sena-50 text-sena-500 font-bold active-glow' : 'text-gray-400 hover:bg-gray-50' }}">
+                <i class="fa-solid fa-chart-simple text-sm"></i>
+                <span class="text-[11px]">Reportes</span>
             </a>
+            <div class="pt-3 pb-1">
+                <p class="text-[7px] font-black text-gray-400 uppercase tracking-[0.2em] px-3 mb-1.5">Soporte</p>
+                <a href="{{ route('manual.asesor') }}" class="sidebar-item flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-50">
+                    <i class="fa-solid fa-book-bookmark text-sm"></i>
+                    <span class="text-[11px]">Manual de Usuario</span>
+                </a>
+            </div>
         </nav>
 
-        <div class="p-8 border-t border-gray-50 mt-auto">
+        <div class="p-4 border-t border-gray-50 mt-auto">
             @if($isPause)
                 <form action="{{ route('asesor.receso.finalizar') }}" method="POST">
                     @csrf
-                    <button type="submit" class="w-full flex items-center justify-center bg-sena-orange text-white font-black py-4 rounded-full shadow-lg shadow-sena-orange/30 hover:bg-sena-orange/90 transition-all hover:scale-105 active:scale-95 space-x-3 text-xs uppercase tracking-widest mb-6 px-2">
+                    <button type="submit" class="w-full flex items-center justify-center bg-sena-orange text-white font-black py-2.5 rounded-full shadow-lg shadow-sena-orange/30 hover:bg-sena-orange/90 transition-all hover:scale-105 active:scale-95 space-x-2 text-[9px] uppercase tracking-widest mb-4 px-1">
                         <i class="fa-solid fa-play"></i>
-                        <span>Finalizar Receso</span>
+                        <span>Finalizar</span>
                     </button>
                 </form>
             @else
                 <form action="{{ route('asesor.receso.iniciar') }}" method="POST">
                     @csrf
-                    <button type="submit" class="w-full flex items-center justify-center border-2 border-sena-orange text-sena-orange font-black py-4 rounded-full hover:bg-sena-orange/5 transition-all hover:scale-105 active:scale-95 space-x-3 text-xs uppercase tracking-widest mb-6 px-2">
+                    <button type="submit" class="w-full flex items-center justify-center border-2 border-sena-orange text-sena-orange font-black py-2.5 rounded-full hover:bg-sena-orange/5 transition-all hover:scale-105 active:scale-95 space-x-2 text-[9px] uppercase tracking-widest mb-4 px-1">
                         <i class="fa-solid fa-pause"></i>
-                        <span>Iniciar Receso</span>
+                        <span>Receso</span>
                     </button>
                 </form>
             @endif
 
-            <a href="{{ route('asesor.configuracion') }}" class="flex items-center space-x-4 px-5 py-3 rounded-xl text-gray-400 hover:text-gray-900 transition-colors mb-4">
-                <i class="fa-solid fa-gear"></i>
-                <span class="text-sm font-bold">Configuración</span>
+            <a href="{{ route('asesor.configuracion') }}" class="flex items-center space-x-3 px-3 py-1.5 rounded-lg text-gray-400 hover:text-gray-900 transition-colors mb-1.5">
+                <i class="fa-solid fa-gear text-[10px]"></i>
+                <span class="text-[10px] font-bold">Configuración</span>
             </a>
 
-            <div class="flex flex-col bg-gray-50 p-4 rounded-[2rem] border border-gray-100">
-                <div class="flex items-center justify-between mb-3 px-1">
-                    <div class="flex items-center space-x-3">
-                        <img src="{{ asset(session('ase_foto', $asesor->ase_foto ?? 'images/foto de perfil.jpg')) }}" class="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover" alt="Profile">
+            <div class="flex flex-col bg-gray-50 p-2.5 rounded-xl border border-gray-100">
+                <div class="flex items-center justify-between mb-1.5 px-0.5">
+                    <div class="flex items-center space-x-2">
+                        <img src="{{ asset(session('ase_foto', $asesor->ase_foto ?? 'images/foto de perfil.jpg')) }}" class="w-7 h-7 rounded-lg border border-white shadow-sm object-cover" alt="Profile">
                         <div>
-                            <p class="text-[11px] font-black text-gray-900 leading-tight">{{ session('ase_nombre', 'Asesor') }}</p>
-                            <p class="text-[9px] font-bold text-sena-500 uppercase tracking-widest">{{ session('ase_tipo_asesor', 'General') }}</p>
+                            <p class="text-[9px] font-black text-gray-900 leading-tight">{{ session('ase_nombre', 'Asesor') }}</p>
+                            <p class="text-[7px] font-bold text-sena-500 uppercase tracking-widest">{{ session('ase_tipo_asesor', 'General') }}</p>
                         </div>
                     </div>
                     <form action="{{ route('asesor.logout') }}" method="POST" id="logout-form">
                         @csrf
-                        <button type="submit" class="text-gray-300 hover:text-rose-500 px-2 transition-colors" title="Cerrar Sesión">
-                            <i class="fa-solid fa-right-from-bracket"></i>
+                        <button type="submit" class="text-gray-300 hover:text-rose-500 px-1 transition-colors" title="Cerrar Sesión">
+                            <i class="fa-solid fa-right-from-bracket text-[10px]"></i>
                         </button>
                     </form>
                 </div>
-                <div class="px-1">
-                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Módulo {{ $asesor->modulo ?? '04' }}</p>
+                <div class="px-0.5">
+                    <p class="text-[7px] font-bold text-gray-400 uppercase tracking-widest">Módulo {{ $asesor->modulo ?? '04' }}</p>
                 </div>
-            </div>
-            <div class="bg-gray-50 rounded-[2rem] p-5 mt-6 border border-gray-100/50 shadow-inner">
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">Ayuda</p>
-                <p class="text-[11px] text-gray-500 leading-relaxed italic mb-4 px-1">¿Necesitas ayuda con el sistema?</p>
-                <a href="{{ route('manual.asesor') }}" class="w-full flex items-center justify-center bg-white border border-sena-500/20 text-sena-500 font-black py-3 rounded-2xl hover:bg-sena-50 transition-all hover:-translate-y-0.5 active:scale-95 space-x-2 text-[10px] uppercase tracking-widest shadow-sm">
-                    <i class="fa-solid fa-book-open"></i>
-                    <span>Manual de usuario</span>
-                </a>
             </div>
         </div>
     </aside>
@@ -136,11 +135,11 @@
     <main class="flex-1 flex flex-col h-full overflow-hidden">
         
         <!-- Header -->
-        <header class="h-24 px-10 flex items-center justify-between border-b border-gray-100 bg-white/80 backdrop-blur-md z-20 sticky top-0">
+        <header class="h-14 px-5 flex items-center justify-between border-b border-gray-100 bg-white/80 backdrop-blur-md z-20 sticky top-0">
             <div class="flex items-center space-x-2">
-                <span class="text-gray-400 font-medium text-sm">Agencia Pública de Empleo</span>
+                <span class="text-gray-400 font-medium text-[10px]">Agencia Pública de Empleo</span>
                 <span class="text-gray-200">|</span>
-                <span class="text-gray-400 font-medium text-sm">SENA Regional</span>
+                <span class="text-gray-400 font-medium text-[10px]">SENA Regional</span>
             </div>
 
             <div class="flex items-center space-x-8">
@@ -198,7 +197,7 @@
             </div>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-10 bg-gray-50/30">
+        <div class="flex-1 overflow-y-auto p-6 bg-gray-50/30">
             <div class="max-w-[1400px] mx-auto">
                 @yield('content')
             </div>
@@ -223,8 +222,58 @@
         </footer>
     </main>
 
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-12 right-10 z-[100] flex flex-col space-y-4"></div>
+
     <script>
+        // Sistema de Notificaciones Toast
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            const colorClass = type === 'success' ? 'bg-emerald-600' : (type === 'warning' ? 'bg-amber-500' : 'bg-rose-600');
+            const iconClass = type === 'success' ? 'fa-circle-check' : (type === 'warning' ? 'fa-triangle-exclamation' : 'fa-circle-xmark');
+            
+            toast.className = `flex items-center space-x-4 ${colorClass} text-white px-6 py-4 rounded-2xl shadow-2xl transform translate-y-10 opacity-0 transition-all duration-500 min-w-[300px] border border-white/20`;
+            toast.innerHTML = `
+                <div class="flex-shrink-0 text-xl">
+                    <i class="fa-solid ${iconClass}"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-70 mb-0.5">SISTEMA APE</p>
+                    <p class="text-xs font-black">${message}</p>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('translate-y-10', 'opacity-0');
+            }, 100);
+
+            // Auto remove
+            setTimeout(() => {
+                toast.classList.add('translate-y-[-20px]', 'opacity-0');
+                setTimeout(() => {
+                    toast.remove();
+                }, 500);
+            }, 5000);
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
+            // Manejar mensajes de sesión de Laravel
+            @if(session('success'))
+                showToast("{{ session('success') }}", 'success');
+            @endif
+            @if(session('error'))
+                showToast("{{ session('error') }}", 'error');
+            @endif
+            @if(session('warning'))
+                showToast("{{ session('warning') }}", 'warning');
+            @endif
+
             const bell = document.getElementById('notification-bell');
             const dropdown = document.getElementById('notification-dropdown');
             const indicator = document.getElementById('notification-indicator');
@@ -275,3 +324,4 @@
     @yield('scripts')
 </body>
 </html>
+
